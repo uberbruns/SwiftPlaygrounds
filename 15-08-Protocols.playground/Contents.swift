@@ -38,7 +38,6 @@ bar(c)
 
 // Protocols and Generics
 
-let d: BaseProtocol = a
 
 struct GenericType<T : BaseProtocol> {
     
@@ -50,11 +49,12 @@ struct GenericType<T : BaseProtocol> {
     
 }
 
-
 let g1 = GenericType(foo: a) // Works
 
+let d: BaseProtocol = a
 // let g2 = GenericType(foo: d)
-//  error: cannot invoke initializer for type 'GenericType<T>' with an argument list of type '(foo: BaseProtocol)'
+// error: cannot invoke initializer for type 'GenericType<T>' with an argument list of type '(foo: BaseProtocol)'
+// note: expected an argument list of type '(foo: T)'
 
 
 
