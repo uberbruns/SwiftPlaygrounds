@@ -23,16 +23,16 @@ func bar(foo: [BaseProtocol]) {
     foo.first?.baseFunc()
 }
 
+
 let a = ExtendedFoo()
-let b: [ExtendedFoo] = [a]
-let c: [BaseProtocol] = b.map({ $0 })
-
-
 bar([a])
-bar(c)
 
+let b: [ExtendedFoo] = [a]
 // bar(b)
 // error: cannot convert value of type '[ExtendedFoo]' to expected argument type '[BaseProtocol]'
+
+let c: [BaseProtocol] = b.map({ $0 })
+bar(c)
 
 
 
