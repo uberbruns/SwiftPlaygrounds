@@ -11,6 +11,6 @@ func twoIntHash(a:UInt32, _ b:UInt32) -> UInt64 {
 }
 
 
-let result = twoIntHash(UInt32.max-1, UInt32.max-1)
+let result: UInt64 = twoIntHash(UInt32.max, UInt32.max)
 let string = String(result, radix: 2, uppercase: false)
 string.characters.count
