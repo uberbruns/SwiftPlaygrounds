@@ -28,7 +28,7 @@ let bookB = MediaType.Book(pages: 100)
 let bookC = MediaType.Book(pages: 200)
 let movieA = MediaType.Movie(length: 90)
 
-print(bookA == bookB)
-print(bookA == bookC)
-print(bookA == movieA)
+print(bookA == bookB)  // true
+print(bookA == bookC)  // false
+print(bookA == movieA) // false
 
