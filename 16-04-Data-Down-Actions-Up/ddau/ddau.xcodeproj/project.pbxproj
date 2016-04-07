@@ -1,0 +1,519 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		9B37B3CD1CB70AB000470889 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3CC1CB70AB000470889 /* AppDelegate.swift */; };
+		9B37B3CF1CB70AB000470889 /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3CE1CB70AB000470889 /* MasterViewController.swift */; };
+		9B37B3D11CB70AB000470889 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3D01CB70AB000470889 /* DetailViewController.swift */; };
+		9B37B3D41CB70AB000470889 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B37B3D21CB70AB000470889 /* Main.storyboard */; };
+		9B37B3D61CB70AB000470889 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B37B3D51CB70AB000470889 /* Assets.xcassets */; };
+		9B37B3D91CB70AB000470889 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B37B3D71CB70AB000470889 /* LaunchScreen.storyboard */; };
+		9B37B3E41CB70AB000470889 /* ddauTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3E31CB70AB000470889 /* ddauTests.swift */; };
+		9B37B3EF1CB70AB000470889 /* ddauUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3EE1CB70AB000470889 /* ddauUITests.swift */; };
+		9B37B3FD1CB70BDB00470889 /* ActionRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3FC1CB70BDB00470889 /* ActionRouter.swift */; };
+		9B37B3FF1CB70E5400470889 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3FE1CB70E5400470889 /* SplitViewController.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9B37B3E01CB70AB000470889 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9B37B3C11CB70AAF00470889 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9B37B3C81CB70AAF00470889;
+			remoteInfo = ddau;
+		};
+		9B37B3EB1CB70AB000470889 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9B37B3C11CB70AAF00470889 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9B37B3C81CB70AAF00470889;
+			remoteInfo = ddau;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		9B37B3C91CB70AAF00470889 /* ddau.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ddau.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B37B3CC1CB70AB000470889 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		9B37B3CE1CB70AB000470889 /* MasterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
+		9B37B3D01CB70AB000470889 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		9B37B3D31CB70AB000470889 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		9B37B3D51CB70AB000470889 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		9B37B3D81CB70AB000470889 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		9B37B3DA1CB70AB000470889 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9B37B3DF1CB70AB000470889 /* ddauTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ddauTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B37B3E31CB70AB000470889 /* ddauTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ddauTests.swift; sourceTree = "<group>"; };
+		9B37B3E51CB70AB000470889 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9B37B3EA1CB70AB000470889 /* ddauUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ddauUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9B37B3EE1CB70AB000470889 /* ddauUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ddauUITests.swift; sourceTree = "<group>"; };
+		9B37B3F01CB70AB000470889 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9B37B3FC1CB70BDB00470889 /* ActionRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionRouter.swift; sourceTree = "<group>"; };
+		9B37B3FE1CB70E5400470889 /* SplitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		9B37B3C61CB70AAF00470889 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9B37B3DC1CB70AB000470889 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9B37B3E71CB70AB000470889 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		9B37B3C01CB70AAF00470889 = {
+			isa = PBXGroup;
+			children = (
+				9B37B3CB1CB70AB000470889 /* ddau */,
+				9B37B3E21CB70AB000470889 /* ddauTests */,
+				9B37B3ED1CB70AB000470889 /* ddauUITests */,
+				9B37B3CA1CB70AAF00470889 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9B37B3CA1CB70AAF00470889 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9B37B3C91CB70AAF00470889 /* ddau.app */,
+				9B37B3DF1CB70AB000470889 /* ddauTests.xctest */,
+				9B37B3EA1CB70AB000470889 /* ddauUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9B37B3CB1CB70AB000470889 /* ddau */ = {
+			isa = PBXGroup;
+			children = (
+				9B37B3CC1CB70AB000470889 /* AppDelegate.swift */,
+				9B37B3CE1CB70AB000470889 /* MasterViewController.swift */,
+				9B37B3D01CB70AB000470889 /* DetailViewController.swift */,
+				9B37B3D21CB70AB000470889 /* Main.storyboard */,
+				9B37B3D51CB70AB000470889 /* Assets.xcassets */,
+				9B37B3D71CB70AB000470889 /* LaunchScreen.storyboard */,
+				9B37B3DA1CB70AB000470889 /* Info.plist */,
+				9B37B3FC1CB70BDB00470889 /* ActionRouter.swift */,
+				9B37B3FE1CB70E5400470889 /* SplitViewController.swift */,
+			);
+			path = ddau;
+			sourceTree = "<group>";
+		};
+		9B37B3E21CB70AB000470889 /* ddauTests */ = {
+			isa = PBXGroup;
+			children = (
+				9B37B3E31CB70AB000470889 /* ddauTests.swift */,
+				9B37B3E51CB70AB000470889 /* Info.plist */,
+			);
+			path = ddauTests;
+			sourceTree = "<group>";
+		};
+		9B37B3ED1CB70AB000470889 /* ddauUITests */ = {
+			isa = PBXGroup;
+			children = (
+				9B37B3EE1CB70AB000470889 /* ddauUITests.swift */,
+				9B37B3F01CB70AB000470889 /* Info.plist */,
+			);
+			path = ddauUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9B37B3C81CB70AAF00470889 /* ddau */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9B37B3F31CB70AB000470889 /* Build configuration list for PBXNativeTarget "ddau" */;
+			buildPhases = (
+				9B37B3C51CB70AAF00470889 /* Sources */,
+				9B37B3C61CB70AAF00470889 /* Frameworks */,
+				9B37B3C71CB70AAF00470889 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ddau;
+			productName = ddau;
+			productReference = 9B37B3C91CB70AAF00470889 /* ddau.app */;
+			productType = "com.apple.product-type.application";
+		};
+		9B37B3DE1CB70AB000470889 /* ddauTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9B37B3F61CB70AB000470889 /* Build configuration list for PBXNativeTarget "ddauTests" */;
+			buildPhases = (
+				9B37B3DB1CB70AB000470889 /* Sources */,
+				9B37B3DC1CB70AB000470889 /* Frameworks */,
+				9B37B3DD1CB70AB000470889 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9B37B3E11CB70AB000470889 /* PBXTargetDependency */,
+			);
+			name = ddauTests;
+			productName = ddauTests;
+			productReference = 9B37B3DF1CB70AB000470889 /* ddauTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		9B37B3E91CB70AB000470889 /* ddauUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9B37B3F91CB70AB000470889 /* Build configuration list for PBXNativeTarget "ddauUITests" */;
+			buildPhases = (
+				9B37B3E61CB70AB000470889 /* Sources */,
+				9B37B3E71CB70AB000470889 /* Frameworks */,
+				9B37B3E81CB70AB000470889 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9B37B3EC1CB70AB000470889 /* PBXTargetDependency */,
+			);
+			name = ddauUITests;
+			productName = ddauUITests;
+			productReference = 9B37B3EA1CB70AB000470889 /* ddauUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		9B37B3C11CB70AAF00470889 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0730;
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = "Karsten Bruns";
+				TargetAttributes = {
+					9B37B3C81CB70AAF00470889 = {
+						CreatedOnToolsVersion = 7.3;
+					};
+					9B37B3DE1CB70AB000470889 = {
+						CreatedOnToolsVersion = 7.3;
+						TestTargetID = 9B37B3C81CB70AAF00470889;
+					};
+					9B37B3E91CB70AB000470889 = {
+						CreatedOnToolsVersion = 7.3;
+						TestTargetID = 9B37B3C81CB70AAF00470889;
+					};
+				};
+			};
+			buildConfigurationList = 9B37B3C41CB70AAF00470889 /* Build configuration list for PBXProject "ddau" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 9B37B3C01CB70AAF00470889;
+			productRefGroup = 9B37B3CA1CB70AAF00470889 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9B37B3C81CB70AAF00470889 /* ddau */,
+				9B37B3DE1CB70AB000470889 /* ddauTests */,
+				9B37B3E91CB70AB000470889 /* ddauUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		9B37B3C71CB70AAF00470889 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9B37B3D91CB70AB000470889 /* LaunchScreen.storyboard in Resources */,
+				9B37B3D61CB70AB000470889 /* Assets.xcassets in Resources */,
+				9B37B3D41CB70AB000470889 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9B37B3DD1CB70AB000470889 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9B37B3E81CB70AB000470889 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9B37B3C51CB70AAF00470889 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9B37B3FD1CB70BDB00470889 /* ActionRouter.swift in Sources */,
+				9B37B3D11CB70AB000470889 /* DetailViewController.swift in Sources */,
+				9B37B3CF1CB70AB000470889 /* MasterViewController.swift in Sources */,
+				9B37B3FF1CB70E5400470889 /* SplitViewController.swift in Sources */,
+				9B37B3CD1CB70AB000470889 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9B37B3DB1CB70AB000470889 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9B37B3E41CB70AB000470889 /* ddauTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9B37B3E61CB70AB000470889 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9B37B3EF1CB70AB000470889 /* ddauUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		9B37B3E11CB70AB000470889 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9B37B3C81CB70AAF00470889 /* ddau */;
+			targetProxy = 9B37B3E01CB70AB000470889 /* PBXContainerItemProxy */;
+		};
+		9B37B3EC1CB70AB000470889 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9B37B3C81CB70AAF00470889 /* ddau */;
+			targetProxy = 9B37B3EB1CB70AB000470889 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		9B37B3D21CB70AB000470889 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9B37B3D31CB70AB000470889 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		9B37B3D71CB70AB000470889 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				9B37B3D81CB70AB000470889 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		9B37B3F11CB70AB000470889 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9B37B3F21CB70AB000470889 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9B37B3F41CB70AB000470889 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = ddau/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = me.bruns.ddau;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		9B37B3F51CB70AB000470889 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = ddau/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = me.bruns.ddau;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		9B37B3F71CB70AB000470889 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = ddauTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = me.bruns.ddauTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ddau.app/ddau";
+			};
+			name = Debug;
+		};
+		9B37B3F81CB70AB000470889 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = ddauTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = me.bruns.ddauTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ddau.app/ddau";
+			};
+			name = Release;
+		};
+		9B37B3FA1CB70AB000470889 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = ddauUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = me.bruns.ddauUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = ddau;
+			};
+			name = Debug;
+		};
+		9B37B3FB1CB70AB000470889 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = ddauUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = me.bruns.ddauUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = ddau;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		9B37B3C41CB70AAF00470889 /* Build configuration list for PBXProject "ddau" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B37B3F11CB70AB000470889 /* Debug */,
+				9B37B3F21CB70AB000470889 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9B37B3F31CB70AB000470889 /* Build configuration list for PBXNativeTarget "ddau" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B37B3F41CB70AB000470889 /* Debug */,
+				9B37B3F51CB70AB000470889 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		9B37B3F61CB70AB000470889 /* Build configuration list for PBXNativeTarget "ddauTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B37B3F71CB70AB000470889 /* Debug */,
+				9B37B3F81CB70AB000470889 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		9B37B3F91CB70AB000470889 /* Build configuration list for PBXNativeTarget "ddauUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9B37B3FA1CB70AB000470889 /* Debug */,
+				9B37B3FB1CB70AB000470889 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 9B37B3C11CB70AAF00470889 /* Project object */;
+}
