@@ -17,6 +17,7 @@
 		9B37B3EF1CB70AB000470889 /* ddauUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3EE1CB70AB000470889 /* ddauUITests.swift */; };
 		9B37B3FD1CB70BDB00470889 /* ActionRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3FC1CB70BDB00470889 /* ActionRouter.swift */; };
 		9B37B3FF1CB70E5400470889 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3FE1CB70E5400470889 /* SplitViewController.swift */; };
+		9B37B4031CB7A7A800470889 /* DataRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B4021CB7A7A800470889 /* DataRouter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		9B37B3F01CB70AB000470889 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9B37B3FC1CB70BDB00470889 /* ActionRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionRouter.swift; sourceTree = "<group>"; };
 		9B37B3FE1CB70E5400470889 /* SplitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
+		9B37B4021CB7A7A800470889 /* DataRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataRouter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +114,7 @@
 				9B37B3DA1CB70AB000470889 /* Info.plist */,
 				9B37B3FC1CB70BDB00470889 /* ActionRouter.swift */,
 				9B37B3FE1CB70E5400470889 /* SplitViewController.swift */,
+				9B37B4021CB7A7A800470889 /* DataRouter.swift */,
 			);
 			path = ddau;
 			sourceTree = "<group>";
@@ -265,6 +268,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B37B4031CB7A7A800470889 /* DataRouter.swift in Sources */,
 				9B37B3FD1CB70BDB00470889 /* ActionRouter.swift in Sources */,
 				9B37B3D11CB70AB000470889 /* DetailViewController.swift in Sources */,
 				9B37B3CF1CB70AB000470889 /* MasterViewController.swift in Sources */,

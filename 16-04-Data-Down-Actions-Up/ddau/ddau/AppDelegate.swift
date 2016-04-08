@@ -9,7 +9,7 @@
 import UIKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate, ActionCatcher {
+class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate, ActionReceiver {
 
     var window: UIWindow?
 
@@ -24,9 +24,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     }
 
     
-    func filterActionPackages(actionPackages: [ActionPackage]) -> [ActionPackage] {
-        print(actionPackages, "received by", self)
-        return actionPackages
+    func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt {
+        print(actionPackage, "received by", self)
+        sendDataPackageDown(DataPackage(name: "World"))
+        return .HandledDefinitely
     }
 
 

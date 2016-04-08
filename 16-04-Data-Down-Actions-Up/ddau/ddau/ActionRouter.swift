@@ -14,65 +14,70 @@ struct ActionPackage {
 }
 
 
-protocol ActionRouter {
-    func sendActionPackageUpwards(actionPackage: ActionPackage)
-    func sendActionPackagesUpwards(actionPackages: [ActionPackage])
-}
 
-
-protocol ActionCatcher {
-    func filterActionPackages(actionPackages: [ActionPackage]) -> [ActionPackage]
+enum ActionReceipt {
+    case HandledDefinitely
+    case SendUp
 }
 
 
 
-extension ActionRouter {
+protocol ActionUpRouter {
+    func sendActionPackageUp(actionPackage: ActionPackage)
+    func sendActionPackagesUp(actionPackages: [ActionPackage])
+}
 
-    func sendActionPackageUpwards(actionPackage: ActionPackage) {
-        sendActionPackagesUpwards([actionPackage])
-    }
 
+
+protocol ActionReceiver {
+    func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt
+}
+
+
+
+extension ActionUpRouter {
     
-    func sendActionPackagesUpwards(actionPackages: [ActionPackage]) {
-        
-        func getParentViewControllerAsCatcher() -> ActionCatcher? {
-            guard let viewController = self as? UIViewController else {
-                return nil
-            }
-            return viewController.parentViewController as? ActionCatcher
-        }
-        
-        
-        func getAppDelegateAsCatcher() -> ActionCatcher? {
-            guard let viewController = self as? UIViewController where viewController == viewController.view.window?.rootViewController else {
-                return nil
-            }
-            return UIApplication.sharedApplication().delegate as? ActionCatcher
-        }
-
-        
-        func getParentViewControllerAsRouter() -> ActionRouter? {
-            guard let viewController = self as? UIViewController else {
-                return nil
-            }
-            return viewController.parentViewController as? ActionRouter
-        }
-        
-
-        let filteredPackages: [ActionPackage]
-        if let parentActionCatcher = getParentViewControllerAsCatcher() ?? getAppDelegateAsCatcher() {
-            filteredPackages = parentActionCatcher.filterActionPackages(actionPackages)
-        } else {
-            filteredPackages = actionPackages
-        }
-        
-        if let parentActionRouter = getParentViewControllerAsRouter() {
-            if filteredPackages.count > 0 {
-                parentActionRouter.sendActionPackagesUpwards(filteredPackages)
-            }
-        }
+    func sendActionPackageUp(actionPackage: ActionPackage) {
+        sendActionPackagesUp([actionPackage])
     }
 }
 
 
-extension UIViewController : ActionRouter { }
+
+extension UIViewController : ActionUpRouter {
+
+    func sendActionPackagesUp(actionPackages: [ActionPackage]) {
+        
+        // Get possible parent instances as specific type
+        func parentViewControllerAsReceiver() -> ActionReceiver? {
+            return self.parentViewController as? ActionReceiver
+        }
+        
+        func appDelegateAsReceiver() -> ActionReceiver? {
+            guard self == self.view.window?.rootViewController else { return nil }
+            return UIApplication.sharedApplication().delegate as? ActionReceiver
+        }
+        
+        func parentViewControllerAsRouter() -> ActionUpRouter? {
+            return self.parentViewController
+        }
+        
+        // Hand over packages to parent handler
+        let remainingPackages: [ActionPackage]
+        if let parentActionReceiver = parentViewControllerAsReceiver() ?? appDelegateAsReceiver() {
+            remainingPackages = actionPackages.filter { package in
+                let sendUp = parentActionReceiver.receiveActionPackage(package) == .SendUp
+                return sendUp
+            }
+        } else {
+            remainingPackages = actionPackages
+        }
+        
+        // Let parent send package up
+        if let parentActionRouter = parentViewControllerAsRouter() {
+            if remainingPackages.count > 0 {
+                parentActionRouter.sendActionPackagesUp(remainingPackages)
+            }
+        }
+    }
+}

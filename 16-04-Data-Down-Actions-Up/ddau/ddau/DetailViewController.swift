@@ -8,7 +8,7 @@
 
 import UIKit
 
-class DetailViewController: UIViewController {
+class DetailViewController: UIViewController, DataReceiver {
 
     @IBOutlet weak var detailDescriptionLabel: UILabel!
 
@@ -33,14 +33,23 @@ class DetailViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         self.configureView()
-        sendActionPackageUpwards(ActionPackage(name: "Hello"))
+        sendActionPackageUp(ActionPackage(name: "Hello"))
     }
+    
+    
+    func receiveDataPackage(dataPackage: DataPackage) -> DataReceipt {
+        switch dataPackage.name {
+        case "World":
+            print(dataPackage)
+            return .HandledDefinitely
+        default:
+            return .SendDown
+        }
+    }
+    
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
 }
-

@@ -8,11 +8,11 @@
 
 import UIKit
 
-class SplitViewController : UISplitViewController, ActionCatcher {
+class SplitViewController : UISplitViewController, ActionReceiver {
 
-    func filterActionPackages(actionPackages: [ActionPackage]) -> [ActionPackage] {
-        print(actionPackages, "received by", self)
-        return actionPackages
+    func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt {
+        print(actionPackage, "received by", self)
+        return .SendUp
     }
     
 }
