@@ -12,7 +12,9 @@ class SplitViewController : UISplitViewController, ActionReceiver {
 
     func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt {
         print(actionPackage, "received by", self)
-        return .SendUp
+        sendActionPackageUp(TestActionPackage(name: "Such Wow"))
+        sendDataPackageDown(TestDataPackage(name: "Foo Fooooo"))
+        return .HandledDefinitely
     }
     
 }

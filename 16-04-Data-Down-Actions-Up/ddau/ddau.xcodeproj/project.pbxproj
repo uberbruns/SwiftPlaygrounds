@@ -15,9 +15,9 @@
 		9B37B3D91CB70AB000470889 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B37B3D71CB70AB000470889 /* LaunchScreen.storyboard */; };
 		9B37B3E41CB70AB000470889 /* ddauTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3E31CB70AB000470889 /* ddauTests.swift */; };
 		9B37B3EF1CB70AB000470889 /* ddauUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3EE1CB70AB000470889 /* ddauUITests.swift */; };
-		9B37B3FD1CB70BDB00470889 /* ActionRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3FC1CB70BDB00470889 /* ActionRouter.swift */; };
+		9B37B3FD1CB70BDB00470889 /* ActionRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3FC1CB70BDB00470889 /* ActionRouting.swift */; };
 		9B37B3FF1CB70E5400470889 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3FE1CB70E5400470889 /* SplitViewController.swift */; };
-		9B37B4031CB7A7A800470889 /* DataRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B4021CB7A7A800470889 /* DataRouter.swift */; };
+		9B37B4031CB7A7A800470889 /* DataRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B4021CB7A7A800470889 /* DataRouting.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,9 +52,9 @@
 		9B37B3EA1CB70AB000470889 /* ddauUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ddauUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B37B3EE1CB70AB000470889 /* ddauUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ddauUITests.swift; sourceTree = "<group>"; };
 		9B37B3F01CB70AB000470889 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9B37B3FC1CB70BDB00470889 /* ActionRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionRouter.swift; sourceTree = "<group>"; };
+		9B37B3FC1CB70BDB00470889 /* ActionRouting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionRouting.swift; sourceTree = "<group>"; };
 		9B37B3FE1CB70E5400470889 /* SplitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
-		9B37B4021CB7A7A800470889 /* DataRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataRouter.swift; sourceTree = "<group>"; };
+		9B37B4021CB7A7A800470889 /* DataRouting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataRouting.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,7 +113,7 @@
 				9B37B3D71CB70AB000470889 /* LaunchScreen.storyboard */,
 				9B37B3DA1CB70AB000470889 /* Info.plist */,
 				9B37B3FE1CB70E5400470889 /* SplitViewController.swift */,
-				9B37B4061CB7B9C700470889 /* DDAU */,
+				9B37B4061CB7B9C700470889 /* InformationRouting */,
 			);
 			path = ddau;
 			sourceTree = "<group>";
@@ -136,13 +136,13 @@
 			path = ddauUITests;
 			sourceTree = "<group>";
 		};
-		9B37B4061CB7B9C700470889 /* DDAU */ = {
+		9B37B4061CB7B9C700470889 /* InformationRouting */ = {
 			isa = PBXGroup;
 			children = (
-				9B37B3FC1CB70BDB00470889 /* ActionRouter.swift */,
-				9B37B4021CB7A7A800470889 /* DataRouter.swift */,
+				9B37B3FC1CB70BDB00470889 /* ActionRouting.swift */,
+				9B37B4021CB7A7A800470889 /* DataRouting.swift */,
 			);
-			name = DDAU;
+			name = InformationRouting;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -276,8 +276,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9B37B4031CB7A7A800470889 /* DataRouter.swift in Sources */,
-				9B37B3FD1CB70BDB00470889 /* ActionRouter.swift in Sources */,
+				9B37B4031CB7A7A800470889 /* DataRouting.swift in Sources */,
+				9B37B3FD1CB70BDB00470889 /* ActionRouting.swift in Sources */,
 				9B37B3D11CB70AB000470889 /* DetailViewController.swift in Sources */,
 				9B37B3CF1CB70AB000470889 /* MasterViewController.swift in Sources */,
 				9B37B3FF1CB70E5400470889 /* SplitViewController.swift in Sources */,
@@ -508,6 +508,7 @@
 				9B37B3F51CB70AB000470889 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		9B37B3F61CB70AB000470889 /* Build configuration list for PBXNativeTarget "ddauTests" */ = {
 			isa = XCConfigurationList;
@@ -516,6 +517,7 @@
 				9B37B3F81CB70AB000470889 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		9B37B3F91CB70AB000470889 /* Build configuration list for PBXNativeTarget "ddauUITests" */ = {
 			isa = XCConfigurationList;
@@ -524,6 +526,7 @@
 				9B37B3FB1CB70AB000470889 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
