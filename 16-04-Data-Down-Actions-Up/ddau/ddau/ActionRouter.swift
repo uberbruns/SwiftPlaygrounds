@@ -9,15 +9,18 @@
 import UIKit
 
 
-struct ActionPackage {
-    let name: String
-}
-
+protocol ActionPackage { }
 
 
 enum ActionReceipt {
     case HandledDefinitely
     case SendUp
+}
+
+
+
+struct TestActionPackage : ActionPackage {
+    let name: String
 }
 
 

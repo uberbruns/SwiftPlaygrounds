@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     
     func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt {
         print(actionPackage, "received by", self)
-        sendDataPackageDown(DataPackage(name: "World"))
+        sendDataPackageDown(TestDataPackage(name: "World"))
         return .HandledDefinitely
     }
 

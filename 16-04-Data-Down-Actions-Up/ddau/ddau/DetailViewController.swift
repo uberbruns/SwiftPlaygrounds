@@ -33,14 +33,14 @@ class DetailViewController: UIViewController, DataReceiver {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         self.configureView()
-        sendActionPackageUp(ActionPackage(name: "Hello"))
+        sendActionPackageUp(TestActionPackage(name: "Hello"))
     }
     
     
     func receiveDataPackage(dataPackage: DataPackage) -> DataReceipt {
-        switch dataPackage.name {
-        case "World":
-            print(dataPackage)
+        switch dataPackage {
+        case let package as TestDataPackage :
+            print(package)
             return .HandledDefinitely
         default:
             return .SendDown

@@ -112,9 +112,8 @@
 				9B37B3D51CB70AB000470889 /* Assets.xcassets */,
 				9B37B3D71CB70AB000470889 /* LaunchScreen.storyboard */,
 				9B37B3DA1CB70AB000470889 /* Info.plist */,
-				9B37B3FC1CB70BDB00470889 /* ActionRouter.swift */,
 				9B37B3FE1CB70E5400470889 /* SplitViewController.swift */,
-				9B37B4021CB7A7A800470889 /* DataRouter.swift */,
+				9B37B4061CB7B9C700470889 /* DDAU */,
 			);
 			path = ddau;
 			sourceTree = "<group>";
@@ -135,6 +134,15 @@
 				9B37B3F01CB70AB000470889 /* Info.plist */,
 			);
 			path = ddauUITests;
+			sourceTree = "<group>";
+		};
+		9B37B4061CB7B9C700470889 /* DDAU */ = {
+			isa = PBXGroup;
+			children = (
+				9B37B3FC1CB70BDB00470889 /* ActionRouter.swift */,
+				9B37B4021CB7A7A800470889 /* DataRouter.swift */,
+			);
+			name = DDAU;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

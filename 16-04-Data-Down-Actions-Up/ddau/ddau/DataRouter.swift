@@ -9,7 +9,10 @@
 import UIKit
 
 
-struct DataPackage {
+protocol DataPackage { }
+
+
+struct TestDataPackage : DataPackage {
     let name: String
 }
 
@@ -43,18 +46,20 @@ extension DataDownRouter {
 
 
 
-private func sendDataPackagesDownViewControllers(dataPackages: [DataPackage], viewControllers: [UIViewController]) {
-    for viewController in viewControllers {
-        let remainingPackages: [DataPackage]
-        if let receiver = viewController as? DataReceiver {
-            remainingPackages = dataPackages.filter { dataPackage in
-                let sendDown = receiver.receiveDataPackage(dataPackage) == .SendDown
-                return sendDown
+private struct DataDownRouterHelper {
+    static func sendDataPackagesDown(dataPackages: [DataPackage], viewControllers: [UIViewController]) {
+        for viewController in viewControllers {
+            let remainingPackages: [DataPackage]
+            if let receiver = viewController as? DataReceiver {
+                remainingPackages = dataPackages.filter { dataPackage in
+                    let sendDown = receiver.receiveDataPackage(dataPackage) == .SendDown
+                    return sendDown
+                }
+            } else {
+                remainingPackages = dataPackages
             }
-        } else {
-            remainingPackages = dataPackages
+            viewController.sendDataPackagesDown(remainingPackages)
         }
-        viewController.sendDataPackagesDown(remainingPackages)
     }
 }
 
@@ -62,7 +67,7 @@ private func sendDataPackagesDownViewControllers(dataPackages: [DataPackage], vi
 
 extension UIViewController : DataDownRouter {
     func sendDataPackagesDown(dataPackages: [DataPackage]) {
-        sendDataPackagesDownViewControllers(dataPackages, viewControllers: childViewControllers)
+        DataDownRouterHelper.sendDataPackagesDown(dataPackages, viewControllers: childViewControllers)
     }
 }
 
@@ -71,6 +76,6 @@ extension UIViewController : DataDownRouter {
 extension AppDelegate : DataDownRouter {
     func sendDataPackagesDown(dataPackages: [DataPackage]) {
         guard let childViewControllers = window?.rootViewController?.childViewControllers else { return }
-        sendDataPackagesDownViewControllers(dataPackages, viewControllers: childViewControllers)
+        DataDownRouterHelper.sendDataPackagesDown(dataPackages, viewControllers: childViewControllers)
     }
 }
