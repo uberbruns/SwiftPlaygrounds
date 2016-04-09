@@ -8,13 +8,35 @@
 
 import UIKit
 
-class SplitViewController : UISplitViewController, ActionReceiver {
+class SplitViewController : UISplitViewController, ActionReceiver, DataReceiver {
 
-    func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt {
-        print(actionPackage, "received by", self)
-        sendActionPackageUp(TestActionPackage(name: "Such Wow"))
-        sendDataPackageDown(TestDataPackage(name: "Foo Fooooo"))
-        return .HandledDefinitely
+    static func directDataPackage(dataPackage: DataPackage) -> DataDirection {
+        return .HandleHere
     }
     
+    
+    func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt {
+        print(self, "Received action", actionPackage)
+        sendActionPackageUp(MasterAction(name: "Action from split view controller"))
+        return .SendUp
+    }
+    
+    
+    func receiveDataPackage(dataPackage: DataPackage) -> DataReceipt {
+        var specificViewControllers = [UIViewController]()
+        
+        if dataPackage is MasterData {
+            specificViewControllers.append(viewControllers[0])
+        }
+        
+        if dataPackage is DetailData {
+            specificViewControllers.append(viewControllers[1])
+        }
+        
+        if specificViewControllers.count > 0 {
+            return .SendDownToViewControllers(viewControllers: specificViewControllers)
+        }
+        
+        return .SendDown
+    }
 }

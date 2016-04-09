@@ -25,8 +25,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
     
     func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt {
-        print(actionPackage, "received by", self)
-        sendDataPackageDown(TestDataPackage(name: "World"))
+        print(self, "Received action", actionPackage)
+        switch actionPackage {
+        case is MasterAction:
+            sendDataPackageDown(MasterData(name: "Data from app delegate"))
+        default:
+            sendDataPackageDown(DetailData(name: "Data from app delegate"))
+        }
         return .HandledDefinitely
     }
 

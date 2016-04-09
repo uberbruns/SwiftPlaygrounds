@@ -8,7 +8,18 @@
 
 import UIKit
 
-class MasterViewController: UITableViewController {
+
+struct MasterAction : ActionPackage {
+    let name: String
+}
+
+
+struct MasterData : DataPackage {
+    let name: String
+}
+
+
+class MasterViewController: UITableViewController, DataReceiver {
 
     var detailViewController: DetailViewController? = nil
     var objects = [AnyObject]()
@@ -19,7 +30,7 @@ class MasterViewController: UITableViewController {
         // Do any additional setup after loading the view, typically from a nib.
         self.navigationItem.leftBarButtonItem = self.editButtonItem()
 
-        let addButton = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: "insertNewObject:")
+        let addButton = UIBarButtonItem(barButtonSystemItem: .Add, target: self, action: #selector(MasterViewController.insertNewObject(_:)))
         self.navigationItem.rightBarButtonItem = addButton
         if let split = self.splitViewController {
             let controllers = split.viewControllers
@@ -41,6 +52,22 @@ class MasterViewController: UITableViewController {
         objects.insert(NSDate(), atIndex: 0)
         let indexPath = NSIndexPath(forRow: 0, inSection: 0)
         self.tableView.insertRowsAtIndexPaths([indexPath], withRowAnimation: .Automatic)
+    }
+    
+    
+    static func directDataPackage(dataPackage: DataPackage) -> DataDirection {
+        return dataPackage is MasterData ? .HandleHere : .SendDown
+    }
+
+    
+    func receiveDataPackage(dataPackage: DataPackage) -> DataReceipt {
+        switch dataPackage {
+        case let package as MasterData :
+            print(self, package)
+            return .HandledDefinitely
+        default:
+            return .SendDown
+        }
     }
 
     // MARK: - Segues

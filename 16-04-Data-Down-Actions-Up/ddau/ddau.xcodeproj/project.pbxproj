@@ -18,6 +18,7 @@
 		9B37B3FD1CB70BDB00470889 /* ActionRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3FC1CB70BDB00470889 /* ActionRouting.swift */; };
 		9B37B3FF1CB70E5400470889 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3FE1CB70E5400470889 /* SplitViewController.swift */; };
 		9B37B4031CB7A7A800470889 /* DataRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B4021CB7A7A800470889 /* DataRouting.swift */; };
+		9BA3A4DB1CB999BF00B96BB6 /* GCDTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA3A4DA1CB999BF00B96BB6 /* GCDTools.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		9B37B3FC1CB70BDB00470889 /* ActionRouting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionRouting.swift; sourceTree = "<group>"; };
 		9B37B3FE1CB70E5400470889 /* SplitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
 		9B37B4021CB7A7A800470889 /* DataRouting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataRouting.swift; sourceTree = "<group>"; };
+		9BA3A4DA1CB999BF00B96BB6 /* GCDTools.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GCDTools.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +143,7 @@
 			children = (
 				9B37B3FC1CB70BDB00470889 /* ActionRouting.swift */,
 				9B37B4021CB7A7A800470889 /* DataRouting.swift */,
+				9BA3A4DA1CB999BF00B96BB6 /* GCDTools.swift */,
 			);
 			name = InformationRouting;
 			sourceTree = "<group>";
@@ -279,6 +282,7 @@
 				9B37B4031CB7A7A800470889 /* DataRouting.swift in Sources */,
 				9B37B3FD1CB70BDB00470889 /* ActionRouting.swift in Sources */,
 				9B37B3D11CB70AB000470889 /* DetailViewController.swift in Sources */,
+				9BA3A4DB1CB999BF00B96BB6 /* GCDTools.swift in Sources */,
 				9B37B3CF1CB70AB000470889 /* MasterViewController.swift in Sources */,
 				9B37B3FF1CB70E5400470889 /* SplitViewController.swift in Sources */,
 				9B37B3CD1CB70AB000470889 /* AppDelegate.swift in Sources */,

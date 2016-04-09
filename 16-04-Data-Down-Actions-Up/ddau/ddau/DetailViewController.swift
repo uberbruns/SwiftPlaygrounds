@@ -8,9 +8,25 @@
 
 import UIKit
 
+
+struct DetailAction : ActionPackage {
+    let name: String
+}
+
+
+struct DetailData : DataPackage {
+    let name: String
+}
+
+
 class DetailViewController: UIViewController, DataReceiver {
 
     @IBOutlet weak var detailDescriptionLabel: UILabel!
+    
+    
+    deinit {
+        print("Gone")
+    }
 
 
     var detailItem: AnyObject? {
@@ -33,14 +49,24 @@ class DetailViewController: UIViewController, DataReceiver {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         self.configureView()
-        sendActionPackageUp(TestActionPackage(name: "Hello"))
     }
     
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        sendActionPackageUp(DetailAction(name: "Action from DetailViewController"))
+    }
+    
+    
+    static func directDataPackage(dataPackage: DataPackage) -> DataDirection {
+        return .HandleHere
+    }
+
+    
     func receiveDataPackage(dataPackage: DataPackage) -> DataReceipt {
         switch dataPackage {
-        case let package as TestDataPackage :
-            print(package)
+        case let package as DetailData :
+            print(self, package)
             return .HandledDefinitely
         default:
             return .SendDown

@@ -17,9 +17,16 @@ struct TestDataPackage : DataPackage {
 }
 
 
+enum DataDirection {
+    case HandleHere
+    case SendDown
+    case Stop
+}
+
 
 enum DataReceipt {
     case HandledDefinitely
+    case SendDownToViewControllers(viewControllers: [UIViewController])
     case SendDown
 }
 
@@ -27,38 +34,68 @@ enum DataReceipt {
 
 protocol DataDownRouter {
     func sendDataPackageDown(dataPackage: DataPackage)
-    func sendDataPackagesDown(dataPackages: [DataPackage])
 }
 
 
 
 protocol DataReceiver {
+    static func directDataPackage(dataPackage: DataPackage) -> DataDirection
     func receiveDataPackage(dataPackage: DataPackage) -> DataReceipt
 }
 
 
-
-extension DataDownRouter {
-    func sendDataPackageDown(dataPackage: DataPackage) {
-        sendDataPackagesDown([dataPackage])
-    }
-}
-
-
-
 private struct DataDownRouterHelper {
-    static func sendDataPackagesDown(dataPackages: [DataPackage], viewControllers: [UIViewController]) {
+    
+    static func sendDataPackageDown(dataPackage: DataPackage, viewControllers: [UIViewController]) {
+        dispatchInBackground {
+            _sendDataPackageDown(dataPackage, viewControllers: viewControllers)
+        }
+    }
+    
+    static func _sendDataPackageDown(dataPackage: DataPackage, viewControllers: [UIViewController]) {
+        
+        // Iterate through view conrollers
         for viewController in viewControllers {
-            let remainingPackages: [DataPackage]
-            if let receiver = viewController as? DataReceiver {
-                remainingPackages = dataPackages.filter { dataPackage in
-                    let sendDown = receiver.receiveDataPackage(dataPackage) == .SendDown
-                    return sendDown
+            
+            var lowerViewControllersWhitelist: [UIViewController]? = nil
+            var sendDown = true
+
+            if let receivingViewController = viewController as? DataReceiver {
+                // Allow data package
+                // Side effect-free call on background thread
+                let dataDirection = receivingViewController.dynamicType.directDataPackage(dataPackage)
+                switch dataDirection {
+                case .HandleHere:
+                    // Call on main thread with potential side effects
+                    dispatchOnMainThread(true) {
+                        switch receivingViewController.receiveDataPackage(dataPackage) {
+                        case .HandledDefinitely :
+                            sendDown = false
+                        case .SendDownToViewControllers(let viewControllers) :
+                            lowerViewControllersWhitelist = viewControllers
+                            sendDown = true
+                        case .SendDown :
+                            sendDown = true
+                        }
+                    }
+                case .SendDown:
+                    sendDown = true
+                case .Stop:
+                    sendDown = false
                 }
-            } else {
-                remainingPackages = dataPackages
             }
-            viewController.sendDataPackagesDown(remainingPackages)
+            
+            // Hand down
+            let viewControllers: [UIViewController]
+            if let lowerViewControllersWhitelist = lowerViewControllersWhitelist {
+                viewControllers = viewController.childViewControllers.filter({ lowerViewControllersWhitelist.contains($0) })
+            } else {
+                viewControllers = viewController.childViewControllers
+            }
+            
+            if sendDown {
+                _sendDataPackageDown(dataPackage, viewControllers: viewControllers)
+            }
         }
     }
 }
@@ -66,16 +103,16 @@ private struct DataDownRouterHelper {
 
 
 extension UIViewController : DataDownRouter {
-    func sendDataPackagesDown(dataPackages: [DataPackage]) {
-        DataDownRouterHelper.sendDataPackagesDown(dataPackages, viewControllers: childViewControllers)
+    func sendDataPackageDown(dataPackage: DataPackage) {
+        DataDownRouterHelper.sendDataPackageDown(dataPackage, viewControllers: childViewControllers)
     }
 }
 
 
 
 extension AppDelegate : DataDownRouter {
-    func sendDataPackagesDown(dataPackages: [DataPackage]) {
-        guard let childViewControllers = window?.rootViewController?.childViewControllers else { return }
-        DataDownRouterHelper.sendDataPackagesDown(dataPackages, viewControllers: childViewControllers)
+    func sendDataPackageDown(dataPackage: DataPackage) {
+        guard let rootViewController = window?.rootViewController else { return }
+        DataDownRouterHelper.sendDataPackageDown(dataPackage, viewControllers: [rootViewController])
     }
 }
