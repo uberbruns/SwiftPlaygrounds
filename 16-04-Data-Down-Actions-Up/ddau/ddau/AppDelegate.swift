@@ -50,3 +50,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
 
 }
 
+
+extension AppDelegate {
+    func sendDataPackageDown(dataPackage: DataPackage) {
+        guard let rootViewController = window?.rootViewController else { return }
+        DataRouter.sendDataPackageDown(dataPackage, viewControllers: [rootViewController])
+    }
+}

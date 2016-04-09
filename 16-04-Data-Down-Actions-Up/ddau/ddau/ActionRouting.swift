@@ -9,47 +9,31 @@
 import UIKit
 
 
-protocol ActionPackage { }
+public protocol ActionPackage { }
 
 
-enum ActionReceipt {
+public enum ActionReceipt {
     case HandledDefinitely
     case SendUp
 }
 
 
 
-struct TestActionPackage : ActionPackage {
-    let name: String
-}
-
-
-
-protocol ActionUpRouter {
+public protocol ActionUpRouter {
     func sendActionPackageUp(actionPackage: ActionPackage)
-    func sendActionPackagesUp(actionPackages: [ActionPackage])
 }
 
 
 
-protocol ActionReceiver {
+public protocol ActionReceiver {
     func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt
 }
 
 
 
-extension ActionUpRouter {
-    
-    func sendActionPackageUp(actionPackage: ActionPackage) {
-        sendActionPackagesUp([actionPackage])
-    }
-}
+extension UIViewController {
 
-
-
-extension UIViewController : ActionUpRouter {
-
-    func sendActionPackagesUp(actionPackages: [ActionPackage]) {
+    public func sendActionPackageUp(actionPackage: ActionPackage) {
         
         // Get possible parent instances as specific type
         func parentViewControllerAsReceiver() -> ActionReceiver? {
@@ -61,25 +45,22 @@ extension UIViewController : ActionUpRouter {
             return UIApplication.sharedApplication().delegate as? ActionReceiver
         }
         
-        func parentViewControllerAsRouter() -> ActionUpRouter? {
+        func parentViewControllerAsRouter() -> UIViewController? {
             return self.parentViewController
         }
         
         // Hand over packages to parent handler
-        let remainingPackages: [ActionPackage]
+        let sendUp: Bool
         if let parentActionReceiver = parentViewControllerAsReceiver() ?? appDelegateAsReceiver() {
-            remainingPackages = actionPackages.filter { package in
-                let sendUp = parentActionReceiver.receiveActionPackage(package) == .SendUp
-                return sendUp
-            }
+            sendUp = parentActionReceiver.receiveActionPackage(actionPackage) == .SendUp
         } else {
-            remainingPackages = actionPackages
+            sendUp = true
         }
         
         // Let parent send package up
         if let parentActionRouter = parentViewControllerAsRouter() {
-            if remainingPackages.count > 0 {
-                parentActionRouter.sendActionPackagesUp(remainingPackages)
+            if sendUp {
+                parentActionRouter.sendActionPackageUp(actionPackage)
             }
         }
     }
