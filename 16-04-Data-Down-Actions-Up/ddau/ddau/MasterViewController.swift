@@ -9,9 +9,16 @@
 import UIKit
 
 
-struct MasterAction : ActionPackage {
+struct MasterDataRequestAction : ActionPackage {
     let name: String
+    let receiptHandler: (receipt: MasterDataRequestReceipt) -> Void
 }
+
+
+struct MasterDataRequestReceipt {
+    let transactionId: Int
+}
+
 
 
 struct MasterData : DataPackage {

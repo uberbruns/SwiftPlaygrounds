@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SplitViewController : UISplitViewController, ActionReceiver, DataReceiver {
+class SplitViewController : UISplitViewController, ActionReceiving, DataReceiver {
 
     static func directDataPackage(dataPackage: DataPackage) -> DataDirection {
         return .HandleHere
@@ -17,8 +17,11 @@ class SplitViewController : UISplitViewController, ActionReceiver, DataReceiver 
     
     func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt {
         print(self, "Received action", actionPackage)
-        sendActionPackageUp(MasterAction(name: "Action from split view controller"))
-        return .SendUp
+        let action = MasterDataRequestAction(name: "Action from split view controller", receiptHandler: { receipt in
+            print(receipt.transactionId)
+        })
+        sendActionPackageUp(action)
+        return ActionReceipt.SendUp
     }
     
     

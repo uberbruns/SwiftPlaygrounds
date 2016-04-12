@@ -9,7 +9,7 @@
 import UIKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate, ActionReceiver {
+class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate, ActionReceiving {
 
     var window: UIWindow?
 
@@ -27,12 +27,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt {
         print(self, "Received action", actionPackage)
         switch actionPackage {
-        case is MasterAction:
+        case let action as MasterDataRequestAction :
+            action.receiptHandler(receipt: MasterDataRequestReceipt(transactionId: 123))
             sendDataPackageDown(MasterData(name: "Data from app delegate"))
-        default:
+        default :
             sendDataPackageDown(DetailData(name: "Data from app delegate"))
         }
-        return .HandledDefinitely
+        return ActionReceipt.HandledDefinitely
     }
 
 

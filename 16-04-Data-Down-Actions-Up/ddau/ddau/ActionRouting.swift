@@ -1,5 +1,5 @@
 //
-//  ActionRouter.swift
+//  ActionSender.swift
 //  ddau
 //
 //  Created by Karsten Bruns on 07/04/16.
@@ -19,49 +19,59 @@ public enum ActionReceipt {
 
 
 
-public protocol ActionUpRouter {
-    func sendActionPackageUp(actionPackage: ActionPackage)
-}
-
-
-
-public protocol ActionReceiver {
+public protocol ActionReceiving {
     func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt
 }
 
 
 
-extension UIViewController {
+private struct ActionSender {
+    
+    static func sendActionPackageUp(actionPackage: ActionPackage, viewController: UIViewController) {
+        dispatchInBackground {
+            _sendActionPackageUp(actionPackage, viewController: viewController)
+        }
+    }
 
-    public func sendActionPackageUp(actionPackage: ActionPackage) {
+    
+    static func _sendActionPackageUp(actionPackage: ActionPackage, viewController: UIViewController) {
         
         // Get possible parent instances as specific type
-        func parentViewControllerAsReceiver() -> ActionReceiver? {
-            return self.parentViewController as? ActionReceiver
+        func parentViewControllerAsReceiver() -> ActionReceiving? {
+            return viewController.parentViewController as? ActionReceiving
         }
         
-        func appDelegateAsReceiver() -> ActionReceiver? {
-            guard self == self.view.window?.rootViewController else { return nil }
-            return UIApplication.sharedApplication().delegate as? ActionReceiver
+        func appDelegateAsReceiver() -> ActionReceiving? {
+            guard viewController == viewController.view.window?.rootViewController else { return nil }
+            return UIApplication.sharedApplication().delegate as? ActionReceiving
         }
         
         func parentViewControllerAsRouter() -> UIViewController? {
-            return self.parentViewController
+            return viewController.parentViewController
         }
         
         // Hand over packages to parent handler
-        let sendUp: Bool
-        if let parentActionReceiver = parentViewControllerAsReceiver() ?? appDelegateAsReceiver() {
-            sendUp = parentActionReceiver.receiveActionPackage(actionPackage) == .SendUp
+        var sendUp: Bool?
+        if let parentActionReceiving = parentViewControllerAsReceiver() ?? appDelegateAsReceiver() {
+            dispatchOnMainThread(true) {
+                sendUp = parentActionReceiving.receiveActionPackage(actionPackage) == .SendUp
+            }
         } else {
             sendUp = true
         }
         
         // Let parent send package up
-        if let parentActionRouter = parentViewControllerAsRouter() {
-            if sendUp {
-                parentActionRouter.sendActionPackageUp(actionPackage)
+        if let sendUp = sendUp where sendUp == true {
+            if let parentActionSender = parentViewControllerAsRouter() {
+                _sendActionPackageUp(actionPackage, viewController: parentActionSender)
             }
         }
+    }
+}
+
+
+extension UIViewController {
+    public func sendActionPackageUp(actionPackage: ActionPackage) {
+        ActionSender.sendActionPackageUp(actionPackage, viewController: self)
     }
 }
