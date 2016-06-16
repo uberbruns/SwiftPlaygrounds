@@ -16,10 +16,23 @@ struct DetailAction : ActionPackage {
 
 struct DetailData : DataPackage {
     let name: String
+    
+    func call(dataReceiver dataReceiver: DataReceiver, receiptHandler: (DataReceipt) -> ()) {
+        guard let dataReceiver = dataReceiver as? DetailDataReceiver else {
+            receiptHandler(.SendDown)
+            return
+        }
+        dataReceiver.receive(data: self, receiptHandler: receiptHandler)
+    }
 }
 
 
-class DetailViewController: UIViewController, DataReceiver {
+protocol DetailDataReceiver : DataReceiver {
+    func receive(data data: DetailData, receiptHandler: (DataReceipt) -> ())
+}
+
+
+class DetailViewController: UIViewController, DetailDataReceiver {
 
     @IBOutlet weak var detailDescriptionLabel: UILabel!
     
@@ -59,18 +72,13 @@ class DetailViewController: UIViewController, DataReceiver {
     
     
     static func directDataPackage(dataPackage: DataPackage) -> DataDirection {
-        return .HandleHere
+        return .HandleOnMainQueue
     }
 
     
-    func receiveDataPackage(dataPackage: DataPackage) -> DataReceipt {
-        switch dataPackage {
-        case let package as DetailData :
-            print(self, package)
-            return .HandledDefinitely
-        default:
-            return .SendDown
-        }
+    func receive(data data: DetailData, receiptHandler: (DataReceipt) -> ()) {
+        print(self, data)
+        receiptHandler(.HandledDefinitely)
     }
     
 

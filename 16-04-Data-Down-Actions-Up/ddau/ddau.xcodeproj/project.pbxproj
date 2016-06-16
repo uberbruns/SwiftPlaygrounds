@@ -15,9 +15,8 @@
 		9B37B3D91CB70AB000470889 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9B37B3D71CB70AB000470889 /* LaunchScreen.storyboard */; };
 		9B37B3E41CB70AB000470889 /* ddauTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3E31CB70AB000470889 /* ddauTests.swift */; };
 		9B37B3EF1CB70AB000470889 /* ddauUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3EE1CB70AB000470889 /* ddauUITests.swift */; };
-		9B37B3FD1CB70BDB00470889 /* ActionRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3FC1CB70BDB00470889 /* ActionRouting.swift */; };
 		9B37B3FF1CB70E5400470889 /* SplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B3FE1CB70E5400470889 /* SplitViewController.swift */; };
-		9B37B4031CB7A7A800470889 /* DataRouting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B4021CB7A7A800470889 /* DataRouting.swift */; };
+		9B37B4031CB7A7A800470889 /* DDAURouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B37B4021CB7A7A800470889 /* DDAURouter.swift */; };
 		9BA3A4DB1CB999BF00B96BB6 /* GCDTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA3A4DA1CB999BF00B96BB6 /* GCDTools.swift */; };
 /* End PBXBuildFile section */
 
@@ -53,9 +52,8 @@
 		9B37B3EA1CB70AB000470889 /* ddauUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ddauUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B37B3EE1CB70AB000470889 /* ddauUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ddauUITests.swift; sourceTree = "<group>"; };
 		9B37B3F01CB70AB000470889 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9B37B3FC1CB70BDB00470889 /* ActionRouting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActionRouting.swift; sourceTree = "<group>"; };
 		9B37B3FE1CB70E5400470889 /* SplitViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SplitViewController.swift; sourceTree = "<group>"; };
-		9B37B4021CB7A7A800470889 /* DataRouting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataRouting.swift; sourceTree = "<group>"; };
+		9B37B4021CB7A7A800470889 /* DDAURouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DDAURouter.swift; sourceTree = "<group>"; };
 		9BA3A4DA1CB999BF00B96BB6 /* GCDTools.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GCDTools.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -141,8 +139,7 @@
 		9B37B4061CB7B9C700470889 /* InformationRouting */ = {
 			isa = PBXGroup;
 			children = (
-				9B37B3FC1CB70BDB00470889 /* ActionRouting.swift */,
-				9B37B4021CB7A7A800470889 /* DataRouting.swift */,
+				9B37B4021CB7A7A800470889 /* DDAURouter.swift */,
 				9BA3A4DA1CB999BF00B96BB6 /* GCDTools.swift */,
 			);
 			name = InformationRouting;
@@ -279,8 +276,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9B37B4031CB7A7A800470889 /* DataRouting.swift in Sources */,
-				9B37B3FD1CB70BDB00470889 /* ActionRouting.swift in Sources */,
+				9B37B4031CB7A7A800470889 /* DDAURouter.swift in Sources */,
 				9B37B3D11CB70AB000470889 /* DetailViewController.swift in Sources */,
 				9BA3A4DB1CB999BF00B96BB6 /* GCDTools.swift in Sources */,
 				9B37B3CF1CB70AB000470889 /* MasterViewController.swift in Sources */,

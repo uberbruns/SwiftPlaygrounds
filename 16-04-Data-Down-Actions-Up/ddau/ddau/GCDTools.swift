@@ -22,7 +22,7 @@ public func dispatchAfterTime(time: Double, action: () -> ()) {
  Takes a block and executes it after a certain amount of time
  on the main thread.
  */
-public func dispatchAfterTime(time: Int, action: () -> ()) {
+public func dispatchAfter(time time: Int, action: () -> ()) {
     dispatchAfterTime(Double(time), action: action)
 }
 
@@ -31,7 +31,7 @@ public func dispatchAfterTime(time: Int, action: () -> ()) {
  Takes a block and executes it on the main thread.
  - Parameter sync: Default is false. If `true` the function waits until the block is executed
  */
-public func dispatchOnMainThread(sync: Bool = false, code: () -> ()) {
+public func dispatchOnMainQueue(sync sync: Bool = false, code: () -> ()) {
     if NSThread.isMainThread() {
         code()
     } else {
@@ -49,7 +49,7 @@ public func dispatchOnMainThread(sync: Bool = false, code: () -> ()) {
  Takes a block and executes it on a background thread thread.
  - Parameter sync: Default is false. If `true` the function waits until the block is executed
  */
-public func dispatchInBackground(sync: Bool = false, code: () -> ()) {
+public func dispatchInBackground(sync sync: Bool = false, code: () -> ()) {
     let backgroundQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0)
     if sync {
         dispatch_sync(backgroundQueue, code)

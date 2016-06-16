@@ -23,10 +23,23 @@ struct MasterDataRequestReceipt {
 
 struct MasterData : DataPackage {
     let name: String
+    
+    func call(dataReceiver dataReceiver: DataReceiver, receiptHandler: (DataReceipt) -> ()) {
+        guard let dataReceiver = dataReceiver as? MasterDataReceiver else {
+            receiptHandler(.SendDown)
+            return
+        }
+        dataReceiver.receive(data: self, receiptHandler: receiptHandler)
+    }
 }
 
 
-class MasterViewController: UITableViewController, DataReceiver {
+protocol MasterDataReceiver : DataReceiver {
+    func receive(data data: MasterData, receiptHandler: (DataReceipt) -> ())
+}
+
+
+class MasterViewController: UITableViewController, MasterDataReceiver {
 
     var detailViewController: DetailViewController? = nil
     var objects = [AnyObject]()
@@ -55,6 +68,7 @@ class MasterViewController: UITableViewController, DataReceiver {
         // Dispose of any resources that can be recreated.
     }
 
+    
     func insertNewObject(sender: AnyObject) {
         objects.insert(NSDate(), atIndex: 0)
         let indexPath = NSIndexPath(forRow: 0, inSection: 0)
@@ -63,18 +77,13 @@ class MasterViewController: UITableViewController, DataReceiver {
     
     
     static func directDataPackage(dataPackage: DataPackage) -> DataDirection {
-        return dataPackage is MasterData ? .HandleHere : .SendDown
+        return dataPackage is MasterData ? .HandleOnMainQueue : .SendDown
     }
 
     
-    func receiveDataPackage(dataPackage: DataPackage) -> DataReceipt {
-        switch dataPackage {
-        case let package as MasterData :
-            print(self, package)
-            return .HandledDefinitely
-        default:
-            return .SendDown
-        }
+    func receive(data data: MasterData, receiptHandler: (DataReceipt) -> ()) {
+        print(self, data)
+        receiptHandler(.HandledDefinitely)
     }
 
     // MARK: - Segues

@@ -9,7 +9,7 @@
 import UIKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate, ActionReceiving {
+class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate, ActionReceiver {
 
     var window: UIWindow?
 
@@ -29,9 +29,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         switch actionPackage {
         case let action as MasterDataRequestAction :
             action.receiptHandler(receipt: MasterDataRequestReceipt(transactionId: 123))
-            sendDataPackageDown(MasterData(name: "Data from app delegate"))
+            window?.rootViewController.map {
+                sendDataPackageDown(rootViewController: $0, dataPackage: MasterData(name: "Data from app delegate"))
+            }
         default :
-            sendDataPackageDown(DetailData(name: "Data from app delegate"))
+            window?.rootViewController.map {
+                sendDataPackageDown(rootViewController: $0, dataPackage: DetailData(name: "Data from app delegate"))
+            }
         }
         return ActionReceipt.HandledDefinitely
     }
@@ -49,12 +53,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         return false
     }
 
-}
-
-
-extension AppDelegate {
-    func sendDataPackageDown(dataPackage: DataPackage) {
-        guard let rootViewController = window?.rootViewController else { return }
-        DataRouter.sendDataPackageDown(dataPackage, viewControllers: [rootViewController])
-    }
 }

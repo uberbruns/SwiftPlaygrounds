@@ -8,10 +8,10 @@
 
 import UIKit
 
-class SplitViewController : UISplitViewController, ActionReceiving, DataReceiver {
+class SplitViewController : UISplitViewController, ActionReceiver, DataReceiver {
 
     static func directDataPackage(dataPackage: DataPackage) -> DataDirection {
-        return .HandleHere
+        return .HandleOnMainQueue
     }
     
     
