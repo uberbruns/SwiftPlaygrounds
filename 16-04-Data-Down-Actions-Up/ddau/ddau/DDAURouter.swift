@@ -6,7 +6,17 @@
 //  Copyright © 2016 Karsten Bruns. All rights reserved.
 //
 
-import UIKit
+
+#if os(iOS)
+    import UIKit
+    public typealias ViewController = UIViewController
+    public typealias ApplicationDelegate = UIApplicationDelegate
+#else
+    import AppKit
+    public typealias ViewController = NSViewController
+    public typealias ApplicationDelegate = NSApplicationDelegate
+#endif
+
 
 
 // MARK: - Types -
@@ -28,7 +38,7 @@ public enum DataDirection {
 
 public enum DataReceipt {
     case HandledDefinitely
-    case SendDownToViewControllers(viewControllers: [UIViewController])
+    case SendDownToViewControllers(viewControllers: [ViewController])
     case SendDown
 }
 
@@ -74,7 +84,7 @@ private struct DDAURouter {
     }
     
     
-    static func sendDataPackageDown(dataPackage: DataPackage, viewControllers: [UIViewController]) {
+    static func sendDataPackageDown(dataPackage: DataPackage, viewControllers: [ViewController]) {
         let instance = DDAURouter.sharedInstance
         instance.operationQueue.addOperationWithBlock() {
             instance.sendDataPackageDown(dataPackage, viewControllers: viewControllers)
@@ -82,12 +92,12 @@ private struct DDAURouter {
     }
     
     
-    private func sendDataPackageDown(dataPackage: DataPackage, viewControllers: [UIViewController]) {
+    private func sendDataPackageDown(dataPackage: DataPackage, viewControllers: [ViewController]) {
     
         // Iterate through view conrollers
         for viewController in viewControllers {
             
-            var viewControllersWhitelist: [UIViewController]? = nil
+            var viewControllersWhitelist: [ViewController]? = nil
             var sendDown = true
 
             if let receivingViewController = viewController as? DataReceiver {
@@ -135,7 +145,7 @@ private struct DDAURouter {
             }
             
             // Hand data down
-            let viewControllers: [UIViewController]
+            let viewControllers: [ViewController]
             if let viewControllersWhitelist = viewControllersWhitelist {
                 viewControllers = viewController.childViewControllers.filter({ viewControllersWhitelist.contains($0) })
             } else {
@@ -149,7 +159,7 @@ private struct DDAURouter {
     }
     
     
-    static func sendActionPackageUp(actionPackage: ActionPackage, viewController: UIViewController) {
+    static func sendActionPackageUp(actionPackage: ActionPackage, viewController: ViewController) {
         let sharedRouter = DDAURouter.sharedInstance
         sharedRouter.operationQueue.addOperationWithBlock() {
             sharedRouter.sendActionPackageUp(actionPackage, viewController: viewController)
@@ -157,7 +167,7 @@ private struct DDAURouter {
     }
     
     
-    func sendActionPackageUp(actionPackage: ActionPackage, viewController: UIViewController) {
+    func sendActionPackageUp(actionPackage: ActionPackage, viewController: ViewController) {
         
         // Get possible parent instances as specific type
         func parentViewControllerAsReceiver() -> ActionReceiver? {
@@ -169,7 +179,7 @@ private struct DDAURouter {
             return UIApplication.sharedApplication().delegate as? ActionReceiver
         }
         
-        func parentViewControllerAsRouter() -> UIViewController? {
+        func parentViewControllerAsRouter() -> ViewController? {
             return viewController.parentViewController
         }
         
@@ -197,7 +207,7 @@ private struct DDAURouter {
 // MARK: - Type Extensions -
 // MARK: Data
 
-extension UIViewController {
+extension ViewController {
     public func sendDataPackageDown(dataPackage: DataPackage) {
         DDAURouter.sendDataPackageDown(dataPackage, viewControllers: childViewControllers)
     }
@@ -207,14 +217,14 @@ extension UIViewController {
 
 // MARK: Actions
 
-extension UIApplicationDelegate {
-    func sendDataPackageDown(rootViewController rootViewController: UIViewController, dataPackage: DataPackage) {
+extension ApplicationDelegate {
+    func sendDataPackageDown(rootViewController rootViewController: ViewController, dataPackage: DataPackage) {
         DDAURouter.sendDataPackageDown(dataPackage, viewControllers: [rootViewController])
     }
 }
 
 
-extension UIViewController {
+extension ViewController {
     public func sendActionPackageUp(actionPackage: ActionPackage) {
         DDAURouter.sendActionPackageUp(actionPackage, viewController: self)
     }
