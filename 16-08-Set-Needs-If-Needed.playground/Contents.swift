@@ -67,6 +67,3 @@ example.setNeedsBoo()
 example.booIfNeeded() // prints "👻"
 example.setNeedsBoo()
 example.setNeedsBoo() // prints "👻"
-
-
-
