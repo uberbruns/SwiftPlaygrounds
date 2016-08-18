@@ -44,12 +44,12 @@ class Example {
     let dispatchHelper = DispatchHelper()
 
 
-    func setNeedsFoo() {
+    func setNeedsBoo() {
         dispatchHelper.addBlock(identifier: "boo", qualityOfService: .userInteractive, block: boo)
     }
 
 
-    func fooIfNeeded() {
+    func booIfNeeded() {
         dispatchHelper.executeBlock(identifier: "boo")
     }
 
@@ -61,12 +61,12 @@ class Example {
 
 
 let example = Example()
-example.setNeedsFoo()
-example.setNeedsFoo()
-example.setNeedsFoo()
-example.fooIfNeeded() // prints "👻"
-example.setNeedsFoo()
-example.setNeedsFoo() // prints "👻"
+example.setNeedsBoo()
+example.setNeedsBoo()
+example.setNeedsBoo()
+example.booIfNeeded() // prints "👻"
+example.setNeedsBoo()
+example.setNeedsBoo() // prints "👻"
 
 
 
