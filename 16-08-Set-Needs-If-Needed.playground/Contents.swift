@@ -1,6 +1,12 @@
 import Foundation
 import PlaygroundSupport
 
+import UIKit
+
+
+UIFeedbackGenerator
+
+
 PlaygroundPage.current.needsIndefiniteExecution = true
 
 
@@ -9,7 +15,7 @@ class DispatchHelper {
     private var code = [String: () -> ()]()
 
     /// Adds a block that will be executed in one of the next run cycles
-    func addBlock(identifier: String, qualityOfService: QualityOfService? = nil, block: () -> ()) {
+    func addBlock(identifier: String, qualityOfService: QualityOfService? = nil, block: @escaping () -> ()) {
         guard code[identifier] == nil, let queue = OperationQueue.current else {
             return
         }

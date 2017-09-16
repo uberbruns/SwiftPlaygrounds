@@ -23,29 +23,29 @@
 // MARK: Data
 
 public protocol DataPackage {
-    func call(dataReceiver dataReceiver: DataReceiver, receiptHandler: (DataReceipt) -> ())
+    func call(dataReceiver: DataReceiver, receiptHandler: (DataReceipt) -> ())
 }
 
 
 public enum DataDirection {
-    case HandleOnMainQueue
-    case HandleOnBackgroundQueue
-    case SendDown
-    case Stop
+    case handleOnMainQueue
+    case handleOnBackgroundQueue
+    case sendDown
+    case stop
 }
 
 
 
 public enum DataReceipt {
-    case HandledDefinitely
-    case SendDownToViewControllers(viewControllers: [ViewController])
-    case SendDown
+    case handledDefinitely
+    case sendDownToViewControllers(viewControllers: [ViewController])
+    case sendDown
 }
 
 
 
 public protocol DataReceiver {
-    static func directDataPackage(dataPackage: DataPackage) -> DataDirection
+    static func directDataPackage(_ dataPackage: DataPackage) -> DataDirection
 }
 
 
@@ -57,14 +57,14 @@ public protocol ActionPackage { }
 
 
 public enum ActionReceipt {
-    case HandledDefinitely
-    case SendUp
+    case handledDefinitely
+    case sendUp
 }
 
 
 
 public protocol ActionReceiver {
-    func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt
+    func receiveActionPackage(_ actionPackage: ActionPackage) -> ActionReceipt
 }
 
 
@@ -74,25 +74,25 @@ public protocol ActionReceiver {
 private struct DDAURouter {
     
     static let sharedInstance = DDAURouter()
-    let operationQueue: NSOperationQueue
+    let operationQueue: OperationQueue
 
     
     init() {
-        let operationQueue = NSOperationQueue()
+        let operationQueue = OperationQueue()
         operationQueue.maxConcurrentOperationCount = 1
         self.operationQueue = operationQueue
     }
     
     
-    static func sendDataPackageDown(dataPackage: DataPackage, viewControllers: [ViewController]) {
+    static func sendDataPackageDown(_ dataPackage: DataPackage, viewControllers: [ViewController]) {
         let instance = DDAURouter.sharedInstance
-        instance.operationQueue.addOperationWithBlock() {
+        instance.operationQueue.addOperation() {
             instance.sendDataPackageDown(dataPackage, viewControllers: viewControllers)
         }
     }
     
     
-    private func sendDataPackageDown(dataPackage: DataPackage, viewControllers: [ViewController]) {
+    private func sendDataPackageDown(_ dataPackage: DataPackage, viewControllers: [ViewController]) {
     
         // Iterate through view conrollers
         for viewController in viewControllers {
@@ -103,31 +103,31 @@ private struct DDAURouter {
             if let receivingViewController = viewController as? DataReceiver {
 
                 // Side effect-free call on background thread
-                let dataDirection = receivingViewController.dynamicType.directDataPackage(dataPackage)
+                let dataDirection = type(of: receivingViewController).directDataPackage(dataPackage)
                 
                 switch dataDirection {
-                case .HandleOnMainQueue, .HandleOnBackgroundQueue:
+                case .handleOnMainQueue, .handleOnBackgroundQueue:
 
                     // Handling with potential side-effects
-                    let determinSendDownStatus = dispatch_group_create()
-                    dispatch_group_enter(determinSendDownStatus)
+                    let determinSendDownStatus = DispatchGroup()
+                    determinSendDownStatus.enter()
 
                     let callViewController = {
                         dataPackage.call(dataReceiver: receivingViewController, receiptHandler: { receipt in
                             switch receipt {
-                            case .HandledDefinitely :
+                            case .handledDefinitely :
                                 sendDown = false
-                            case .SendDownToViewControllers(let viewControllers) :
+                            case .sendDownToViewControllers(let viewControllers) :
                                 viewControllersWhitelist = viewControllers
                                 sendDown = true
-                            case .SendDown :
+                            case .sendDown :
                                 sendDown = true
                             }
                         })
-                        dispatch_group_leave(determinSendDownStatus)
+                        determinSendDownStatus.leave()
                     }
 
-                    if dataDirection == .HandleOnMainQueue {
+                    if dataDirection == .handleOnMainQueue {
                         // Call on main thread
                         dispatchOnMainQueue(sync: true, code: callViewController)
                     } else {
@@ -135,11 +135,11 @@ private struct DDAURouter {
                         callViewController()
                     }
                     
-                    dispatch_group_wait(determinSendDownStatus, DISPATCH_TIME_FOREVER)
+                    _ = determinSendDownStatus.wait(timeout: DispatchTime.distantFuture)
                     
-                case .SendDown:
+                case .sendDown:
                     sendDown = true
-                case .Stop:
+                case .stop:
                     sendDown = false
                 }
             }
@@ -159,42 +159,42 @@ private struct DDAURouter {
     }
     
     
-    static func sendActionPackageUp(actionPackage: ActionPackage, viewController: ViewController) {
+    static func sendActionPackageUp(_ actionPackage: ActionPackage, viewController: ViewController) {
         let sharedRouter = DDAURouter.sharedInstance
-        sharedRouter.operationQueue.addOperationWithBlock() {
+        sharedRouter.operationQueue.addOperation() {
             sharedRouter.sendActionPackageUp(actionPackage, viewController: viewController)
         }
     }
     
     
-    func sendActionPackageUp(actionPackage: ActionPackage, viewController: ViewController) {
+    func sendActionPackageUp(_ actionPackage: ActionPackage, viewController: ViewController) {
         
         // Get possible parent instances as specific type
         func parentViewControllerAsReceiver() -> ActionReceiver? {
-            return viewController.parentViewController as? ActionReceiver
+            return viewController.parent as? ActionReceiver
         }
         
         func appDelegateAsReceiver() -> ActionReceiver? {
             guard viewController == viewController.view.window?.rootViewController else { return nil }
-            return UIApplication.sharedApplication().delegate as? ActionReceiver
+            return UIApplication.shared.delegate as? ActionReceiver
         }
         
         func parentViewControllerAsRouter() -> ViewController? {
-            return viewController.parentViewController
+            return viewController.parent
         }
         
         // Hand over packages to parent handler
         var sendUp: Bool?
         if let parentActionReceiving = parentViewControllerAsReceiver() ?? appDelegateAsReceiver() {
             dispatchOnMainQueue(sync: true) {
-                sendUp = parentActionReceiving.receiveActionPackage(actionPackage) == .SendUp
+                sendUp = parentActionReceiving.receiveActionPackage(actionPackage) == .sendUp
             }
         } else {
             sendUp = true
         }
         
         // Let parent send package up
-        if let sendUp = sendUp where sendUp == true {
+        if let sendUp = sendUp, sendUp == true {
             if let parentDDAURouter = parentViewControllerAsRouter() {
                 sendActionPackageUp(actionPackage, viewController: parentDDAURouter)
             }
@@ -208,7 +208,7 @@ private struct DDAURouter {
 // MARK: Data
 
 extension ViewController {
-    public func sendDataPackageDown(dataPackage: DataPackage) {
+    public func sendDataPackageDown(_ dataPackage: DataPackage) {
         DDAURouter.sendDataPackageDown(dataPackage, viewControllers: childViewControllers)
     }
 }
@@ -218,14 +218,14 @@ extension ViewController {
 // MARK: Actions
 
 extension ApplicationDelegate {
-    func sendDataPackageDown(rootViewController rootViewController: ViewController, dataPackage: DataPackage) {
+    func sendDataPackageDown(rootViewController: ViewController, dataPackage: DataPackage) {
         DDAURouter.sendDataPackageDown(dataPackage, viewControllers: [rootViewController])
     }
 }
 
 
 extension ViewController {
-    public func sendActionPackageUp(actionPackage: ActionPackage) {
+    public func sendActionPackageUp(_ actionPackage: ActionPackage) {
         DDAURouter.sendActionPackageUp(actionPackage, viewController: self)
     }
 }

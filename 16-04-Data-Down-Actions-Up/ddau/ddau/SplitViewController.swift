@@ -10,22 +10,22 @@ import UIKit
 
 class SplitViewController : UISplitViewController, ActionReceiver, DataReceiver {
 
-    static func directDataPackage(dataPackage: DataPackage) -> DataDirection {
-        return .HandleOnMainQueue
+    static func directDataPackage(_ dataPackage: DataPackage) -> DataDirection {
+        return .handleOnMainQueue
     }
     
     
-    func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt {
+    func receiveActionPackage(_ actionPackage: ActionPackage) -> ActionReceipt {
         print(self, "Received action", actionPackage)
         let action = MasterDataRequestAction(name: "Action from split view controller", receiptHandler: { receipt in
             print(receipt.transactionId)
         })
         sendActionPackageUp(action)
-        return ActionReceipt.SendUp
+        return ActionReceipt.sendUp
     }
     
     
-    func receiveDataPackage(dataPackage: DataPackage) -> DataReceipt {
+    func receiveDataPackage(_ dataPackage: DataPackage) -> DataReceipt {
         var specificViewControllers = [UIViewController]()
         
         if dataPackage is MasterData {
@@ -37,9 +37,9 @@ class SplitViewController : UISplitViewController, ActionReceiver, DataReceiver 
         }
         
         if specificViewControllers.count > 0 {
-            return .SendDownToViewControllers(viewControllers: specificViewControllers)
+            return .sendDownToViewControllers(viewControllers: specificViewControllers)
         }
         
-        return .SendDown
+        return .sendDown
     }
 }

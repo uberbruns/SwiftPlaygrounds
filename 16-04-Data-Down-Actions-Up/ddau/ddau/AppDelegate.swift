@@ -14,21 +14,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     var window: UIWindow?
 
 
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+    func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
         // Override point for customization after application launch.
         let splitViewController = self.window!.rootViewController as! UISplitViewController
         let navigationController = splitViewController.viewControllers[splitViewController.viewControllers.count-1] as! UINavigationController
-        navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem()
+        navigationController.topViewController!.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
         splitViewController.delegate = self
         return true
     }
 
     
-    func receiveActionPackage(actionPackage: ActionPackage) -> ActionReceipt {
+    func receiveActionPackage(_ actionPackage: ActionPackage) -> ActionReceipt {
         print(self, "Received action", actionPackage)
         switch actionPackage {
         case let action as MasterDataRequestAction :
-            action.receiptHandler(receipt: MasterDataRequestReceipt(transactionId: 123))
+            action.receiptHandler(MasterDataRequestReceipt(transactionId: 123))
             window?.rootViewController.map {
                 sendDataPackageDown(rootViewController: $0, dataPackage: MasterData(name: "Data from app delegate"))
             }
@@ -37,13 +37,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
                 sendDataPackageDown(rootViewController: $0, dataPackage: DetailData(name: "Data from app delegate"))
             }
         }
-        return ActionReceipt.HandledDefinitely
+        return ActionReceipt.handledDefinitely
     }
 
 
     // MARK: - Split view
 
-    func splitViewController(splitViewController: UISplitViewController, collapseSecondaryViewController secondaryViewController:UIViewController, ontoPrimaryViewController primaryViewController:UIViewController) -> Bool {
+    func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController:UIViewController, onto primaryViewController:UIViewController) -> Bool {
         guard let secondaryAsNavController = secondaryViewController as? UINavigationController else { return false }
         guard let topAsDetailController = secondaryAsNavController.topViewController as? DetailViewController else { return false }
         if topAsDetailController.detailItem == nil {

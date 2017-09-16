@@ -17,9 +17,9 @@ struct DetailAction : ActionPackage {
 struct DetailData : DataPackage {
     let name: String
     
-    func call(dataReceiver dataReceiver: DataReceiver, receiptHandler: (DataReceipt) -> ()) {
+    func call(dataReceiver: DataReceiver, receiptHandler: (DataReceipt) -> ()) {
         guard let dataReceiver = dataReceiver as? DetailDataReceiver else {
-            receiptHandler(.SendDown)
+            receiptHandler(.sendDown)
             return
         }
         dataReceiver.receive(data: self, receiptHandler: receiptHandler)
@@ -28,7 +28,7 @@ struct DetailData : DataPackage {
 
 
 protocol DetailDataReceiver : DataReceiver {
-    func receive(data data: DetailData, receiptHandler: (DataReceipt) -> ())
+    func receive(data: DetailData, receiptHandler: (DataReceipt) -> ())
 }
 
 
@@ -65,20 +65,20 @@ class DetailViewController: UIViewController, DetailDataReceiver {
     }
     
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         sendActionPackageUp(DetailAction(name: "Action from DetailViewController"))
     }
     
     
-    static func directDataPackage(dataPackage: DataPackage) -> DataDirection {
-        return .HandleOnMainQueue
+    static func directDataPackage(_ dataPackage: DataPackage) -> DataDirection {
+        return .handleOnMainQueue
     }
 
     
-    func receive(data data: DetailData, receiptHandler: (DataReceipt) -> ()) {
+    func receive(data: DetailData, receiptHandler: (DataReceipt) -> ()) {
         print(self, data)
-        receiptHandler(.HandledDefinitely)
+        receiptHandler(.handledDefinitely)
     }
     
 
