@@ -54,10 +54,6 @@ let device = Device.light(state: .on(brightness: 0.5), connection: .bluetooth(vi
 
 // Simple Example
 
-if let brightness = device.light?.state.on?.brightness {
-    print("Light is on at \(brightness)")
-}
-
 if case .light(state: .on(let brightness), connection: _) = device {
     print("Light is on at \(brightness)")
 }
@@ -66,17 +62,37 @@ if case .light(.on(let brightness), _) = device {
     print("Light is on at \(brightness)")
 }
 
+if let brightness = device.light?.state.on?.brightness {
+    print("Light is on at \(brightness)")
+}
+
+
 
 // Less Simple Example
 
-if let rssi = device.light?.connection.bluetooth?.visibility.visible?.rssi, rssi > -60  {
-    print("Light signal present")
-}
+// Pattern matching with and without labels:
+//
+// + Allows matching and assigning multiple values
+// - Too verbose or not verbose enough
+// - Breaks when you add, remove or change associated values
+// - Nested
 
 if case .light(state: _, connection: .bluetooth(visibility: .visible(state: _, rssi: (-60)...))) = device {
-    print("Light signal present")
+    print("something")
 }
 
 if case .light(_, .bluetooth(.visible(_, (-60)...))) = device {
-    print("Light signal present")
+    print("something")
 }
+
+// Optional chaining using auto generated accessors
+//
+// + More readable
+// + No nesting
+// + Does not break if you add, remove or change associated values
+// - You can only read one value, no powerful pattern matching
+
+if let rssi = device.light?.connection.bluetooth?.visibility.visible?.rssi, rssi >= -60  {
+    print("something")
+}
+
