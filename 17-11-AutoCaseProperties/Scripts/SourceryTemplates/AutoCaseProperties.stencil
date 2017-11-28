@@ -1,0 +1,35 @@
+{% for enum in types.implementing.AutoCaseProperties|enum %}
+extension {{ enum.name }} {
+	{% for case in enum.cases %}{% if case.hasAssociatedValue %}
+
+	struct {{ case.name|upperFirst }} {
+		{% for value in case.associatedValues %}
+		let {{ value.localName }}: {{ value.typeName }}
+		{% endfor %}
+	}
+	{% endif %}{% endfor %}
+	{% for case in enum.cases %}
+
+	var is{{ case.name|upperFirst }}: Bool {
+		if case .{{ case.name }} = self {
+			return true
+		} else {
+			return false
+		}
+	}
+	{% if case.hasAssociatedValue %}
+
+	
+	var {{ case.name }}: {{ case.name|upperFirst }}? {
+		switch self {
+		case .{{ case.name }}({% for value in case.associatedValues %}let {{ value.localName }}{% if not forloop.last %}, {% endif %}{% endfor %}):
+			return {{ case.name|upperFirst }}({% for value in case.associatedValues %}{{ value.localName }}: {{ value.localName }}{% if not forloop.last %}, {% endif %}{% endfor %})
+		default:
+			return nil
+		}
+	}
+	{% endif %}{% endfor %}
+}
+
+
+{% endfor %}
