@@ -132,3 +132,13 @@ extension UITableView {
         return (deleteIndexPaths, insertIndexPaths, reloadIndexPaths)
     }
 }
+
+
+extension Array where Element == SectionData {
+    
+    subscript(indexPath indexPath: IndexPath) -> RowData {
+        get {
+            return self[indexPath.section].rows[indexPath.row]
+        }
+    }
+}

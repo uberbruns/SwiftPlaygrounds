@@ -32,7 +32,7 @@ class ViewController: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
         // Setup navigation bar
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Names", style: .plain, target: self, action: #selector(handleFirstNameButton))
+        navigationItem.leftBarButtonItem  = UIBarButtonItem(title: "Names", style: .plain, target: self, action: #selector(handleFirstNameButton))
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "NextGen", style: .plain, target: self, action: #selector(handleNextGenButton))
     }
 
@@ -109,6 +109,12 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
             return title
         }
         return nil
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let row = sections[indexPath: indexPath]
+        print(row.data)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
