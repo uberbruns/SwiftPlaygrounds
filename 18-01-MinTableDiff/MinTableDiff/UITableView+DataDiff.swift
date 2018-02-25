@@ -42,7 +42,7 @@ extension UITableView {
         let movedIdentities = existingNew != remainingOld
         let doubleIdentities = newIdentities.count > Set(newIdentities).count
         if  movedIdentities || doubleIdentities {
-            // Reload and early return: We no not support moves and double identities
+            // Reload and early return: We do not support moves and double identities
             reloadData()
             return
         }
