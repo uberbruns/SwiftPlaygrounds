@@ -9,23 +9,41 @@
 import UIKit
 
 
+/// Data representing the content of a table view row.
 struct RowData {
+    /// The reuse identifier used to register the table view cell.
     var reuseIdentifier: String
+    
+    /// The identity of the data set. Used to determine if a cell needs to be updated (known identity), inserted (new identity) or deleted (obsolete identity).
     var identity: AnyHashable
+    
+    /// The data representing the content of a table view row. Different hashes on a known identity, trigger a table view cell reload.
     var data: AnyHashable
 }
 
 
+/// Data representing the content of a table view section.
 struct SectionData {
-    var reuseIdentifier: String
+    /// The identity of the section. Used to determine if a section needs to be updated (known identity), inserted (new identity) or deleted (obsolete identity).
     var identity: AnyHashable
+    
+    /// The data representing the content of a table view section. Different hashes on a known identity, trigger a table view section reload.
     var data: AnyHashable
+    
+    /// A list of rows displayed in the table view section.
     var rows: [RowData]
 }
 
 
 extension UITableView {
     
+    /// Performs an animated batch update on the table view by calculating
+    /// the differences between `oldSections` and `newSections`.
+    ///
+    /// - Parameters:
+    ///   - oldSections: An array of `SectionData` representing the current and soon to be old data of displayed content.
+    ///   - newSections: An array of `SectionData` representing the new data of displayed content.
+    ///   - animated: Pass `true` to see animated table view updated. `False` currently ommits the diffing and just does a `reloadData()`.
     func reloadData(oldSections: [SectionData], newSections: [SectionData], animated: Bool) {
         guard animated else {
             reloadData()
@@ -64,14 +82,14 @@ extension UITableView {
         
         // Update table view
         performBatchUpdates({
-            // Remove obsolete items
+            // Remove obsolete sections
             for (oldIndex, oldIdentity) in oldIdentities.enumerated().reversed() {
                 if !newIdentities.contains(oldIdentity) {
                     deleteSections(IndexSet(integer: oldIndex), with: .automatic)
                 }
             }
             
-            // Add or reload new items
+            // Add or reload new sections and apply row deletions, insertions or reloads
             for (newIndex, newIdentity) in newIdentities.enumerated() {
                 let newSection = newSections[newIndex]
                 if let oldIndex = oldIdentities.index(of: newIdentity) {
@@ -91,6 +109,14 @@ extension UITableView {
         }, completion: nil)
     }
     
+    /// Calculates the index pathes that need to be deleted, inserted or reloaded.
+    ///
+    /// - Parameters:
+    ///   - oldRows: An array representing the current state of row data.
+    ///   - newRows: An array representing the new state of row data.
+    ///   - oldSection: An integer with the section index of the `oldRows`.
+    ///   - newSection: An integer with the section index of the `newRows`.
+    /// - Returns: Returns a 3-part-tuple of index path lists (deletions, insetions, reloads).
     private func updatePaths(oldRows: [RowData], newRows: [RowData], oldSection: Int, newSection: Int) -> ([IndexPath], [IndexPath], [IndexPath])? {
         // Build identities
         let newIdentities = newRows.map({ $0.identity })
@@ -136,6 +162,9 @@ extension UITableView {
 
 extension Array where Element == SectionData {
     
+    /// A convenience subscript that allows access to `RowData` in an array of `SectionData`
+    ///
+    /// - Parameter indexPath: The indexPath to the row data.
     subscript(indexPath indexPath: IndexPath) -> RowData {
         get {
             return self[indexPath.section].rows[indexPath.row]

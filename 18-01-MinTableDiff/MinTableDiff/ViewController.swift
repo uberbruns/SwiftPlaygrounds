@@ -57,7 +57,7 @@ class ViewController: UIViewController {
         } else {
             rows = [picard, sisko, janeway]
         }
-        let newSections = [SectionData(reuseIdentifier: "header", identity: "captains", data: firstNames ? "Last Names" : "Last Names", rows: rows)]
+        let newSections = [SectionData(identity: "captains", data: firstNames ? "Last Names" : "Last Names", rows: rows)]
         
         sections = newSections
         tableView.reloadData(oldSections: oldSections, newSections: newSections, animated: animated)
@@ -89,7 +89,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let row = sections[indexPath.section].rows[indexPath.row]
+        let row = sections[indexPath: indexPath]
         let cell = tableView.dequeueReusableCell(withIdentifier: row.reuseIdentifier, for: indexPath)
         
         switch (cell, row.reuseIdentifier, row.data) {
