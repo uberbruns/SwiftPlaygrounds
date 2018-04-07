@@ -9,9 +9,18 @@
 import UIKit
 
 extension NSLayoutConstraint {
-    
-    open static func toggleConstraints(_ constraints: [NSLayoutConstraint]) {
-        
+
+    /// Activates and deactivates constraints based on the state of the
+    /// participating views and or the naming of the identifier.
+    ///
+    /// - Starting the identifier with a dot "." activates the constraint only if its first view is hidden.
+    /// - Starting the identifier with a "~" deactivates a constraint if one of the two views is hidden.
+    /// - Starting the identifier with a "?" uses the delegate to determine if the constraint should be activated.
+    ///
+    /// - Parameters:
+    ///   - constraints: A list of constraints that should be automatically activated or deactivated.
+    ///   - delegate: An optional reference to a class, that decides if a constraint starting with "?" should be activated or not.
+    open static func toggleConstraints(_ constraints: [NSLayoutConstraint], delegate: LayoutConstraintDelegate? = nil) {
         var constraintsToActivate = [NSLayoutConstraint]()
         var constraintsToDeactivate = [NSLayoutConstraint]()
         
@@ -42,6 +51,17 @@ extension NSLayoutConstraint {
                 continue
             }
 
+            // Handle delegate managed constraints
+            if let identifier = constraint.identifier, identifier.starts(with: "?"), let delegate = delegate {
+                let shouldBeActive = delegate.shouldActivateConstraint(constraint, identifier: identifier)
+                if shouldBeActive && !constraint.isActive {
+                    constraintsToActivate.append(constraint)
+                } else if !shouldBeActive && constraint.isActive {
+                    constraintsToDeactivate.append(constraint)
+                }
+                continue
+            }
+
             // Handle permanent active constraints
             if !constraint.isActive {
                 constraintsToActivate.append(constraint)
@@ -51,6 +71,11 @@ extension NSLayoutConstraint {
         NSLayoutConstraint.activate(constraintsToActivate)
         NSLayoutConstraint.deactivate(constraintsToDeactivate)
     }
+}
+
+
+public protocol LayoutConstraintDelegate {
+    func shouldActivateConstraint(_ constraint: NSLayoutConstraint, identifier: String) -> Bool
 }
 
 
@@ -302,6 +327,7 @@ extension NSLayoutDimension {
 
 private extension UIView {
     var isInvisible: Bool {
-        return isHidden || alpha < 0.0001
+        // TODO: ancestors
+        return isHidden || alpha <= 0
     }
 }

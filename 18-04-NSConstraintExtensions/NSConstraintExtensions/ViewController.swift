@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     private lazy var redView = UIView()
     private lazy var blueView = UIView()
 
-    private lazy var constraints = [
+    private lazy var viewConstraints = [
         redView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor, identifier: "redView.top"),
         redView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor, identifier: "~redView.bottom.whenBlueViewIsHidden", priority: .defaultLow),
         redView.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor, identifier: "redView.left"),
@@ -26,8 +26,8 @@ class ViewController: UIViewController {
         blueView.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor, identifier: "blueView.left"),
         blueView.rightAnchor.constraint(equalTo: view.layoutMarginsGuide.rightAnchor, identifier: "blueView.right"),
         blueView.heightAnchor.constraint(equalTo: redView.heightAnchor, identifier: "~blueView.height"),
-        blueView.heightAnchor.constraint(equalToConstant: 0, identifier: ".blueView.height"),
-        ]
+        blueView.heightAnchor.constraint(equalToConstant: 0, identifier: ".blueView.height")
+    ]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,7 +52,7 @@ class ViewController: UIViewController {
     }
 
     override func updateViewConstraints() {
-        NSLayoutConstraint.toggleConstraints(constraints)
+        NSLayoutConstraint.toggleConstraints(viewConstraints, delegate: self)
         super.updateViewConstraints()
     }
     
@@ -82,3 +82,8 @@ class ViewController: UIViewController {
     }
 }
 
+extension ViewController: LayoutConstraintDelegate {
+    func shouldActivateConstraint(_ constraint: NSLayoutConstraint, identifier: String) -> Bool {
+        return true
+    }
+}
