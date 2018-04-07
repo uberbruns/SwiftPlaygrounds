@@ -16,7 +16,7 @@ extension NSLayoutConstraint {
         var constraintsToDeactivate = [NSLayoutConstraint]()
         
         for constraint in constraints {
-            // Handle constraint for invisibile views
+            // Handle constraint for invisible views
             let viewIsHidden = (constraint.firstItem as? UIView)?.isInvisible == true
             if constraint.identifier?.starts(with: ".") == true {
                 if viewIsHidden && !constraint.isActive {
@@ -27,6 +27,7 @@ extension NSLayoutConstraint {
                 continue
             }
 
+            // Handle visibility dependent constraints
             if constraint.identifier?.starts(with: "~") == true {
                 // `true` if one participating view is hidden
                 let deactivateConstraint = [constraint.firstItem, constraint.secondItem]
@@ -41,7 +42,7 @@ extension NSLayoutConstraint {
                 continue
             }
 
-            // Handle permanent constraints
+            // Handle permanent active constraints
             if !constraint.isActive {
                 constraintsToActivate.append(constraint)
             }

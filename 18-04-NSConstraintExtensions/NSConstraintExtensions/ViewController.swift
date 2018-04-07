@@ -18,9 +18,9 @@ class ViewController: UIViewController {
         redView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor, identifier: "~redView.bottom.whenBlueViewIsHidden", priority: .defaultLow),
         redView.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor, identifier: "redView.left"),
         redView.rightAnchor.constraint(equalTo: view.layoutMarginsGuide.rightAnchor, identifier: "redView.right"),
-        redView.heightAnchor.constraint(equalToConstant: 0, identifier: ".redView.bottomAnchor"),
+        redView.heightAnchor.constraint(equalToConstant: 0, identifier: ".redView.bottom"),
 
-        blueView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor, identifier: "~blueView.top.whenRedViewIsHidden", priority: .defaultLow),
+        blueView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor, identifier: "blueView.top.whenRedViewIsHidden", priority: .defaultLow),
         blueView.topAnchor.constraintEqualToSystemSpacingBelow(redView.bottomAnchor, multiplier: 1, identifier: "~blueView.top"),
         blueView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor, identifier: "blueView.bottom"),
         blueView.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor, identifier: "blueView.left"),
@@ -36,13 +36,17 @@ class ViewController: UIViewController {
     }
 
     private func addSubviews() {
+        view.layoutMargins = UIEdgeInsetsMake(15, 15, 15, 15)
+        
         redView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTapGesture)))
         redView.backgroundColor = .red
+        redView.layer.cornerRadius = 5
         redView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(redView)
         
         blueView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTapGesture)))
         blueView.backgroundColor = .blue
+        blueView.layer.cornerRadius = 5
         blueView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(blueView)
     }
@@ -73,8 +77,6 @@ class ViewController: UIViewController {
             }
 
             self?.view.setNeedsUpdateConstraints()
-            self?.view.updateConstraintsIfNeeded()
-            self?.view.setNeedsLayout()
             self?.view.layoutIfNeeded()
         }
     }
