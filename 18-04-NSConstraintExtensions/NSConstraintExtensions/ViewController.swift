@@ -14,19 +14,19 @@ class ViewController: UIViewController {
     private lazy var blueView = UIView()
 
     private lazy var viewConstraints = [
-        redView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor, identifier: "redView.top"),
-        redView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor, identifier: "~redView.bottom.whenBlueViewIsHidden", priority: .defaultLow),
-        redView.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor, identifier: "redView.left"),
-        redView.rightAnchor.constraint(equalTo: view.layoutMarginsGuide.rightAnchor, identifier: "redView.right"),
-        redView.heightAnchor.constraint(equalToConstant: 0, identifier: ".redView.bottom"),
+        redView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor),
+        redView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor, priority: .defaultLow),
+        redView.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor),
+        redView.rightAnchor.constraint(equalTo: view.layoutMarginsGuide.rightAnchor),
+        redView.heightAnchor.constraint(equalToConstant: 0, activationRule: .firstInvisible),
 
-        blueView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor, identifier: "blueView.top.whenRedViewIsHidden", priority: .defaultLow),
-        blueView.topAnchor.constraintEqualToSystemSpacingBelow(redView.bottomAnchor, multiplier: 1, identifier: "~blueView.top"),
-        blueView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor, identifier: "blueView.bottom"),
-        blueView.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor, identifier: "blueView.left"),
-        blueView.rightAnchor.constraint(equalTo: view.layoutMarginsGuide.rightAnchor, identifier: "blueView.right"),
-        blueView.heightAnchor.constraint(equalTo: redView.heightAnchor, identifier: "~blueView.height"),
-        blueView.heightAnchor.constraint(equalToConstant: 0, identifier: ".blueView.height")
+        blueView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor, priority: .defaultLow),
+        blueView.topAnchor.constraintEqualToSystemSpacingBelow(redView.bottomAnchor, multiplier: 1, activationRule: .bothVisible),
+        blueView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor),
+        blueView.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor),
+        blueView.rightAnchor.constraint(equalTo: view.layoutMarginsGuide.rightAnchor),
+        blueView.heightAnchor.constraint(equalTo: redView.heightAnchor, activationRule: .bothVisible),
+        blueView.heightAnchor.constraint(equalToConstant: 0, activationRule: .firstInvisible)
     ]
 
     override func viewDidLoad() {
@@ -52,7 +52,7 @@ class ViewController: UIViewController {
     }
 
     override func updateViewConstraints() {
-        NSLayoutConstraint.toggleConstraints(viewConstraints, delegate: self)
+        NSLayoutConstraint.evaluateConstraints(viewConstraints, delegate: self)
         super.updateViewConstraints()
     }
     
@@ -83,7 +83,7 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: LayoutConstraintDelegate {
-    func shouldActivateConstraint(_ constraint: NSLayoutConstraint, identifier: String) -> Bool {
+    func shouldActivateConstraint(_ constraint: NSLayoutConstraint) -> Bool {
         return true
     }
 }

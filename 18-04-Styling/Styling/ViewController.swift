@@ -11,25 +11,26 @@ import UIKit
 
 struct Styling {
     typealias StylingOperation = (UIView) -> ()
-    let style: StylingOperation
-    init(_ style: @escaping StylingOperation) {
-        self.style = style
+    let styleView: StylingOperation
+    init(_ operation: @escaping StylingOperation) {
+        self.styleView = operation
     }
 }
 
 
 extension UIView {
-    func style(_ stylings: Styling...) {
-        style(stylings)
+    func applyStyles(_ stylings: Styling...) {
+        applyStyles(stylings)
     }
     
     
-    func style(_ stylings: [Styling]) {
+    func applyStyles(_ stylings: [Styling]) {
         for styling in stylings {
-            styling.style(self)
+            styling.styleView(self)
         }
     }
 }
+
 
 
 extension Styling {
@@ -41,6 +42,7 @@ extension Styling {
         }
     }
 
+    
     static let buttonBackground = Styling { view in
         if let layer = view.layer as? CAGradientLayer {
             layer.colors = [UIColor.yellow.cgColor, UIColor.orange.cgColor]
@@ -49,6 +51,7 @@ extension Styling {
         }
     }
 
+    
     static let buttonBackgroundHighlighted = Styling { view in
         if let layer = view.layer as? CAGradientLayer {
             layer.colors = [UIColor.red.cgColor, UIColor.purple.cgColor]
@@ -56,45 +59,63 @@ extension Styling {
             view.backgroundColor = .purple
         }
     }
+    
 
     static let rounded = Styling { view in
-        view.layer.cornerRadius = 8
+        view.layer.cornerRadius = 40
     }
 
+    static let glow = Styling { view in
+        view.layer.shadowColor = UIColor.yellow.cgColor
+        view.layer.shadowRadius = 20
+        view.layer.shadowOffset = CGSize(width: 0, height: 5)
+        view.layer.shadowOpacity = 0.5
+    }
+
+    static let glowHighlighted = Styling { view in
+        view.layer.shadowColor = UIColor.purple.cgColor
+    }
+
+    
     static let bordered = Styling { view in
         view.layer.borderColor = UIColor.orange.cgColor
         view.layer.borderWidth = 2
     }
     
+    
     static let borderedHighlighted = Styling { view in
         view.layer.borderColor = UIColor.purple.cgColor
-        view.layer.borderWidth = 2
     }
 }
+
 
 
 class ViewController: UIViewController {
     
     private lazy var testView = GradientButton()
     
+    
     override func loadView() {
         view = GradientView()
     }
 
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         addSubviews()
         addConstraints()
     }
     
+    
     func addSubviews() {
-        view.style(.defaultBackground)
+        view.applyStyles(.defaultBackground)
         
-        testView.style(for: .normal, .buttonBackground, .rounded, .bordered)
-        testView.style(for: .highlighted, .buttonBackgroundHighlighted, .borderedHighlighted)
+        testView.addStyle(for: .normal, .buttonBackground, .rounded, .bordered, .glow)
+        testView.addStyle(for: .highlighted, .buttonBackgroundHighlighted, .borderedHighlighted, .glowHighlighted)
         testView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(testView)
     }
+    
     
     func addConstraints() {
         NSLayoutConstraint.activate([
@@ -107,11 +128,13 @@ class ViewController: UIViewController {
 }
 
 
+
 class GradientView: UIView {
     override class var layerClass: AnyClass {
         return CAGradientLayer.self
     }
 }
+
 
 
 class GradientButton: UIButton {
@@ -122,24 +145,28 @@ class GradientButton: UIButton {
         }
     }
     
+    
     private(set) var stateStylings = [UInt: [Styling]]()
+    
     
     override class var layerClass: AnyClass {
         return CAGradientLayer.self
     }
     
-    func style(for controlState: UIControlState, _ stylings: Styling...) {
+    
+    func addStyle(for controlState: UIControlState, _ stylings: Styling...) {
         stateStylings[controlState.rawValue] = stylings
         setNeedsLayout()
     }
+    
     
     override func layoutSubviews() {
         super.layoutSubviews()
         
         if isHighlighted, let highlightStyles = stateStylings[UIControlState.highlighted.rawValue] {
-            style(highlightStyles)
+            applyStyles(highlightStyles)
         } else if let normalStyles = stateStylings[UIControlState.normal.rawValue] {
-            style(normalStyles)
+            applyStyles(normalStyles)
         }
     }
 }
