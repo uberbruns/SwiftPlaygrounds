@@ -15,6 +15,7 @@ enum Connection: AutoCaseProperties {
     case bluetooth(visibility: BluetoothVisibility)
 }
 
+
 enum BluetoothVisibility: AutoCaseProperties {
     
     enum State: AutoCaseProperties {
@@ -26,23 +27,30 @@ enum BluetoothVisibility: AutoCaseProperties {
     case notVisible
 }
 
+
 enum Device: AutoCaseProperties {
 
     enum PowerSwitchState: AutoCaseProperties {
-        case off
         case on
+        case off
     }
 
     enum LightState: AutoCaseProperties {
-        case off
         case on(brightness: Double)
+        case off
+    }
+    
+    enum Test<T> {
+        case a(test: T)
+        case b
     }
 
     case powerSwitch(state: PowerSwitchState, connection: Connection)
     case light(state: LightState, connection: Connection)
-    case shades(connection: Connection)
+    case shades(connection: Connection, test: Test<Int>)
     case thermostat(connection: Connection)
 }
+
 
 enum BluetoothSupport: AutoCaseProperties {
     case notSupported
@@ -88,7 +96,7 @@ if case .light(_, .bluetooth(.visible(_, (-60)...))) = device {
 // Optional chaining using auto generated accessors
 //
 // + More readable
-// + No nesting
+// + Dot-chaining instead of nesting
 // + Does not break if you add, remove or change associated values
 // - You can only read one value, no powerful pattern matching
 

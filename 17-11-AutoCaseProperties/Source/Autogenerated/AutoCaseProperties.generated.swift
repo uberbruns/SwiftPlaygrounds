@@ -136,6 +136,7 @@ extension Device {
 
 	struct Shades {
 		let connection: Connection
+		let test: Test<Int>
 	}
 
 	struct Thermostat {
@@ -186,8 +187,8 @@ extension Device {
 
 	var shades: Shades? {
 		switch self {
-		case .shades(let connection):
-			return Shades(connection: connection)
+		case .shades(let connection, let test):
+			return Shades(connection: connection, test: test)
 		default:
 			return nil
 		}
@@ -218,14 +219,6 @@ extension Device.LightState {
 		let brightness: Double
 	}
 
-	var isOff: Bool {
-		if case .off = self {
-			return true
-		} else {
-			return false
-		}
-	}
-
 	var isOn: Bool {
 		if case .on = self {
 			return true
@@ -242,10 +235,6 @@ extension Device.LightState {
 			return nil
 		}
 	}
-}
-
-
-extension Device.PowerSwitchState {
 
 	var isOff: Bool {
 		if case .off = self {
@@ -254,9 +243,21 @@ extension Device.PowerSwitchState {
 			return false
 		}
 	}
+}
+
+
+extension Device.PowerSwitchState {
 
 	var isOn: Bool {
 		if case .on = self {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	var isOff: Bool {
+		if case .off = self {
 			return true
 		} else {
 			return false
