@@ -56,14 +56,6 @@ class TrackingService {
     private let env: AnyEnvironment
     private let database: DatabaseProtocol
     private let locationManager: LocationManagerProtocol
-
-    convenience init(env: AnyEnvironment) throws {
-        if let env = env as? TrackingServiceEnvironmentProtocol {
-            self.init(env: env)
-        } else {
-            throw EnvironmentError()
-        }
-    }
     // sourcery:end
 
     init(env: TrackingServiceEnvironmentProtocol) {
@@ -73,6 +65,16 @@ class TrackingService {
         self.env = env
         // sourcery:end
     }
+
+    // sourcery:inline:TrackingService.Environment.ConvenienceInit
+    convenience init(env: AnyEnvironment) throws {
+        if let env = env as? TrackingServiceEnvironmentProtocol {
+            self.init(env: env)
+        } else {
+            throw EnvironmentError()
+        }
+    }
+    // sourcery:end
 }
 
 // sourcery:inline:TrackingService.Environment.Protocol
@@ -97,14 +99,6 @@ class SettingsService {
     // sourcery:inline:SettingsService.Environment.Properties
     private let env: AnyEnvironment
     private let database: DatabaseProtocol
-
-    convenience init(env: AnyEnvironment) throws {
-        if let env = env as? SettingsServiceEnvironmentProtocol {
-            self.init(env: env)
-        } else {
-            throw EnvironmentError()
-        }
-    }
     // sourcery:end
 
     init(env: SettingsServiceEnvironmentProtocol) {
@@ -113,6 +107,16 @@ class SettingsService {
         self.env = env
         // sourcery:end
     }
+
+    // sourcery:inline:SettingsService.Environment.ConvenienceInit
+    convenience init(env: AnyEnvironment) throws {
+        if let env = env as? SettingsServiceEnvironmentProtocol {
+            self.init(env: env)
+        } else {
+            throw EnvironmentError()
+        }
+    }
+    // sourcery:end
 }
 
 

@@ -4,8 +4,10 @@
 {% for property in class.containedType.Environment.cases %}
     private let {{ property.name }}: {{ property.associatedValues.first.typeName }}
 {% endfor %}
+// sourcery:end
 
-    convenience init(env: AnyEnvironment) throws {
+// sourcery:inline:{{ class.name }}.Environment.ConvenienceInit
+    convenience init(env: AnyEnvironment{% for initializer in class.initializers.first %}, abc{% endfor %}) throws {
         if let env = env as? {{ class.name }}EnvironmentProtocol {
             self.init(env: env)
         } else {
