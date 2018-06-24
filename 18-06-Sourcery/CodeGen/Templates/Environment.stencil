@@ -1,0 +1,35 @@
+{% for class in types.classes where class|annotated:"environment" %}
+// sourcery:inline:{{ class.name }}.Environment.Properties
+{% for property in class.containedType.Environment.cases %}
+    private let {{ property.name }}: {{ property.associatedValues.first.typeName }}
+{% endfor %}
+// sourcery:end
+
+// sourcery:inline:{{ class.name }}.Environment.Init
+{% for property in class.containedType.Environment.cases %}
+        self.{{ property.name }} = env.{{ property.name }}
+{% endfor %}
+// sourcery:end
+
+// sourcery:inline:{{ class.name }}.Environment.Protocol
+protocol {{ class.name }}EnvironmentProtocol {
+{% for property in class.containedType.Environment.cases %}
+    var {{ property.name }}: {{ property.associatedValues.first.typeName }} { get }
+{% endfor %}
+}
+
+struct {{ class.name }}Environment: {{ class.name }}EnvironmentProtocol {
+{% for property in class.containedType.Environment.cases %}
+    let {{ property.name }}: {{ property.associatedValues.first.typeName }}
+{% endfor %}
+}
+
+// sourcery:end
+{% endfor %}
+
+
+// sourcery:inline:Main.Environment
+{% for class in types.classes where class|annotated:"environment" %}
+    {{ class.name }}EnvironmentProtocol{% if not forloop.last %},{% else %}{{ " {" }}{% endif %}
+{% endfor %}
+// sourcery:end

@@ -1,0 +1,26 @@
+{% macro functionDeclaration method %}
+    {% if method.isStatic %}static {% endif %}func {{ method.name }}{% if method.rethrows %} rethrows{% endif %}{% if method.throws %} throws{% endif %}{% if not method.returnTypeName.isVoid %} -> {{ method.returnTypeName.name }}{% endif %}
+{% endmacro %}
+
+{% macro variableDeclaration variable %}
+    {% if variable.isStatic %}static {% endif %}var {{ variable.name }}: {{ variable.typeName }} { {% if variable.readAccess|!hasSuffix:"private" %}get{% endif %}{% if variable.writeAccess|!hasSuffix:"private" and variable.isMutable %} set{% endif %} }
+{% endmacro %}
+
+{% for class in types.classes where class|annotated:"retro_protocol" %}
+{{ class.name }}.RetroProtocol
+// sourcery:inline:{{ class.name }}.RetroProtocol
+
+protocol {{ class.annotations.retro_protocol.name }} {
+{% for variable in class.variables where variable.readAccess|!hasSuffix:"private" or variable.writeAccess|!hasSuffix:"private" %}
+    {% call variableDeclaration variable %}
+{% endfor %}
+{% for method in class.methods where method.accessLevel != "private" and method.accessLevel != "fileprivate" %}
+    {% call functionDeclaration method %}
+{% endfor %}
+}
+
+extension {{ class.name }}: {{ class.annotations.retro_protocol.name }} { }
+
+// sourcery:end
+   
+{% endfor %}
