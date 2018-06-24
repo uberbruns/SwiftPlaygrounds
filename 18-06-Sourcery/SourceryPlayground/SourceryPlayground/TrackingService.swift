@@ -33,7 +33,7 @@ struct EnvironmentError: Error { }
 struct GlobalEnvironment:
     // sourcery:inline:Global.Environment
     AnyEnvironment,
-    SettingServiceEnvironmentProtocol,
+    SettingsServiceEnvironmentProtocol,
     TrackingServiceEnvironmentProtocol {
     // sourcery:end
     var database: DatabaseProtocol = Database()
@@ -56,25 +56,23 @@ class TrackingService {
     private let env: AnyEnvironment
     private let database: DatabaseProtocol
     private let locationManager: LocationManagerProtocol
-    // sourcery:end
 
-    // sourcery:inline:TrackingService.Environment.Init
-    init(env: AnyEnvironment) throws {
+    convenience init(env: AnyEnvironment) throws {
         if let env = env as? TrackingServiceEnvironmentProtocol {
-            self.database = env.database
-            self.locationManager = env.locationManager
+            self.init(env: env)
         } else {
             throw EnvironmentError()
         }
-        self.env = env
     }
+    // sourcery:end
 
     init(env: TrackingServiceEnvironmentProtocol) {
+        // sourcery:inline:TrackingService.Environment.Init
         self.database = env.database
         self.locationManager = env.locationManager
         self.env = env
+        // sourcery:end
     }
-    // sourcery:end
 }
 
 // sourcery:inline:TrackingService.Environment.Protocol
@@ -90,41 +88,40 @@ struct TrackingServiceEnvironment: TrackingServiceEnvironmentProtocol {
 // sourcery:end
 
 // sourcery:environment
-class SettingService {
+class SettingsService {
 
     private enum Environment {
         case database(DatabaseProtocol)
     }
 
-    // sourcery:inline:SettingService.Environment.Properties
+    // sourcery:inline:SettingsService.Environment.Properties
     private let env: AnyEnvironment
     private let database: DatabaseProtocol
-    // sourcery:end
 
-    // sourcery:inline:SettingService.Environment.Init
-    init(env: AnyEnvironment) throws {
-        if let env = env as? SettingServiceEnvironmentProtocol {
-            self.database = env.database
+    convenience init(env: AnyEnvironment) throws {
+        if let env = env as? SettingsServiceEnvironmentProtocol {
+            self.init(env: env)
         } else {
             throw EnvironmentError()
         }
-        self.env = env
-    }
-
-    init(env: SettingServiceEnvironmentProtocol) {
-        self.database = env.database
-        self.env = env
     }
     // sourcery:end
+
+    init(env: SettingsServiceEnvironmentProtocol) {
+        // sourcery:inline:SettingsService.Environment.Init
+        self.database = env.database
+        self.env = env
+        // sourcery:end
+    }
 }
 
 
-// sourcery:inline:SettingService.Environment.Protocol
-protocol SettingServiceEnvironmentProtocol: AnyEnvironment {
+// sourcery:inline:SettingsService.Environment.Protocol
+protocol SettingsServiceEnvironmentProtocol: AnyEnvironment {
     var database: DatabaseProtocol { get }
 }
 
-struct SettingServiceEnvironment: SettingServiceEnvironmentProtocol {
+struct SettingsServiceEnvironment: SettingsServiceEnvironmentProtocol {
     let database: DatabaseProtocol
 }
 // sourcery:end
@@ -134,4 +131,4 @@ struct SettingServiceEnvironment: SettingServiceEnvironmentProtocol {
 
 let env = GlobalEnvironment()
 let trackingService = TrackingService(env: env)
-let settingService = SettingService(env: env)
+let settingsService = SettingsService(env: env)

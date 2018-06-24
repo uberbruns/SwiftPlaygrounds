@@ -4,26 +4,21 @@
 {% for property in class.containedType.Environment.cases %}
     private let {{ property.name }}: {{ property.associatedValues.first.typeName }}
 {% endfor %}
-// sourcery:end
 
-// sourcery:inline:{{ class.name }}.Environment.Init
-    init(env: AnyEnvironment) throws {
+    convenience init(env: AnyEnvironment) throws {
         if let env = env as? {{ class.name }}EnvironmentProtocol {
-{% for property in class.containedType.Environment.cases %}
-            self.{{ property.name }} = env.{{ property.name }}
-{% endfor %}
+            self.init(env: env)
         } else {
             throw EnvironmentError()
         }
-        self.env = env
     }
+// sourcery:end
 
-    init(env: {{ class.name }}EnvironmentProtocol) {
+// sourcery:inline:{{ class.name }}.Environment.Init
 {% for property in class.containedType.Environment.cases %}
         self.{{ property.name }} = env.{{ property.name }}
 {% endfor %}
         self.env = env
-    }
 // sourcery:end
 
 // sourcery:inline:{{ class.name }}.Environment.Protocol
