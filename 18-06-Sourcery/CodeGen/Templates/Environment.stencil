@@ -1,18 +1,33 @@
 {% for class in types.classes where class|annotated:"environment" %}
 // sourcery:inline:{{ class.name }}.Environment.Properties
+    private let env: AnyEnvironment
 {% for property in class.containedType.Environment.cases %}
     private let {{ property.name }}: {{ property.associatedValues.first.typeName }}
 {% endfor %}
 // sourcery:end
 
 // sourcery:inline:{{ class.name }}.Environment.Init
+    init(env: AnyEnvironment) throws {
+        if let env = env as? {{ class.name }}EnvironmentProtocol {
+{% for property in class.containedType.Environment.cases %}
+            self.{{ property.name }} = env.{{ property.name }}
+{% endfor %}
+        } else {
+            throw EnvironmentError()
+        }
+        self.env = env
+    }
+
+    init(env: {{ class.name }}EnvironmentProtocol) {
 {% for property in class.containedType.Environment.cases %}
         self.{{ property.name }} = env.{{ property.name }}
 {% endfor %}
+        self.env = env
+    }
 // sourcery:end
 
 // sourcery:inline:{{ class.name }}.Environment.Protocol
-protocol {{ class.name }}EnvironmentProtocol {
+protocol {{ class.name }}EnvironmentProtocol: AnyEnvironment {
 {% for property in class.containedType.Environment.cases %}
     var {{ property.name }}: {{ property.associatedValues.first.typeName }} { get }
 {% endfor %}
@@ -28,7 +43,16 @@ struct {{ class.name }}Environment: {{ class.name }}EnvironmentProtocol {
 {% endfor %}
 
 
-// sourcery:inline:Main.Environment
+// sourcery:inline:Setup.Environment
+protocol AnyEnvironment { }
+
+struct EnvironmentError: Error { }
+
+// sourcery:end
+
+
+// sourcery:inline:Global.Environment
+    AnyEnvironment,
 {% for class in types.classes where class|annotated:"environment" %}
     {{ class.name }}EnvironmentProtocol{% if not forloop.last %},{% else %}{{ " {" }}{% endif %}
 {% endfor %}
