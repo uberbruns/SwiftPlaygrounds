@@ -1,5 +1,7 @@
 {% for class in types.classes where class|annotated:"environment" %}
 // sourcery:inline:{{ class.name }}.Environment.Properties
+    typealias EnvironmentProtocol = {{ class.name }}EnvironmentProtocol
+
     private let env: AnyEnvironment
 {% for property in class.containedType.Environment.cases %}
     private let {{ property.name }}: {{ property.associatedValues.first.typeName }}
@@ -7,9 +9,9 @@
 // sourcery:end
 
 // sourcery:inline:{{ class.name }}.Environment.ConvenienceInit
-    convenience init(env: AnyEnvironment{% for initializer in class.initializers.first %}, abc{% endfor %}) throws {
-        if let env = env as? {{ class.name }}EnvironmentProtocol {
-            self.init(env: env)
+    convenience init(env: AnyEnvironment{% for parameter in class.initializers.first.parameters where parameter.name != "env" %}, {% if parameter.argumentLabel == nil %}_ {% elif parameter.name != parameter.argumentLabel %}{{ parameter.argumentLabel }} {% endif %}{{ parameter.name }}: {{ parameter.typeName }}{% endfor %}) throws {
+        if let env = env as? EnvironmentProtocol {
+            self.init(env: env{% for parameter in class.initializers.first.parameters where parameter.name != "env" %}, {% if parameter.argumentLabel %}{{ parameter.argumentLabel }}: {% endif %}{{ parameter.name }}{% endfor %})
         } else {
             throw EnvironmentError()
         }

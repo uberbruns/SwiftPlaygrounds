@@ -53,12 +53,14 @@ class TrackingService {
     }
 
     // sourcery:inline:TrackingService.Environment.Properties
+    typealias EnvironmentProtocol = TrackingServiceEnvironmentProtocol
+
     private let env: AnyEnvironment
     private let database: DatabaseProtocol
     private let locationManager: LocationManagerProtocol
     // sourcery:end
 
-    init(env: TrackingServiceEnvironmentProtocol) {
+    init(env: EnvironmentProtocol, withLimit limit: Int) {
         // sourcery:inline:TrackingService.Environment.Init
         self.database = env.database
         self.locationManager = env.locationManager
@@ -67,9 +69,9 @@ class TrackingService {
     }
 
     // sourcery:inline:TrackingService.Environment.ConvenienceInit
-    convenience init(env: AnyEnvironment) throws {
-        if let env = env as? TrackingServiceEnvironmentProtocol {
-            self.init(env: env)
+    convenience init(env: AnyEnvironment, withLimit limit: Int) throws {
+        if let env = env as? EnvironmentProtocol {
+            self.init(env: env, withLimit: limit)
         } else {
             throw EnvironmentError()
         }
@@ -97,6 +99,8 @@ class SettingsService {
     }
 
     // sourcery:inline:SettingsService.Environment.Properties
+    typealias EnvironmentProtocol = SettingsServiceEnvironmentProtocol
+
     private let env: AnyEnvironment
     private let database: DatabaseProtocol
     // sourcery:end
@@ -110,7 +114,7 @@ class SettingsService {
 
     // sourcery:inline:SettingsService.Environment.ConvenienceInit
     convenience init(env: AnyEnvironment) throws {
-        if let env = env as? SettingsServiceEnvironmentProtocol {
+        if let env = env as? EnvironmentProtocol {
             self.init(env: env)
         } else {
             throw EnvironmentError()
@@ -134,5 +138,5 @@ struct SettingsServiceEnvironment: SettingsServiceEnvironmentProtocol {
 // SAMLE SETUP
 
 let env = GlobalEnvironment()
-let trackingService = TrackingService(env: env)
+let trackingService = TrackingService(env: env, withLimit: 5)
 let settingsService = SettingsService(env: env)
