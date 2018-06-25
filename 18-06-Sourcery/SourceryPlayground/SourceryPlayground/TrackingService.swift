@@ -51,80 +51,55 @@ struct GlobalEnvironment:
 // sourcery:environment
 class TrackingService {
 
-    private enum Environment {
-        static let include = [SettingsServiceEnvironmentProtocol.self]
-        case locationManager(LocationManagerProtocol)
+    private struct Environment {
+        let includesSettingsService: SettingsServiceEnvironmentProtocol
+        let locationManager: LocationManagerProtocol
     }
 
     // sourcery:inline:TrackingService.Environment.Properties
     typealias EnvironmentProtocol = TrackingServiceEnvironmentProtocol
 
-    private let env: AnyEnvironment
+    private let env: EnvironmentProtocol
     private let locationManager: LocationManagerProtocol
     // sourcery:end
 
     init(env: EnvironmentProtocol, withLimit limit: Int) {
         // sourcery:inline:TrackingService.Environment.Init
-        self.locationManager = env.locationManager
         self.env = env
+        self.locationManager = env.locationManager
         // sourcery:end
 
-        if let settingService = try? SettingsService(env: env) {
-            settingService.save()
-        }
+        let settingService = SettingsService(env: env)
+        settingService.save()
     }
-
-    // sourcery:inline:TrackingService.Environment.ConvenienceInit
-    convenience init(env: AnyEnvironment, withLimit limit: Int) throws {
-        if let env = env as? EnvironmentProtocol {
-            self.init(env: env, withLimit: limit)
-        } else {
-            throw EnvironmentError()
-        }
-    }
-    // sourcery:end
 }
 
 // sourcery:inline:TrackingService.Environment.Protocol
-protocol TrackingServiceEnvironmentProtocol: AnyEnvironment {
+protocol TrackingServiceEnvironmentProtocol: SettingsServiceEnvironmentProtocol {
     var locationManager: LocationManagerProtocol { get }
-}
-
-struct TrackingServiceEnvironment: TrackingServiceEnvironmentProtocol {
-    let locationManager: LocationManagerProtocol
 }
 // sourcery:end
 
 // sourcery:environment
 class SettingsService {
 
-    private enum Environment {
-        case database(DatabaseProtocol)
+    private struct Environment {
+        let database: DatabaseProtocol
     }
 
     // sourcery:inline:SettingsService.Environment.Properties
     typealias EnvironmentProtocol = SettingsServiceEnvironmentProtocol
 
-    private let env: AnyEnvironment
+    private let env: EnvironmentProtocol
     private let database: DatabaseProtocol
     // sourcery:end
 
     init(env: SettingsServiceEnvironmentProtocol) {
         // sourcery:inline:SettingsService.Environment.Init
-        self.database = env.database
         self.env = env
+        self.database = env.database
         // sourcery:end
     }
-
-    // sourcery:inline:SettingsService.Environment.ConvenienceInit
-    convenience init(env: AnyEnvironment) throws {
-        if let env = env as? EnvironmentProtocol {
-            self.init(env: env)
-        } else {
-            throw EnvironmentError()
-        }
-    }
-    // sourcery:end
 
     func save() {
         dump(database.path)
@@ -133,11 +108,7 @@ class SettingsService {
 
 
 // sourcery:inline:SettingsService.Environment.Protocol
-protocol SettingsServiceEnvironmentProtocol: AnyEnvironment {
+protocol SettingsServiceEnvironmentProtocol {
     var database: DatabaseProtocol { get }
-}
-
-struct SettingsServiceEnvironment: SettingsServiceEnvironmentProtocol {
-    let database: DatabaseProtocol
 }
 // sourcery:end

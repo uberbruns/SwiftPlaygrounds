@@ -2,9 +2,9 @@
 // sourcery:inline:{{ class.name }}.Environment.Properties
     typealias EnvironmentProtocol = {{ class.name }}EnvironmentProtocol
 
-    private let env: AnyEnvironment
-{% for property in class.containedType.Environment.cases %}
-    private let {{ property.name }}: {{ property.associatedValues.first.typeName }}
+    private let env: EnvironmentProtocol
+{% for property in class.containedType.Environment.variables where property.name|!hasPrefix:"includes" %}
+    private let {{ property.name }}: {{ property.typeName }}
 {% endfor %}
 // sourcery:end
 
@@ -19,27 +19,29 @@
 // sourcery:end
 
 // sourcery:inline:{{ class.name }}.Environment.Init
-{% for property in class.containedType.Environment.cases %}
+        self.env = env
+{% for property in class.containedType.Environment.variables where property.name|!hasPrefix:"includes" %}
         self.{{ property.name }} = env.{{ property.name }}
 {% endfor %}
-        self.env = env
 // sourcery:end
 
 // sourcery:inline:{{ class.name }}.Environment.Protocol
-protocol {{ class.name }}EnvironmentProtocol: AnyEnvironment {
-{% for property in class.containedType.Environment.cases %}
-    var {{ property.name }}: {{ property.associatedValues.first.typeName }} { get }
+protocol {{ class.name }}EnvironmentProtocol{% for include in class.containedType.Environment.variables where include.name|hasPrefix:"includes" %}{% if forloop.first %}: {% endif %}{{ include.typeName }}{% if not forloop.last %}, {% endif %}{% endfor %} {
+{% for property in class.containedType.Environment.variables where property.name|!hasPrefix:"includes" %}
+    var {{ property.name }}: {{ property.typeName }} { get }
 {% endfor %}
 }
+// sourcery:end
 
+// sourcery:inline:{{ class.name }}.Environment.ProtocolImplementation
 struct {{ class.name }}Environment: {{ class.name }}EnvironmentProtocol {
-{% for property in class.containedType.Environment.cases %}
-    let {{ property.name }}: {{ property.associatedValues.first.typeName }}
+{% for property in class.containedType.Environment.variables where property.name|!hasPrefix:"includes" %}
+    let {{ property.name }}: {{ property.typeName }}
 {% endfor %}
 }
-
 // sourcery:end
 {% endfor %}
+
 
 
 // sourcery:inline:Setup.Environment
