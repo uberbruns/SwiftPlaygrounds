@@ -11,3 +11,5 @@ import Foundation
 
 
 
+let env = GlobalEnvironment()
+let trackingService = TrackingService(env: env, withLimit: 5)

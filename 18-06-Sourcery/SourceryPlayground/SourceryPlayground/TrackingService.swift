@@ -12,9 +12,13 @@ import Foundation
 
 // SAMPLE DEPENDENCIES
 
-protocol DatabaseProtocol { }
+protocol DatabaseProtocol {
+    var path: String { get }
+}
 
-class Database: DatabaseProtocol { }
+class Database: DatabaseProtocol {
+    var path = "/db"
+}
 
 protocol LocationManagerProtocol { }
 
@@ -48,7 +52,7 @@ struct GlobalEnvironment:
 class TrackingService {
 
     private enum Environment {
-        case database(DatabaseProtocol)
+        static let include = [SettingsServiceEnvironmentProtocol.self]
         case locationManager(LocationManagerProtocol)
     }
 
@@ -56,16 +60,18 @@ class TrackingService {
     typealias EnvironmentProtocol = TrackingServiceEnvironmentProtocol
 
     private let env: AnyEnvironment
-    private let database: DatabaseProtocol
     private let locationManager: LocationManagerProtocol
     // sourcery:end
 
     init(env: EnvironmentProtocol, withLimit limit: Int) {
         // sourcery:inline:TrackingService.Environment.Init
-        self.database = env.database
         self.locationManager = env.locationManager
         self.env = env
         // sourcery:end
+
+        if let settingService = try? SettingsService(env: env) {
+            settingService.save()
+        }
     }
 
     // sourcery:inline:TrackingService.Environment.ConvenienceInit
@@ -81,12 +87,10 @@ class TrackingService {
 
 // sourcery:inline:TrackingService.Environment.Protocol
 protocol TrackingServiceEnvironmentProtocol: AnyEnvironment {
-    var database: DatabaseProtocol { get }
     var locationManager: LocationManagerProtocol { get }
 }
 
 struct TrackingServiceEnvironment: TrackingServiceEnvironmentProtocol {
-    let database: DatabaseProtocol
     let locationManager: LocationManagerProtocol
 }
 // sourcery:end
@@ -121,6 +125,10 @@ class SettingsService {
         }
     }
     // sourcery:end
+
+    func save() {
+        dump(database.path)
+    }
 }
 
 
@@ -133,10 +141,3 @@ struct SettingsServiceEnvironment: SettingsServiceEnvironmentProtocol {
     let database: DatabaseProtocol
 }
 // sourcery:end
-
-
-// SAMLE SETUP
-
-let env = GlobalEnvironment()
-let trackingService = TrackingService(env: env, withLimit: 5)
-let settingsService = SettingsService(env: env)
