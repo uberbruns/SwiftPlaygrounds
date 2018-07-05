@@ -28,24 +28,18 @@ class CompanyService {
     static let didSetEmployees = Foundation.Notification.Name("CompanyServiceDidSetEmployeesNotification")
   }
 
-  var ceo: String {
+  private(set) var ceo: String {
     didSet {
-      let userInfo = [Notification.newValueKey: ceo, Notification.oldValueKey: oldValue]
-      NotificationCenter.default.post(name: Notification.didSetCeo, object: self, userInfo: userInfo)
     }
   }
 
-  var bouncer: String {
+  private(set) var bouncer: String {
     didSet {
-      let userInfo = [Notification.newValueKey: bouncer, Notification.oldValueKey: oldValue]
-      NotificationCenter.default.post(name: Notification.didSetBouncer, object: self, userInfo: userInfo)
     }
   }
 
-  var employees: [String] {
+  private(set) var employees: [String] {
     didSet {
-      let userInfo = [Notification.newValueKey: employees, Notification.oldValueKey: oldValue]
-      NotificationCenter.default.post(name: Notification.didSetEmployees, object: self, userInfo: userInfo)
     }
   }
   // sourcery:end
@@ -73,6 +67,21 @@ protocol CompanyServiceObserver: AnyObject {
 
 
 extension CompanyServiceObserver {
+
+  func setCeo(_ newValue: String, sender: Any?) {
+      let userInfo = [Notification.newValueKey: ceo, Notification.oldValueKey: oldValue]
+      NotificationCenter.default.post(name: Notification.didSetCeo, object: self, userInfo: userInfo)
+  }
+
+  func setBouncer(_ newValue: String, sender: Any?) {
+      let userInfo = [Notification.newValueKey: bouncer, Notification.oldValueKey: oldValue]
+      NotificationCenter.default.post(name: Notification.didSetBouncer, object: self, userInfo: userInfo)
+  }
+
+  func setEmployees(_ newValue: [String], sender: Any?) {
+      let userInfo = [Notification.newValueKey: employees, Notification.oldValueKey: oldValue]
+      NotificationCenter.default.post(name: Notification.didSetEmployees, object: self, userInfo: userInfo)
+  }
 
   func startObservingCompanyService() {
     let center = NotificationCenter.default

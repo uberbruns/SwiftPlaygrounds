@@ -11,10 +11,8 @@
   }
 
 {% for property in class.containedType.ObservableProperties.cases %}
-  var {{ property.name }}: {{ property.associatedValues.first.typeName }} {
+  private(set) var {{ property.name }}: {{ property.associatedValues.first.typeName }} {
     didSet {
-      let userInfo = [Notification.newValueKey: {{ property.name }}, Notification.oldValueKey: oldValue]
-      NotificationCenter.default.post(name: Notification.didSet{{ property.name|upperFirstLetter }}, object: self, userInfo: userInfo)
     }
   }
 
@@ -37,6 +35,13 @@ protocol {{ class.name }}Observer: AnyObject {
 
 
 extension {{ class.name }}Observer {
+{% for property in class.containedType.ObservableProperties.cases %}
+
+  func set{{ property.name|upperFirstLetter }}(_ newValue: {{ property.associatedValues.first.typeName }}, sender: Any?) {
+      let userInfo = [Notification.newValueKey: {{ property.name }}, Notification.oldValueKey: oldValue]
+      NotificationCenter.default.post(name: Notification.didSet{{ property.name|upperFirstLetter }}, object: self, userInfo: userInfo)
+  }
+{% endfor %}
 
   func startObserving{{ class.name }}() {
     let center = NotificationCenter.default
