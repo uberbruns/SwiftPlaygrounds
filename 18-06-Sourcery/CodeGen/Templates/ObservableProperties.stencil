@@ -4,6 +4,7 @@
   enum Notification {
     static let newValueKey = "newValue"
     static let oldValueKey = "oldValueKey"
+    static let senderKey = "senderKey"
 
 {% for property in class.containedType.ObservableProperties.cases %}
     static let didSet{{ property.name|upperFirstLetter }} = Foundation.Notification.Name("{{ class.name }}DidSet{{ property.name|upperFirstLetter  }}Notification")
@@ -11,11 +12,7 @@
   }
 
 {% for property in class.containedType.ObservableProperties.cases %}
-  private(set) var {{ property.name }}: {{ property.associatedValues.first.typeName }} {
-    didSet {
-    }
-  }
-
+  private var _{{ property.name }}: {{ property.associatedValues.first.typeName }}
 {% endfor %}
 // sourcery:end
 
@@ -29,28 +26,51 @@ protocol {{ class.name }}Observer: AnyObject {
   func stopObserving{{ class.name }}()
 
 {% for property in class.containedType.ObservableProperties.cases %}
-  func {{ class.name|lowerFirstLetter }}DidSet{{ property.name|upperFirstLetter }}(_ {{ property.name }}: {{ property.associatedValues.first.typeName }}, old{{ property.name|upperFirstLetter }}: {{ property.associatedValues.first.typeName }})
+  func {{ class.name|lowerFirstLetter }}DidSet{{ property.name|upperFirstLetter }}(_ {{ property.name }}: {{ property.associatedValues.first.typeName }}, old{{ property.name|upperFirstLetter }}: {{ property.associatedValues.first.typeName }}, sender: Any?)
+{% endfor %}
+}
+
+
+extension {{ class.name }} {
+{% for property in class.containedType.ObservableProperties.cases %}
+
+  // MARK: {{ property.name|upperFirstLetter }}
+
+  var {{ property.name }}: {{ property.associatedValues.first.typeName }} {
+    get {
+      return _{{ property.name }}
+    }
+    set {
+      set{{ property.name|upperFirstLetter }}(newValue, oldValue: _{{ property.name }}, sender: nil)
+    }
+  }
+
+  func set{{ property.name|upperFirstLetter }}(_ newValue: {{ property.associatedValues.first.typeName }}, sender: Any?) {
+    set{{ property.name|upperFirstLetter }}(newValue, oldValue: _{{ property.name }}, sender: sender)
+  }
+
+  private func set{{ property.name|upperFirstLetter }}(_ newValue: {{ property.associatedValues.first.typeName }}, oldValue: {{ property.associatedValues.first.typeName }}, sender: Any?) {
+    _{{ property.name }} = newValue
+    var userInfo: [AnyHashable: Any] = [Notification.newValueKey: newValue, Notification.oldValueKey: oldValue]
+    if let sender = sender {
+      userInfo[Notification.senderKey] = sender
+    }
+    NotificationCenter.default.post(name: Notification.didSet{{ property.name|upperFirstLetter }}, object: self, userInfo: userInfo)
+  }
 {% endfor %}
 }
 
 
 extension {{ class.name }}Observer {
-{% for property in class.containedType.ObservableProperties.cases %}
-
-  func set{{ property.name|upperFirstLetter }}(_ newValue: {{ property.associatedValues.first.typeName }}, sender: Any?) {
-      let userInfo = [Notification.newValueKey: {{ property.name }}, Notification.oldValueKey: oldValue]
-      NotificationCenter.default.post(name: Notification.didSet{{ property.name|upperFirstLetter }}, object: self, userInfo: userInfo)
-  }
-{% endfor %}
-
   func startObserving{{ class.name }}() {
     let center = NotificationCenter.default
 {% for property in class.containedType.ObservableProperties.cases %}
 
-    {{ class.name|lowerFirstLetter }}ObserverTokens.append(center.addObserver(forName: CompanyService.Notification.didSet{{ property.name|upperFirstLetter }}, object: companyService, queue: OperationQueue.main) { [weak self] notification in
+    {{ class.name|lowerFirstLetter }}ObserverTokens.append(center.addObserver(forName: CompanyService.Notification.didSet{{ property.name|upperFirstLetter }}, object: companyService, queue: .main) { [weak self] notification in
       guard let newValue = notification.userInfo?[{{ class.name }}.Notification.newValueKey] as? {{ property.associatedValues.first.typeName }},
         let oldValue = notification.userInfo?[{{ class.name }}.Notification.oldValueKey] as? {{ property.associatedValues.first.typeName }} else { return }
-      self?.{{ class.name|lowerFirstLetter }}DidSet{{ property.name|upperFirstLetter }}(newValue, old{{ property.name|upperFirstLetter }}: oldValue)
+      let sender = notification.userInfo?[{{ class.name }}.Notification.senderKey]
+      self?.{{ class.name|lowerFirstLetter }}DidSet{{ property.name|upperFirstLetter }}(newValue, old{{ property.name|upperFirstLetter }}: oldValue, sender: sender)
     })
 {% endfor %}
   }
@@ -63,7 +83,7 @@ extension {{ class.name }}Observer {
   }
 {% for property in class.containedType.ObservableProperties.cases %}
 
-  func {{ class.name|lowerFirstLetter }}DidSet{{ property.name|upperFirstLetter }}(_ {{ property.name }}: {{ property.associatedValues.first.typeName }}, old{{ property.name|upperFirstLetter }}: {{ property.associatedValues.first.typeName }}) { }
+  func {{ class.name|lowerFirstLetter }}DidSet{{ property.name|upperFirstLetter }}(_ {{ property.name }}: {{ property.associatedValues.first.typeName }}, old{{ property.name|upperFirstLetter }}: {{ property.associatedValues.first.typeName }}, sender: Any?) { }
 {% endfor %}
 }
 // sourcery:end
