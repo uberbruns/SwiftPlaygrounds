@@ -16,8 +16,6 @@ struct MyService {
     }
 
     struct MyConnection<R: Decodable>: ResultDecoderConnection, URLRequestConnection, MyAPIConnection, RetryConnection {
-
-
         typealias ResultType = R
 
         var attempts = 0
@@ -39,22 +37,21 @@ struct MyService {
 
     static func requestIPAddress() {
         let connection = MyConnection<IpifyResult>(url: URL(string: "https://api.ipify.org/?format=json")!)
-        request(connection) { (connection) in
+        request(connection) { connection, finished in
             dump(connection.decodedResult)
-            exit(0)
+            exit(finished ? 0 : 1)
         }
     }
 
 
-    static func request<R: Decodable>(_ connection: MyConnection<R>, completion completionHandler: @escaping (MyConnection<R>) -> ()) {
+    static func request<R: Decodable>(_ connection: MyConnection<R>, completion completionHandler: @escaping (MyConnection<R>, Bool) -> ()) {
         Pipeline()
-            .addPlug(RetryPlug.init)
-            .addPlug(MyAPIPlug.init)
-            .addPlug(URLRequestPlug.init)
-            .addPlug(ResultDecoderPlug.init)
+            .append(RetryPlug.self)
+            .append(MyAPIPlug.self)
+            .append(URLRequestPlug.self, onFailure: .restartPipeline)
+            .append(ResultDecoderPlug.self)
             .load(connection, completion: completionHandler)
     }
-
 }
 
 

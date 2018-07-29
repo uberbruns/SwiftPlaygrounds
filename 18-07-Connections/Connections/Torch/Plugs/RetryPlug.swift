@@ -18,12 +18,10 @@ protocol RetryConnection: Connection {
 struct RetryPlug<C>: Plug where C: RetryConnection {
     typealias ConnectionType = C
 
-    init() { }
-
-    func evaluate(connection: C, callback: @escaping (C, PipelineCommand) -> ()) {
+    static func evaluate(connection: C, callback: @escaping (C, PlugResult) -> ()) {
         var connection = connection
         connection.attempts += 1
         print("RetryPlug: a")
-        callback(connection, connection.attempts <= connection.maxAttempts ? .next : .restart)
+        callback(connection, connection.attempts <= connection.maxAttempts ? .success : .failure)
     }
 }

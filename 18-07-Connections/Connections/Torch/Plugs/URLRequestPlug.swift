@@ -21,9 +21,7 @@ struct URLRequestPlug<C>: Plug where C: URLRequestConnection & RetryConnection {
 
     typealias ConnectionType = C
 
-    init() { }
-
-    func evaluate(connection: C, callback: @escaping (C, PipelineCommand) -> ()) {
+    static func evaluate(connection: C, callback: @escaping (C, PlugResult) -> ()) {
         if connection.attempts > 3 {
             let task = URLSession.shared.dataTask(with: connection.request) { (data, response, error) in
                 var connection = connection
@@ -31,12 +29,12 @@ struct URLRequestPlug<C>: Plug where C: URLRequestConnection & RetryConnection {
                 connection.response = response
                 connection.error = error
                 print("URLRequestPlug: a")
-                callback(connection, .next)
+                callback(connection, .success)
             }
             task.resume()
         } else {
             print("URLRequestPlug: b")
-            callback(connection, .restart)
+            callback(connection, .failure)
         }
     }
 }

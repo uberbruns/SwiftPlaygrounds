@@ -12,23 +12,27 @@ import Foundation
 protocol Connection { }
 
 
-enum PipelineCommand {
-    case next
-    case restart
-    case abort
+enum PlugResult {
+    case success
+    case failure
+}
+
+
+enum PlugFailureStrategy {
+    case restartPipeline
+    case stopPipeline
 }
 
 
 protocol Plug {
     associatedtype ConnectionType
-    init()
-    func evaluate(connection: ConnectionType, callback: @escaping (ConnectionType, PipelineCommand) -> ())
+    static func evaluate(connection: ConnectionType, callback: @escaping (ConnectionType, PlugResult) -> ())
 }
 
 
 struct Pipeline<C: Connection> {
 
-    typealias Work = (C, @escaping (C) -> Void) -> Void
+    typealias Work = (C, @escaping (C, Bool) -> Void) -> Void
     private let work: Work
     private let root: Bool
 
@@ -40,11 +44,11 @@ struct Pipeline<C: Connection> {
     init() {
         self.root = true
         self.work = { connection, completionHandler in
-            completionHandler(connection)
+            completionHandler(connection, true)
         }
     }
 
-    func addPlug<P: Plug>(_ plug: @escaping () -> P) -> Pipeline<C> where P.ConnectionType == C {
+    func append<P: Plug>(_ plug: P.Type, onFailure failureStrategy: PlugFailureStrategy = .stopPipeline) -> Pipeline<C> where P.ConnectionType == C {
         // A stack of plugs needs to be executed from the bottom to the top.
         // To achieve that each new pipeline has to execute first the work of its
         // preceeding pipeline.
@@ -52,35 +56,51 @@ struct Pipeline<C: Connection> {
 
         // Creating next pipeline.
         return Pipeline(work: { connectionIn, completionHandler in
-            // Before the new pipeline can execute its own work (executing the plug)
-            // the work of the preceeding pipeline is executed.
-            func attempt(_ triedConnection: C) {
-                preceedingPipeline.work(triedConnection) { connectionOut in
-                    // After completing the preceding pipelines work the new plug is executed.
-                    plug().evaluate(connection: connectionOut, callback: { connectionUpdated, command in
-                        switch (command, preceedingPipeline.root) {
-                        case (.next, _):
-                            completionHandler(connectionUpdated)
-                        case (.restart, false):
-                            attempt(connectionUpdated)
+            // To make work repeatable this step is capsuled in a function.
+            func executeWork(_ triedConnection: C) {
+
+                // Before the new pipeline can execute its own work (executing the plug)
+                // the work of the preceeding pipeline is executed.
+                preceedingPipeline.work(triedConnection, { connectionOut, isProgressing in
+                    // The work of the preceeding pipeline is done. If we stopped progressing
+                    // we directly call the completion handler to go back to the  beginning of
+                    // the stack.
+                    guard isProgressing else {
+                        completionHandler(connectionOut, false)
+                        return
+                    }
+
+                    // After completing the preceding pipelines work the new plug's connection
+                    // evaluation executed.
+                    plug.evaluate(connection: connectionOut, callback: { connectionUpdated, plugResult in
+
+                        // Depending on the plug result and configuration, we
+                        // - call the completion handler with success `true` or
+                        // - call the completion handler with success `false` or
+                        // - or attempt a restart
+                        switch (plugResult, failureStrategy, preceedingPipeline.root) {
+                        case (.success, _, _):
+                            completionHandler(connectionUpdated, true)
+                        case (.failure, .restartPipeline, false):
+                            executeWork(connectionUpdated)
                         default:
-                            fatalError()
+                            completionHandler(connectionUpdated, false)
                         }
                     })
-                }
+                })
             }
-            attempt(connectionIn)
+            executeWork(connectionIn)
         })
     }
 
-    func load(_ connection: C, queue: OperationQueue? = .main, completion finalCompletionHandler: @escaping (C) -> ()) {
-        work(connection) { connection in
+    func load(_ connection: C, queue: OperationQueue? = .main, completion finalCompletionHandler: @escaping (C, Bool) -> ()) {
+        work(connection) { connection, finished  in
             if let queue = queue, queue != OperationQueue.current {
                 queue.addOperation {
-                    finalCompletionHandler(connection)
+                    finalCompletionHandler(connection, finished)
                 }
             } else {
-                finalCompletionHandler(connection)
+                finalCompletionHandler(connection, finished)
             }
         }
     }

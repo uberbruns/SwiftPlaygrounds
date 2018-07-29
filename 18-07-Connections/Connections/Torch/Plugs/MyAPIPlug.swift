@@ -17,10 +17,8 @@ protocol MyAPIConnection: Connection {
 struct MyAPIPlug<C>: Plug where C: MyAPIConnection {
     typealias ConnectionType = C
 
-    init() { }
-
-    func evaluate(connection: C, callback: @escaping (C, PipelineCommand) -> ()) {
+    static func evaluate(connection: C, callback: @escaping (C, PlugResult) -> ()) {
         print("MyAPIPlug: a")
-        callback(connection, .next)
+        callback(connection, .success)
     }
 }

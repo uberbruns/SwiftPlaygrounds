@@ -18,9 +18,7 @@ protocol ResultDecoderConnection: URLRequestConnection {
 struct ResultDecoderPlug<C>: Plug where C: ResultDecoderConnection {
     typealias ConnectionType = C
 
-    init() { }
-
-    func evaluate(connection: C, callback: @escaping (C, PipelineCommand) -> ()) {
+    static func evaluate(connection: C, callback: @escaping (C, PlugResult) -> ()) {
         var connection = connection
         let work = {
             guard let data = connection.data else { return }
@@ -33,6 +31,6 @@ struct ResultDecoderPlug<C>: Plug where C: ResultDecoderConnection {
         } else {
             work()
         }
-        callback(connection, .next)
+        callback(connection, .success)
     }
 }
