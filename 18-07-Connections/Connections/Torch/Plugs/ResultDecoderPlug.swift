@@ -20,7 +20,7 @@ struct ResultDecoderPlug<C>: Plug where C: ResultDecoderConnection {
 
     init() { }
 
-    func execute(connection: C, completion completionHandler: @escaping (C) -> ()) {
+    func progress(connection: C, nextPlug: @escaping (C) -> ()) {
         var connection = connection
         let work = {
             guard let data = connection.data else { return }
@@ -33,6 +33,6 @@ struct ResultDecoderPlug<C>: Plug where C: ResultDecoderConnection {
         } else {
             work()
         }
-        completionHandler(connection)
+        nextPlug(connection)
     }
 }

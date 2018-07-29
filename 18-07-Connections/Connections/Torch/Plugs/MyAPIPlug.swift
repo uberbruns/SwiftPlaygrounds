@@ -19,7 +19,7 @@ struct MyAPIPlug<C>: Plug where C: MyAPIConnection {
 
     init() { }
 
-    func execute(connection: C, completion completionHandler: @escaping (C) -> ()) {
-        completionHandler(connection)
+    func progress(connection: C, nextPlug: @escaping (C) -> ()) {
+        nextPlug(connection)
     }
 }

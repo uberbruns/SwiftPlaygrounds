@@ -15,7 +15,7 @@ protocol Connection { }
 protocol Plug {
     associatedtype ConnectionType
     init()
-    func execute(connection: ConnectionType, completion completionHandler: @escaping (ConnectionType) -> ())
+    func progress(connection: ConnectionType, nextPlug: @escaping (ConnectionType) -> ())
 }
 
 
@@ -46,7 +46,7 @@ struct Pipeline<C: Connection> {
             // the work of the preceeding pipeline is executed.
             preceedingPipeline.work(connectionIn) { connectionOut in
                 // After completing the preceding pipelines work the new plug is executed.
-                plug().execute(connection: connectionOut) { connectionUpdated in
+                plug().progress(connection: connectionOut) { connectionUpdated in
                     completionHandler(connectionUpdated)
                 }
             }

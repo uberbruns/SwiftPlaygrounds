@@ -23,13 +23,13 @@ struct URLRequestPlug<C>: Plug where C: URLRequestConnection {
 
     init() { }
 
-    func execute(connection: C, completion completionHandler: @escaping (C) -> ()) {
+    func progress(connection: C, nextPlug: @escaping (C) -> ()) {
         let task = URLSession.shared.dataTask(with: connection.request) { (data, response, error) in
             var connection = connection
             connection.data = data
             connection.response = response
             connection.error = error
-            completionHandler(connection)
+            nextPlug(connection)
         }
         task.resume()
     }
