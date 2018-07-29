@@ -11,7 +11,7 @@ import Foundation
 
 protocol ResultDecoderConnection: URLRequestConnection {
     associatedtype ResultType: Decodable
-    var result: ResultType? { get set }
+    var decodedResult: ResultType? { get set }
 }
 
 
@@ -24,7 +24,7 @@ struct ResultDecoderPlug<C>: Plug where C: ResultDecoderConnection {
         var connection = connection
         let work = {
             guard let data = connection.data else { return }
-            connection.result = try? JSONDecoder().decode(C.ResultType.self, from: data)
+            connection.decodedResult = try? JSONDecoder().decode(C.ResultType.self, from: data)
         }
         if OperationQueue.current == .main {
             OperationQueue().addOperation {

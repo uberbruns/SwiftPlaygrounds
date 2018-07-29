@@ -11,19 +11,19 @@ import Foundation
 
 struct MyService {
 
-    struct Ipify: Codable {
+    struct IpifyResult: Codable {
         let ip: String
     }
 
-    struct MyConnection: ResultDecoderConnection, URLRequestConnection, MyAPIConnection {
+    struct MyConnection<R: Decodable>: ResultDecoderConnection, URLRequestConnection, MyAPIConnection {
 
-        typealias ResultType = Ipify
+        typealias ResultType = R
 
         let apiKey: String
         var request: URLRequest
         var response: URLResponse?
         var data: Data?
-        var result: MyService.Ipify?
+        var decodedResult: R?
         var error: Error?
 
         init(url: URL) {
@@ -31,18 +31,25 @@ struct MyService {
             self.request = URLRequest(url: url)
         }
     }
+    
 
     static func requestIPAddress() {
-        let connection = MyConnection(url: URL(string: "https://api.ipify.org/?format=json")!)
+        let connection = MyConnection<IpifyResult>(url: URL(string: "https://api.ipify.org/?format=json")!)
+        request(connection) { (connection) in
+            dump(connection.decodedResult)
+            exit(0)
+        }
+    }
+
+
+    static func request<R: Decodable>(_ connection: MyConnection<R>, completion completionHandler: @escaping (MyConnection<R>) -> ()) {
         Pipeline()
             .addPlug(MyAPIPlug.init)
             .addPlug(URLRequestPlug.init)
             .addPlug(ResultDecoderPlug.init)
-            .load(connection) {
-                dump($0.result)
-                exit(0)
-        }
+            .load(connection, completion: completionHandler)
     }
+
 }
 
 
