@@ -10,7 +10,7 @@ import Foundation
 
 
 protocol MyAPIConnection: Connection {
-    var apiKey: String  { get }
+    var apiKey: String { get }
 }
 
 
@@ -19,7 +19,8 @@ struct MyAPIPlug<C>: Plug where C: MyAPIConnection {
 
     init() { }
 
-    func progress(connection: C, nextPlug: @escaping (C) -> ()) {
-        nextPlug(connection)
+    func progress(connection: C, nextPlug: @escaping (C, Bool) -> ()) {
+        print("MyAPIPlug: a")
+        nextPlug(connection, true)
     }
 }
