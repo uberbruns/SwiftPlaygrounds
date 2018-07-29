@@ -1,0 +1,6 @@
+sources:
+  - CleanApp/
+templates:
+  - CodeGen/Templates/
+output:
+  CodeGen/Output/SceneProtocols.swift

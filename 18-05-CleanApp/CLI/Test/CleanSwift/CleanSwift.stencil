@@ -1,0 +1,44 @@
+{% for useCase in types.implementing.UseCaseProtocol %}
+// MARK: Interactor
+
+protocol {{ useCase.localName|replace:"UseCase","" }}DataStoreProtocol: class, DataStoreProtocol { }
+
+protocol {{ useCase.localName|replace:"UseCase","" }}BusinessLogicProtocol: BusinessLogicProtocol {
+    {% for usecaseType in useCase.containedTypes %}
+        {% for modelType in usecaseType.containedTypes %}
+            {% if modelType.localName == "Request" %}
+  func do{{ usecaseType.localName }}(with request: {{ useCase.localName }}.{{ usecaseType.localName }}.{{ modelType.localName }})
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+}
+
+protocol {{ useCase.localName|replace:"UseCase","" }}InteractorProtocol: InteractorProtocol, MapDataStoreProtocol, {{ useCase.localName|replace:"UseCase","" }}BusinessLogicProtocol where RouterType: {{ useCase.localName|replace:"UseCase","" }}RouterProtocol, PresenterType: {{ useCase.localName|replace:"UseCase","" }}PresenterProtocol { }
+
+// MARK: Presenter
+
+protocol {{ useCase.localName|replace:"UseCase","" }}PresenterProtocol: PresenterProtocol where UserInterfaceType: {{ useCase.localName|replace:"UseCase","" }}UserInterfaceProtocol {
+    {% for usecaseType in useCase.containedTypes %}
+        {% for modelType in usecaseType.containedTypes %}
+            {% if modelType.localName == "Response" %}
+  func present{{ usecaseType.localName }}(with response: {{ useCase.localName }}.{{ usecaseType.localName }}.{{ modelType.localName }})
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+}
+
+// MARK: User Interface
+
+protocol {{ useCase.localName|replace:"UseCase","" }}UserInterfaceProtocol: UserInterfaceProtocol {
+  var interactor: {{ useCase.localName|replace:"UseCase","" }}BusinessLogicProtocol? { get set }
+
+  {% for usecaseType in useCase.containedTypes %}
+        {% for modelType in usecaseType.containedTypes %}
+            {% if modelType.localName == "ViewModel" %}
+  func display{{ usecaseType.localName }}(with viewModel: {{ useCase.localName }}.{{ usecaseType.localName }}.{{ modelType.localName }})
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+}
+
+{% endfor %}

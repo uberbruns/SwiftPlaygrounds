@@ -1,0 +1,6 @@
+sources:
+  - /Users/karstenbruns/Desktop/CleanApp/Architecture/CleanApp/Scenes/Booking/MainScene
+templates:
+  - /Users/karstenbruns/Desktop/CleanApp/Architecture/CodeGen/Templates
+output:
+  /Users/karstenbruns/Desktop/CleanApp/Architecture/CleanApp/Scenes/Booking/MainScene/BookingMainSceneProtocols.swift
