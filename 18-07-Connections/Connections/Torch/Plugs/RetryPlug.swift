@@ -20,10 +20,10 @@ struct RetryPlug<C>: Plug where C: RetryConnection {
 
     init() { }
 
-    func progress(connection: C, nextPlug: @escaping (C, Bool) -> ()) {
+    func evaluate(connection: C, callback: @escaping (C, PipelineCommand) -> ()) {
         var connection = connection
         connection.attempts += 1
         print("RetryPlug: a")
-        nextPlug(connection, connection.attempts <= connection.maxAttempts)
+        callback(connection, connection.attempts <= connection.maxAttempts ? .next : .restart)
     }
 }

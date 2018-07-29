@@ -20,7 +20,7 @@ struct ResultDecoderPlug<C>: Plug where C: ResultDecoderConnection {
 
     init() { }
 
-    func progress(connection: C, nextPlug: @escaping (C, Bool) -> ()) {
+    func evaluate(connection: C, callback: @escaping (C, PipelineCommand) -> ()) {
         var connection = connection
         let work = {
             guard let data = connection.data else { return }
@@ -33,6 +33,6 @@ struct ResultDecoderPlug<C>: Plug where C: ResultDecoderConnection {
         } else {
             work()
         }
-        nextPlug(connection, true)
+        callback(connection, .next)
     }
 }

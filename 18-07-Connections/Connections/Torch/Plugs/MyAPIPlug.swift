@@ -19,8 +19,8 @@ struct MyAPIPlug<C>: Plug where C: MyAPIConnection {
 
     init() { }
 
-    func progress(connection: C, nextPlug: @escaping (C, Bool) -> ()) {
+    func evaluate(connection: C, callback: @escaping (C, PipelineCommand) -> ()) {
         print("MyAPIPlug: a")
-        nextPlug(connection, true)
+        callback(connection, .next)
     }
 }

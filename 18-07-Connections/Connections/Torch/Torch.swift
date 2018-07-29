@@ -12,10 +12,17 @@ import Foundation
 protocol Connection { }
 
 
+enum PipelineCommand {
+    case next
+    case restart
+    case abort
+}
+
+
 protocol Plug {
     associatedtype ConnectionType
     init()
-    func progress(connection: ConnectionType, nextPlug: @escaping (ConnectionType, Bool) -> ())
+    func evaluate(connection: ConnectionType, callback: @escaping (ConnectionType, PipelineCommand) -> ())
 }
 
 
@@ -50,15 +57,14 @@ struct Pipeline<C: Connection> {
             func attempt(_ triedConnection: C) {
                 preceedingPipeline.work(triedConnection) { connectionOut in
                     // After completing the preceding pipelines work the new plug is executed.
-                    plug().progress(connection: connectionOut, nextPlug: { connectionUpdated, success in
-                        if success {
+                    plug().evaluate(connection: connectionOut, callback: { connectionUpdated, command in
+                        switch (command, preceedingPipeline.root) {
+                        case (.next, _):
                             completionHandler(connectionUpdated)
-                        } else {
-                            if !preceedingPipeline.root {
-                                attempt(connectionUpdated)
-                            } else {
-                                fatalError()
-                            }
+                        case (.restart, false):
+                            attempt(connectionUpdated)
+                        default:
+                            fatalError()
                         }
                     })
                 }
