@@ -15,7 +15,13 @@ struct MyService {
         let ip: String
     }
 
-    struct MyConnection<R: Decodable>: ResultDecoderConnection, URLRequestConnection, MyAPIConnection, RetryConnection {
+    struct MyConnection<R: Decodable>:
+        ResultDecoderConnection,
+        HTTPRequestConnection,
+        HTTPErrorHandlerConnection,
+        MyAPIConnection,
+        RetryConnection {
+
         typealias ResultType = R
 
         var attempts = 0
@@ -45,12 +51,14 @@ struct MyService {
 
 
     static func request<R: Decodable>(_ connection: MyConnection<R>, completion completionHandler: @escaping (MyConnection<R>, Bool) -> ()) {
-        Pipeline()
+        let pipeline = Pipeline<MyConnection<R>>()
             .append(RetryPlug.self)
             .append(MyAPIPlug.self)
-            .append(URLRequestPlug.self, onFailure: .restartPipeline)
+            .append(HTTPRequestPlug.self, allowRestart: true)
+            .append(HTTPErrorHandlerPlug.self, allowRestart: true)
             .append(ResultDecoderPlug.self)
-            .load(connection, completion: completionHandler)
+
+        pipeline.load(connection, completion: completionHandler)
     }
 }
 

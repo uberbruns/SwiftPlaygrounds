@@ -9,7 +9,7 @@
 import Foundation
 
 
-protocol MyAPIConnection: Connection {
+protocol MyAPIConnection: HTTPRequestConnection {
     var apiKey: String { get }
 }
 
@@ -17,8 +17,10 @@ protocol MyAPIConnection: Connection {
 struct MyAPIPlug<C>: Plug where C: MyAPIConnection {
     typealias ConnectionType = C
 
-    static func evaluate(connection: C, callback: @escaping (C, PlugResult) -> ()) {
-        print("MyAPIPlug: a")
-        callback(connection, .success)
+    static func run(with connection: C, callback: @escaping (C, PlugCommand) -> ()) {
+        var connection = connection
+        connection.request.addValue("application/json", forHTTPHeaderField: "Accept")
+        connection.request.addValue(connection.apiKey, forHTTPHeaderField: "X-MYAPI-KEY")
+        callback(connection, .progress)
     }
 }

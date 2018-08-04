@@ -12,21 +12,16 @@ import Foundation
 protocol Connection { }
 
 
-enum PlugResult {
-    case success
-    case failure
-}
-
-
-enum PlugFailureStrategy {
-    case restartPipeline
-    case stopPipeline
+enum PlugCommand {
+    case progress
+    case restarOrAbort
+    case abort
 }
 
 
 protocol Plug {
     associatedtype ConnectionType
-    static func evaluate(connection: ConnectionType, callback: @escaping (ConnectionType, PlugResult) -> ())
+    static func run(with connection: ConnectionType, callback: @escaping (ConnectionType, PlugCommand) -> ())
 }
 
 
@@ -34,62 +29,62 @@ struct Pipeline<C: Connection> {
 
     typealias Work = (C, @escaping (C, Bool) -> Void) -> Void
     private let work: Work
-    private let root: Bool
+    private let isRoot: Bool
 
     private init(work: @escaping Work) {
-        self.root = false
+        self.isRoot = false
         self.work = work
     }
 
     init() {
-        self.root = true
+        self.isRoot = true
         self.work = { connection, completionHandler in
             completionHandler(connection, true)
         }
     }
 
-    func append<P: Plug>(_ plug: P.Type, onFailure failureStrategy: PlugFailureStrategy = .stopPipeline) -> Pipeline<C> where P.ConnectionType == C {
+    func append<P: Plug>(_ plug: P.Type, allowRestart: Bool = false) -> Pipeline<C> where P.ConnectionType == C {
         // A stack of plugs needs to be executed from the bottom to the top.
         // To achieve that each new pipeline has to execute first the work of its
         // preceeding pipeline.
         let preceedingPipeline = self
 
         // Creating next pipeline.
-        return Pipeline(work: { connectionIn, completionHandler in
+        return Pipeline(work: { connection, completionHandler in
             // To make work repeatable this step is capsuled in a function.
-            func executeWork(_ triedConnection: C) {
+            func runPlug(_ connectionIn: C) {
 
                 // Before the new pipeline can execute its own work (executing the plug)
                 // the work of the preceeding pipeline is executed.
-                preceedingPipeline.work(triedConnection, { connectionOut, isProgressing in
+                preceedingPipeline.work(connectionIn, { connectionOut, isProgressing in
                     // The work of the preceeding pipeline is done. If we stopped progressing
-                    // we directly call the completion handler to go back to the  beginning of
-                    // the stack.
+                    // we directly call this pipelines completion handler to go back to the beginning
+                    //  of the stack.
                     guard isProgressing else {
                         completionHandler(connectionOut, false)
                         return
                     }
 
-                    // After completing the preceding pipelines work the new plug's connection
+                    // After completing the preceeding pipelines work the new plug's connection
                     // evaluation executed.
-                    plug.evaluate(connection: connectionOut, callback: { connectionUpdated, plugResult in
+                    plug.run(with: connectionOut, callback: { updatedConnection, plugResult in
 
                         // Depending on the plug result and configuration, we
                         // - call the completion handler with success `true` or
                         // - call the completion handler with success `false` or
-                        // - or attempt a restart
-                        switch (plugResult, failureStrategy, preceedingPipeline.root) {
-                        case (.success, _, _):
-                            completionHandler(connectionUpdated, true)
-                        case (.failure, .restartPipeline, false):
-                            executeWork(connectionUpdated)
+                        // - attempt a restart of the pipeline.
+                        switch (plugResult, allowRestart, preceedingPipeline.isRoot) {
+                        case (.progress, _, _):
+                            completionHandler(updatedConnection, true)
+                        case (.restarOrAbort, true, false):
+                            runPlug(updatedConnection)
                         default:
-                            completionHandler(connectionUpdated, false)
+                            completionHandler(updatedConnection, false)
                         }
                     })
                 })
             }
-            executeWork(connectionIn)
+            runPlug(connection)
         })
     }
 

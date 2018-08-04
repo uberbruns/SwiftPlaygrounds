@@ -9,7 +9,7 @@
 import Foundation
 
 
-protocol ResultDecoderConnection: URLRequestConnection {
+protocol ResultDecoderConnection: HTTPRequestConnection {
     associatedtype ResultType: Decodable
     var decodedResult: ResultType? { get set }
 }
@@ -18,7 +18,7 @@ protocol ResultDecoderConnection: URLRequestConnection {
 struct ResultDecoderPlug<C>: Plug where C: ResultDecoderConnection {
     typealias ConnectionType = C
 
-    static func evaluate(connection: C, callback: @escaping (C, PlugResult) -> ()) {
+    static func run(with connection: C, callback: @escaping (C, PlugCommand) -> ()) {
         var connection = connection
         let work = {
             guard let data = connection.data else { return }
@@ -31,6 +31,6 @@ struct ResultDecoderPlug<C>: Plug where C: ResultDecoderConnection {
         } else {
             work()
         }
-        callback(connection, .success)
+        callback(connection, .progress)
     }
 }
