@@ -9,13 +9,13 @@
 import Foundation
 
 
-protocol ResultDecoderConnection: HTTPRequestConnection {
+protocol JSONDecoderConnection: HTTPRequestConnection {
     associatedtype ResultType: Decodable
     var decodedResult: ResultType? { get set }
 }
 
 
-struct ResultDecoderPlug<C>: Plug where C: ResultDecoderConnection {
+struct JSONDecoderPlug<C>: Plug where C: JSONDecoderConnection {
     typealias ConnectionType = C
 
     static func run(with connection: C, callback: @escaping (C, PlugCommand) -> ()) {

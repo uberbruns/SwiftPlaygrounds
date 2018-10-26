@@ -16,7 +16,7 @@ struct MyService {
     }
 
     struct MyConnection<R: Decodable>:
-        ResultDecoderConnection,
+        JSONDecoderConnection,
         HTTPRequestConnection,
         HTTPErrorHandlerConnection,
         MyAPIConnection,
@@ -56,7 +56,7 @@ struct MyService {
             .append(MyAPIPlug.self)
             .append(HTTPRequestPlug.self, allowRestart: true)
             .append(HTTPErrorHandlerPlug.self, allowRestart: true)
-            .append(ResultDecoderPlug.self)
+            .append(JSONDecoderPlug.self)
 
         pipeline.load(connection, completion: completionHandler)
     }

@@ -9,10 +9,11 @@
 /* Begin PBXBuildFile section */
 		9B0FF6B9210DB1E100582475 /* Torch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0FF6B8210DB1E100582475 /* Torch.swift */; };
 		9B0FF6BC210DC7BE00582475 /* HTTPRequestPlug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0FF6BB210DC7BE00582475 /* HTTPRequestPlug.swift */; };
-		9B0FF6BE210DC7EF00582475 /* ResultDecoderPlug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0FF6BD210DC7EF00582475 /* ResultDecoderPlug.swift */; };
+		9B0FF6BE210DC7EF00582475 /* JSONDecoderPlug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0FF6BD210DC7EF00582475 /* JSONDecoderPlug.swift */; };
 		9B0FF6C0210DC81700582475 /* MyAPIPlug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0FF6BF210DC81700582475 /* MyAPIPlug.swift */; };
 		9B0FF6C2210E25A600582475 /* RetryPlug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0FF6C1210E25A600582475 /* RetryPlug.swift */; };
 		9B7FDA02210FAB3D0065806A /* HTTPErrorHandlerPlug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B7FDA01210FAB3D0065806A /* HTTPErrorHandlerPlug.swift */; };
+		9BA01D92211635A2001F29B6 /* XMLDecoderPlug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA01D91211635A2001F29B6 /* XMLDecoderPlug.swift */; };
 		9BF747AA210D1637008C848D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF747A9210D1637008C848D /* main.swift */; };
 /* End PBXBuildFile section */
 
@@ -31,10 +32,11 @@
 /* Begin PBXFileReference section */
 		9B0FF6B8210DB1E100582475 /* Torch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Torch.swift; sourceTree = "<group>"; };
 		9B0FF6BB210DC7BE00582475 /* HTTPRequestPlug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPRequestPlug.swift; sourceTree = "<group>"; };
-		9B0FF6BD210DC7EF00582475 /* ResultDecoderPlug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultDecoderPlug.swift; sourceTree = "<group>"; };
+		9B0FF6BD210DC7EF00582475 /* JSONDecoderPlug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONDecoderPlug.swift; sourceTree = "<group>"; };
 		9B0FF6BF210DC81700582475 /* MyAPIPlug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyAPIPlug.swift; sourceTree = "<group>"; };
 		9B0FF6C1210E25A600582475 /* RetryPlug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RetryPlug.swift; sourceTree = "<group>"; };
 		9B7FDA01210FAB3D0065806A /* HTTPErrorHandlerPlug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPErrorHandlerPlug.swift; sourceTree = "<group>"; };
+		9BA01D91211635A2001F29B6 /* XMLDecoderPlug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLDecoderPlug.swift; sourceTree = "<group>"; };
 		9BF747A6210D1637008C848D /* Connections */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Connections; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BF747A9210D1637008C848D /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -64,9 +66,10 @@
 			children = (
 				9B7FDA01210FAB3D0065806A /* HTTPErrorHandlerPlug.swift */,
 				9B0FF6BB210DC7BE00582475 /* HTTPRequestPlug.swift */,
+				9B0FF6BD210DC7EF00582475 /* JSONDecoderPlug.swift */,
 				9B0FF6BF210DC81700582475 /* MyAPIPlug.swift */,
-				9B0FF6BD210DC7EF00582475 /* ResultDecoderPlug.swift */,
 				9B0FF6C1210E25A600582475 /* RetryPlug.swift */,
+				9BA01D91211635A2001F29B6 /* XMLDecoderPlug.swift */,
 			);
 			path = Plugs;
 			sourceTree = "<group>";
@@ -159,7 +162,8 @@
 				9BF747AA210D1637008C848D /* main.swift in Sources */,
 				9B7FDA02210FAB3D0065806A /* HTTPErrorHandlerPlug.swift in Sources */,
 				9B0FF6C2210E25A600582475 /* RetryPlug.swift in Sources */,
-				9B0FF6BE210DC7EF00582475 /* ResultDecoderPlug.swift in Sources */,
+				9BA01D92211635A2001F29B6 /* XMLDecoderPlug.swift in Sources */,
+				9B0FF6BE210DC7EF00582475 /* JSONDecoderPlug.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +289,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/Mac",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
 			};
@@ -294,6 +302,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/Mac",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
 			};
