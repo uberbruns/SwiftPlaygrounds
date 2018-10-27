@@ -18,15 +18,15 @@ class StickyLayoutTests: XCTestCase {
     }
 
     func testOneParameter() {
-        let parameters = [Parameter(element: "A", height: 10, alignment: .leadingEdge)]
+        let parameters = [Parameter(element: "A", height: 10, alignment: .top)]
         let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 10))
     }
 
     func testMultipleParameter() {
         let parameters = [
-            Parameter(element: "A", height: 10, alignment: .leadingEdge),
-            Parameter(element: "B", height: 10, alignment: .leadingEdge)
+            Parameter(element: "A", height: 10, alignment: .top),
+            Parameter(element: "B", height: 10, alignment: .top)
         ]
 
         let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
@@ -36,8 +36,8 @@ class StickyLayoutTests: XCTestCase {
 
     func testOffset() {
         let parameters = [
-            Parameter(element: "A", height: 10, alignment: .leadingEdge),
-            Parameter(element: "B", height: 10, alignment: .leadingEdge)
+            Parameter(element: "A", height: 10, alignment: .top),
+            Parameter(element: "B", height: 10, alignment: .top)
         ]
 
         let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 50)
@@ -45,33 +45,35 @@ class StickyLayoutTests: XCTestCase {
         XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: -40, width: 100, height: 10))
     }
 
-    func testSpaciousAlignment() {
+    func testFlexibleSizeAlignment() {
         let parameters = [
-            Parameter(element: "A", height: 10, alignment: .leadingEdge),
-            Parameter(element: "B", height: 10, alignment: .leadingSpace)
+            Parameter(element: "A", height: 10, alignment: .top),
+            Parameter(element: "B", height: 10, alignment: .flexibleSize)
         ]
 
         let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 10))
-        XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 90, width: 100, height: 10))
+        XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 10, width: 100, height: 90))
     }
 
-    func testSpaciousCenterAlignment() {
+    func testCenterAlignment() {
         let parameters = [
-            Parameter(element: "B", height: 20, alignment: .leadingSpace),
-            Parameter(element: "C", height: 0, alignment: .leadingSpace),
+            Parameter(element: "A", height: 0, alignment: .flexibleSize),
+            Parameter(element: "B", height: 20, alignment: .top),
+            Parameter(element: "C", height: 0, alignment: .flexibleSize),
         ]
 
         let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
-        XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 40, width: 100, height: 20))
-        XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 100, width: 100, height: 0))
+        XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 40))
+        XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 40, width: 100, height: 20))
+        XCTAssertEqual(positionings[2].frame, CGRect(x: 0, y: 60, width: 100, height: 40))
     }
 
     func testTrailingAlignment() {
         let parameters = [
-            Parameter(element: "A", height: 20, alignment: .leadingEdge),
-            Parameter(element: "B", height: 20, alignment: .trailingEdge),
-            Parameter(element: "C", height: 20, alignment: .trailingEdge),
+            Parameter(element: "A", height: 20, alignment: .top),
+            Parameter(element: "B", height: 20, alignment: .bottom),
+            Parameter(element: "C", height: 20, alignment: .bottom),
         ]
 
         let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
@@ -82,29 +84,29 @@ class StickyLayoutTests: XCTestCase {
 
     func testMixedAlignment() {
         let parameters = [
-            Parameter(element: "A", height: 20, alignment: .leadingEdge),
-            Parameter(element: "B", height: 20, alignment: .leadingSpace),
-            Parameter(element: "C", height: 20, alignment: .trailingEdge),
+            Parameter(element: "A", height: 20, alignment: .top),
+            Parameter(element: "B", height: 20, alignment: .flexibleSize),
+            Parameter(element: "C", height: 20, alignment: .bottom),
         ]
 
         let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 20))
-        XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 60, width: 100, height: 20))
+        XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 20, width: 100, height: 60))
         XCTAssertEqual(positionings[2].frame, CGRect(x: 0, y: 80, width: 100, height: 20))
     }
 
     func testMixedCenteringAlignment() {
         let parameters = [
-            Parameter(element: "A", height: 20, alignment: .leadingEdge),
-            Parameter(element: "B1", height: 20, alignment: .leadingSpace),
-            Parameter(element: "B2", height: 0, alignment: .leadingSpace),
-            Parameter(element: "C", height: 20, alignment: .trailingEdge),
+            Parameter(element: "A", height: 20, alignment: .top),
+            Parameter(element: "B1", height: 20, alignment: .flexibleSize),
+            Parameter(element: "B2", height: 0, alignment: .flexibleSize),
+            Parameter(element: "C", height: 20, alignment: .bottom),
         ]
 
         let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 20))
-        XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 40, width: 100, height: 20))
-        XCTAssertEqual(positionings[2].frame, CGRect(x: 0, y: 80, width: 100, height: 0))
+        XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 20, width: 100, height: 40))
+        XCTAssertEqual(positionings[2].frame, CGRect(x: 0, y: 60, width: 100, height: 20))
         XCTAssertEqual(positionings[3].frame, CGRect(x: 0, y: 80, width: 100, height: 20))
     }
 }
