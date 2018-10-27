@@ -6,6 +6,7 @@
 //  Copyright © 2018 bruns.me. All rights reserved.
 //
 
+import Foundation
 import XCTest
 @testable import StickyLayout
 
@@ -18,92 +19,92 @@ class StickyLayoutTests: XCTestCase {
     }
 
     func testOneParameter() {
-        let parameters = [Parameter(element: "A", height: 10, alignment: .top)]
-        let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
+        let items = [FillLayout.Item(for: "A", height: 10, alignment: .top)]
+        let positionings = FillLayout.positionings(for: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 10))
     }
 
     func testMultipleParameter() {
-        let parameters = [
-            Parameter(element: "A", height: 10, alignment: .top),
-            Parameter(element: "B", height: 10, alignment: .top)
+        let items = [
+            FillLayout.Item(for: "A", height: 10, alignment: .top),
+            FillLayout.Item(for: "B", height: 10, alignment: .top)
         ]
 
-        let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
+        let positionings = FillLayout.positionings(for: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 10))
         XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 10, width: 100, height: 10))
     }
 
     func testOffset() {
-        let parameters = [
-            Parameter(element: "A", height: 10, alignment: .top),
-            Parameter(element: "B", height: 10, alignment: .top)
+        let items = [
+            FillLayout.Item(for: "A", height: 10, alignment: .top),
+            FillLayout.Item(for: "B", height: 10, alignment: .top)
         ]
 
-        let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 50)
+        let positionings = FillLayout.positionings(for: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 50)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: -50, width: 100, height: 10))
         XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: -40, width: 100, height: 10))
     }
 
     func testFlexibleSizeAlignment() {
-        let parameters = [
-            Parameter(element: "A", height: 10, alignment: .top),
-            Parameter(element: "B", height: 10, alignment: .flexibleSize)
+        let items = [
+            FillLayout.Item(for: "A", height: 10, alignment: .top),
+            FillLayout.Item(for: "B", height: 10, alignment: .flexible)
         ]
 
-        let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
+        let positionings = FillLayout.positionings(for: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 10))
         XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 10, width: 100, height: 90))
     }
 
     func testCenterAlignment() {
-        let parameters = [
-            Parameter(element: "A", height: 0, alignment: .flexibleSize),
-            Parameter(element: "B", height: 20, alignment: .top),
-            Parameter(element: "C", height: 0, alignment: .flexibleSize),
+        let items = [
+            FillLayout.Item(for: "A", height: 0, alignment: .flexible),
+            FillLayout.Item(for: "B", height: 20, alignment: .top),
+            FillLayout.Item(for: "C", height: 0, alignment: .flexible),
         ]
 
-        let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
+        let positionings = FillLayout.positionings(for: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 40))
         XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 40, width: 100, height: 20))
         XCTAssertEqual(positionings[2].frame, CGRect(x: 0, y: 60, width: 100, height: 40))
     }
 
-    func testTrailingAlignment() {
-        let parameters = [
-            Parameter(element: "A", height: 20, alignment: .top),
-            Parameter(element: "B", height: 20, alignment: .bottom),
-            Parameter(element: "C", height: 20, alignment: .bottom),
+    func testBottomAlignment() {
+        let items = [
+            FillLayout.Item(for: "A", height: 20, alignment: .top),
+            FillLayout.Item(for: "B", height: 20, alignment: .bottom),
+            FillLayout.Item(for: "C", height: 20, alignment: .bottom),
         ]
 
-        let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
+        let positionings = FillLayout.positionings(for: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 20))
         XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 60, width: 100, height: 20))
         XCTAssertEqual(positionings[2].frame, CGRect(x: 0, y: 80, width: 100, height: 20))
     }
 
     func testMixedAlignment() {
-        let parameters = [
-            Parameter(element: "A", height: 20, alignment: .top),
-            Parameter(element: "B", height: 20, alignment: .flexibleSize),
-            Parameter(element: "C", height: 20, alignment: .bottom),
+        let items = [
+            FillLayout.Item(for: "A", height: 20, alignment: .top),
+            FillLayout.Item(for: "B", height: 20, alignment: .flexible),
+            FillLayout.Item(for: "C", height: 20, alignment: .bottom),
         ]
 
-        let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
+        let positionings = FillLayout.positionings(for: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 20))
         XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 20, width: 100, height: 60))
         XCTAssertEqual(positionings[2].frame, CGRect(x: 0, y: 80, width: 100, height: 20))
     }
 
     func testMixedCenteringAlignment() {
-        let parameters = [
-            Parameter(element: "A", height: 20, alignment: .top),
-            Parameter(element: "B1", height: 20, alignment: .flexibleSize),
-            Parameter(element: "B2", height: 0, alignment: .flexibleSize),
-            Parameter(element: "C", height: 20, alignment: .bottom),
+        let items = [
+            FillLayout.Item(for: "A", height: 20, alignment: .top),
+            FillLayout.Item(for: "B1", height: 20, alignment: .flexible),
+            FillLayout.Item(for: "B2", height: 0, alignment: .flexible),
+            FillLayout.Item(for: "C", height: 20, alignment: .bottom),
         ]
 
-        let positionings = Resolver().resolve(parameters: parameters, bounds: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
+        let positionings = FillLayout.positionings(for: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 20))
         XCTAssertEqual(positionings[1].frame, CGRect(x: 0, y: 20, width: 100, height: 40))
         XCTAssertEqual(positionings[2].frame, CGRect(x: 0, y: 60, width: 100, height: 20))

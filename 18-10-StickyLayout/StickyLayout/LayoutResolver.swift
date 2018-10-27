@@ -8,29 +8,41 @@
 
 import UIKit
 
-enum Alignment {
-    case top
-    case flexibleSize
-    case bottom
-}
+enum FillLayout {
 
-struct Parameter {
-    let element: Any
-    let height: CGFloat
-    let alignment: Alignment
-}
+    enum Alignment {
+        case top
+        case flexible
+        case bottom
+    }
 
-struct Positioning {
-    var element: Any
-    var frame: CGRect
-}
+    struct Item<T> {
+        fileprivate let object: T
+        fileprivate let height: CGFloat
+        fileprivate let alignment: Alignment
 
-struct Resolver {
-    func resolve(parameters: [Parameter], bounds: CGRect, offset: CGFloat) -> [Positioning] {
-        var positionings = [Positioning]()
+        init(for object: T, height: CGFloat, alignment: Alignment) {
+            self.object = object
+            self.height = height
+            self.alignment = alignment
+        }
+    }
 
-        var lastTopPositioning = Positioning(element: Void(), frame: CGRect(x: bounds.minX, y: bounds.minY - offset, width: bounds.width, height: 0))
-        var lastBottomPositioning = Positioning(element: Void(), frame: CGRect(x: bounds.minX, y: bounds.maxY, width: bounds.width, height: 0))
+    struct Positioning<T> {
+        fileprivate(set) var object: T
+        fileprivate(set) var frame: CGRect
+
+        init(for object: T, frame: CGRect) {
+            self.object = object
+            self.frame = frame
+        }
+    }
+
+    static func positionings<T>(for items: [Item<T>], inside bounds: CGRect, offset: CGFloat) -> [Positioning<T>] {
+        var positionings = [Positioning<T>]()
+
+        var lastTopFrame = CGRect(x: bounds.minX, y: bounds.minY - offset, width: bounds.width, height: 0)
+        var lastBottomFrame = CGRect(x: bounds.minX, y: bounds.maxY, width: bounds.width, height: 0)
 
         var combinedHeight = CGFloat(0)
         var combinedBottomHeight = CGFloat(0)
@@ -39,28 +51,28 @@ struct Resolver {
         var flexiblePositioningCount = CGFloat(0)
         var bottomPositionings = [Int]()
 
-        for (index, parameter) in parameters.enumerated() {
-            let positioning: Positioning
-            let height = parameter.height
+        for (index, item) in items.enumerated() {
+            let positioning: Positioning<T>
+            let height = item.height
 
-            switch parameter.alignment {
-            case .top, .flexibleSize:
-                let y = lastTopPositioning.frame.maxY
+            switch item.alignment {
+            case .top, .flexible:
+                let y = lastTopFrame.maxY
                 let frame = CGRect(x: bounds.minX, y: y, width: bounds.width, height: height)
-                positioning = Positioning(element: parameter.element, frame: frame)
-                lastTopPositioning = positioning
-                if parameter.alignment == .flexibleSize {
+                positioning = Positioning(for: item.object, frame: frame)
+                lastTopFrame = frame
+                if item.alignment == .flexible {
                     flexiblePositioningCount += 1
                     if firstFlexiblePositioning == nil {
                         firstFlexiblePositioning = index
                     }
                 }
             case .bottom:
-                let y = lastBottomPositioning.frame.maxY
+                let y = lastBottomFrame.maxY
                 let frame = CGRect(x: bounds.minX, y: y, width: bounds.width, height: height)
-                positioning = Positioning(element: parameter.element, frame: frame)
+                positioning = Positioning(for: item.object, frame: frame)
                 combinedBottomHeight += height
-                lastBottomPositioning = positioning
+                lastBottomFrame = frame
                 bottomPositionings.append(index)
             }
 
@@ -68,16 +80,17 @@ struct Resolver {
             combinedHeight += height
         }
 
+        // Change size and positions due flexible alignments
         if let firstFlexiblePositioning = firstFlexiblePositioning {
             let freeSpace = bounds.height - combinedHeight
             if freeSpace > 0 {
                 let extraHeightPerItem = freeSpace / flexiblePositioningCount
                 var additionalY = CGFloat(0)
-                for index in firstFlexiblePositioning..<parameters.endIndex {
-                    let parameter = parameters[index]
+                for index in firstFlexiblePositioning..<items.endIndex {
+                    let item = items[index]
 
                     // Skip bottom alignments
-                    if parameter.alignment == .bottom {
+                    if item.alignment == .bottom {
                         continue
                     }
 
@@ -85,7 +98,7 @@ struct Resolver {
                     positionings[index].frame.origin.y += additionalY
 
                     // Flexible alignments gain extra height
-                    if parameter.alignment == .flexibleSize {
+                    if item.alignment == .flexible {
                         positionings[index].frame.size.height += extraHeightPerItem
                         additionalY += extraHeightPerItem
                     }
@@ -93,6 +106,7 @@ struct Resolver {
             }
         }
 
+        // Move bottom items up
         for index in bottomPositionings {
             positionings[index].frame.origin.y -= combinedBottomHeight
         }
