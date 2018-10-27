@@ -21,7 +21,7 @@ enum FillLayout {
         fileprivate let height: CGFloat
         fileprivate let alignment: Alignment
 
-        init(for object: T, height: CGFloat, alignment: Alignment) {
+        init(with object: T, height: CGFloat, alignment: Alignment) {
             self.object = object
             self.height = height
             self.alignment = alignment
@@ -29,16 +29,23 @@ enum FillLayout {
     }
 
     struct Positioning<T> {
-        fileprivate(set) var object: T
+        let object: T
+        let alignment: Alignment
         fileprivate(set) var frame: CGRect
 
-        init(for object: T, frame: CGRect) {
+        init(for object: T, frame: CGRect, alignment: Alignment) {
             self.object = object
             self.frame = frame
+            self.alignment = alignment
         }
     }
 
-    static func positionings<T>(for items: [Item<T>], inside bounds: CGRect, offset: CGFloat) -> [Positioning<T>] {
+    struct Result<T> {
+        let positionings: [Positioning<T>]
+        let contentSize: CGSize
+    }
+
+    static func solve<S:BidirectionalCollection, T>(with items: S, inside bounds: CGRect, offset: CGFloat) -> Result<T> where S.Element == Item<T>, S.Index == Int {
         var positionings = [Positioning<T>]()
 
         var lastTopFrame = CGRect(x: bounds.minX, y: bounds.minY - offset, width: bounds.width, height: 0)
@@ -59,7 +66,7 @@ enum FillLayout {
             case .top, .flexible:
                 let y = lastTopFrame.maxY
                 let frame = CGRect(x: bounds.minX, y: y, width: bounds.width, height: height)
-                positioning = Positioning(for: item.object, frame: frame)
+                positioning = Positioning(for: item.object, frame: frame, alignment: item.alignment)
                 lastTopFrame = frame
                 if item.alignment == .flexible {
                     flexiblePositioningCount += 1
@@ -70,7 +77,7 @@ enum FillLayout {
             case .bottom:
                 let y = lastBottomFrame.maxY
                 let frame = CGRect(x: bounds.minX, y: y, width: bounds.width, height: height)
-                positioning = Positioning(for: item.object, frame: frame)
+                positioning = Positioning(for: item.object, frame: frame, alignment: item.alignment)
                 combinedBottomHeight += height
                 lastBottomFrame = frame
                 bottomPositionings.append(index)
@@ -81,6 +88,7 @@ enum FillLayout {
         }
 
         // Change size and positions due flexible alignments
+        let contentSize: CGSize
         if let firstFlexiblePositioning = firstFlexiblePositioning {
             let freeSpace = bounds.height - combinedHeight
             if freeSpace > 0 {
@@ -104,6 +112,9 @@ enum FillLayout {
                     }
                 }
             }
+            contentSize = CGSize(width: bounds.width, height: max(bounds.height, combinedHeight))
+        } else {
+            contentSize = CGSize(width: bounds.width, height: combinedHeight)
         }
 
         // Move bottom items up
@@ -111,6 +122,6 @@ enum FillLayout {
             positionings[index].frame.origin.y -= combinedBottomHeight
         }
 
-        return positionings
+        return Result(positionings: positionings, contentSize: contentSize)
     }
 }
