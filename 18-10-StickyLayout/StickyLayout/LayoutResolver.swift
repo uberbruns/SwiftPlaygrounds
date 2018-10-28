@@ -54,8 +54,8 @@ enum FillLayout {
 
         let x = bounds.minX + safeArea.left
         let width = bounds.width - safeArea.left - safeArea.right
-        var lastTopFrame = CGRect(x: x, y: bounds.minY - offset, width: width, height: 0)
-        var lastBottomFrame = CGRect(x: x, y: bounds.maxY - safeArea.bottom, width: width, height: 0)
+        var lastTopFrame = CGRect(x: x, y: bounds.minY, width: width, height: 0)
+        var lastBottomFrame = CGRect(x: x, y: bounds.maxY - safeArea.bottom + offset, width: width, height: 0)
 
         var combinedHeight = CGFloat(0)
         var combinedBottomHeight = CGFloat(0)
@@ -127,7 +127,6 @@ enum FillLayout {
         // Move bottom items up
         for index in bottomPositionings {
             positionings[index].frame.origin.y -= combinedBottomHeight
-            print("\(index): \(positionings[index].frame.origin.y)")
         }
 
         return Result(positionings: positionings,

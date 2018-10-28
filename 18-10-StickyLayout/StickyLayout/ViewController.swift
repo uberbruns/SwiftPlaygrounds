@@ -50,7 +50,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
         }
 
         // Solve layout
-        let bounds = collectionView.bounds
+        let bounds = CGRect(x: 0, y: 0, width: collectionView.bounds.width, height: collectionView.bounds.height)
         let result = FillLayout.solve(with: items, inside: bounds, offset: collectionView.contentOffset.y, safeArea: collectionView.safeAreaInsets)
         cachedContentSize = result.contentSize
 
@@ -69,12 +69,14 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
         // Configure collection view
         collectionView.scrollIndicatorInsets.bottom = result.stickyBottomHeight
+
+        dump(result)
     }
 
-    override func prepare(forCollectionViewUpdates updateItems: [UICollectionViewUpdateItem]) {
-        invalidateCachedAttributes()
-        super.prepare(forCollectionViewUpdates: updateItems)
-    }
+//    override func prepare(forCollectionViewUpdates updateItems: [UICollectionViewUpdateItem]) {
+//        invalidateCachedAttributes()
+//        super.prepare(forCollectionViewUpdates: updateItems)
+//    }
 
 
     override var collectionViewContentSize: CGSize {
@@ -96,7 +98,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
         }
     }
 
-    private func invalidateCachedAttributes() {
+    func invalidateCachedAttributes() {
         cachedLayoutAttributes.removeAll(keepingCapacity: true)
     }
 }
@@ -129,12 +131,11 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         collectionView.register(TextCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
 
         NSLayoutConstraint.activate([
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            ])
-
+        ])
     }
 
     override func viewSafeAreaInsetsDidChange() {
@@ -155,13 +156,13 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
     func collectionView(_ collectionView: UICollectionView, alignmentForItemAt indexPath: IndexPath) -> FillLayout.Alignment {
         switch indexPath.row {
         case 0:
-            return .stickyBottom
-        case 1:
-            return .stickyBottom
-        case 2:
             return .flexible
+        case i-3:
+            return .flexible
+        case i-2:
+            return .stickyBottom
         case i-1:
-            return .flexible
+            return .stickyBottom
         default:
             return .default
         }
@@ -178,27 +179,28 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         default:
             break
         }
-
+        
         switch indexPath.row {
         case 0:
-            cell.contentView.backgroundColor = .darkGray
-        case 1:
-            cell.contentView.backgroundColor = .black
-        case 2:
+            cell.contentView.backgroundColor = .white
+        case i-3:
+            cell.contentView.backgroundColor = .white
+        case i-2:
             cell.contentView.backgroundColor = .lightGray
         case i-1:
-            cell.contentView.backgroundColor = .lightGray
+            cell.contentView.backgroundColor = .darkGray
         default:
             cell.contentView.backgroundColor = .yellow
         }
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if indexPath.row == 0 {
+        if indexPath.row == i-1 {
             i -= 1
         } else {
             i += 1
         }
+        layout.invalidateCachedAttributes()
         collectionView.reloadData()
     }
 }

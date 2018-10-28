@@ -1,0 +1,150 @@
+▿ StickyLayout.FillLayout.Result<Foundation.IndexPath>
+  ▿ positionings: 12 elements
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 0
+      - alignment: StickyLayout.FillLayout.Alignment.flexible
+      ▿ frame: (0.0, 0.0, 375.0, 77.0)
+        ▿ origin: (0.0, 0.0)
+          - x: 0.0
+          - y: 0.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 1
+      - alignment: StickyLayout.FillLayout.Alignment.default
+      ▿ frame: (0.0, 77.0, 375.0, 77.0)
+        ▿ origin: (0.0, 77.0)
+          - x: 0.0
+          - y: 77.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 2
+      - alignment: StickyLayout.FillLayout.Alignment.default
+      ▿ frame: (0.0, 154.0, 375.0, 77.0)
+        ▿ origin: (0.0, 154.0)
+          - x: 0.0
+          - y: 154.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 3
+      - alignment: StickyLayout.FillLayout.Alignment.default
+      ▿ frame: (0.0, 231.0, 375.0, 77.0)
+        ▿ origin: (0.0, 231.0)
+          - x: 0.0
+          - y: 231.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 4
+      - alignment: StickyLayout.FillLayout.Alignment.default
+      ▿ frame: (0.0, 308.0, 375.0, 77.0)
+        ▿ origin: (0.0, 308.0)
+          - x: 0.0
+          - y: 308.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 5
+      - alignment: StickyLayout.FillLayout.Alignment.default
+      ▿ frame: (0.0, 385.0, 375.0, 77.0)
+        ▿ origin: (0.0, 385.0)
+          - x: 0.0
+          - y: 385.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 6
+      - alignment: StickyLayout.FillLayout.Alignment.default
+      ▿ frame: (0.0, 462.0, 375.0, 77.0)
+        ▿ origin: (0.0, 462.0)
+          - x: 0.0
+          - y: 462.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 7
+      - alignment: StickyLayout.FillLayout.Alignment.default
+      ▿ frame: (0.0, 539.0, 375.0, 77.0)
+        ▿ origin: (0.0, 539.0)
+          - x: 0.0
+          - y: 539.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 8
+      - alignment: StickyLayout.FillLayout.Alignment.default
+      ▿ frame: (0.0, 616.0, 375.0, 77.0)
+        ▿ origin: (0.0, 616.0)
+          - x: 0.0
+          - y: 616.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 9
+      - alignment: StickyLayout.FillLayout.Alignment.flexible
+      ▿ frame: (0.0, 693.0, 375.0, 77.0)
+        ▿ origin: (0.0, 693.0)
+          - x: 0.0
+          - y: 693.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 10
+      - alignment: StickyLayout.FillLayout.Alignment.stickyBottom
+      ▿ frame: (0.0, 770.0, 375.0, 77.0)
+        ▿ origin: (0.0, 770.0)
+          - x: 0.0
+          - y: 770.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+    ▿ StickyLayout.FillLayout.Positioning<Foundation.IndexPath>
+      ▿ object: 2 elements
+        - 0
+        - 11
+      - alignment: StickyLayout.FillLayout.Alignment.stickyBottom
+      ▿ frame: (0.0, 847.0, 375.0, 77.0)
+        ▿ origin: (0.0, 847.0)
+          - x: 0.0
+          - y: 847.0
+        ▿ size: (375.0, 77.0)
+          - width: 375.0
+          - height: 77.0
+  ▿ contentSize: (375.0, 924.0)
+    - width: 375.0
+    - height: 924.0
+  - stickyBottomHeight: 154.0
