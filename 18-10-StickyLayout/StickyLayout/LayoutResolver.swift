@@ -43,13 +43,19 @@ enum FillLayout {
     struct Result<T> {
         let positionings: [Positioning<T>]
         let contentSize: CGSize
+        let stickyBottomHeight: CGFloat
     }
 
-    static func solve<S:BidirectionalCollection, T>(with items: S, inside bounds: CGRect, offset: CGFloat, safeArea: UIEdgeInsets = .zero) -> Result<T> where S.Element == Item<T>, S.Index == Int {
+    static func solve<S:BidirectionalCollection, T>(with items: S,
+                                                    inside bounds: CGRect,
+                                                    offset: CGFloat,
+                                                    safeArea: UIEdgeInsets = .zero) -> Result<T> where S.Element == Item<T>, S.Index == Int {
         var positionings = [Positioning<T>]()
 
-        var lastTopFrame = CGRect(x: bounds.minX, y: bounds.minY - offset, width: bounds.width, height: 0)
-        var lastBottomFrame = CGRect(x: bounds.minX, y: bounds.maxY, width: bounds.width, height: 0)
+        let x = bounds.minX + safeArea.left
+        let width = bounds.width - safeArea.left - safeArea.right
+        var lastTopFrame = CGRect(x: x, y: bounds.minY - offset, width: width, height: 0)
+        var lastBottomFrame = CGRect(x: x, y: bounds.maxY - safeArea.bottom, width: width, height: 0)
 
         var combinedHeight = CGFloat(0)
         var combinedBottomHeight = CGFloat(0)
@@ -65,7 +71,7 @@ enum FillLayout {
             switch item.alignment {
             case .default, .flexible:
                 let y = lastTopFrame.maxY
-                let frame = CGRect(x: bounds.minX, y: y, width: bounds.width, height: height)
+                let frame = CGRect(x: x, y: y, width: width, height: height)
                 positioning = Positioning(for: item.object, frame: frame, alignment: item.alignment)
                 lastTopFrame = frame
                 if item.alignment == .flexible {
@@ -76,7 +82,7 @@ enum FillLayout {
                 }
             case .stickyBottom:
                 let y = lastBottomFrame.maxY
-                let frame = CGRect(x: bounds.minX, y: y, width: bounds.width, height: height)
+                let frame = CGRect(x: x, y: y, width: width, height: height)
                 positioning = Positioning(for: item.object, frame: frame, alignment: item.alignment)
                 combinedBottomHeight += height
                 lastBottomFrame = frame
@@ -113,16 +119,19 @@ enum FillLayout {
                     }
                 }
             }
-            contentSize = CGSize(width: bounds.width, height: max(availableHeight, combinedHeight))
+            contentSize = CGSize(width: width, height: max(availableHeight, combinedHeight))
         } else {
-            contentSize = CGSize(width: bounds.width, height: combinedHeight)
+            contentSize = CGSize(width: width, height: combinedHeight)
         }
 
         // Move bottom items up
         for index in bottomPositionings {
             positionings[index].frame.origin.y -= combinedBottomHeight
+            print("\(index): \(positionings[index].frame.origin.y)")
         }
 
-        return Result(positionings: positionings, contentSize: contentSize)
+        return Result(positionings: positionings,
+                      contentSize: contentSize,
+                      stickyBottomHeight: combinedBottomHeight)
     }
 }

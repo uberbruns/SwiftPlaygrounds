@@ -40,10 +40,10 @@ class CollectionViewFillLayout: UICollectionViewLayout {
                 let cellType = delegate.collectionView(collectionView, cellTypeForItemAt: indexPath)
                 let cell = cellType.init(frame: CGRect.zero)
                 delegate.collectionView(collectionView, configureCell: cell, forItemAt: indexPath)
-                let maximumCellSize = CGSize(width: collectionView.bounds.width, height: CGFloat.greatestFiniteMagnitude)
+                let maximumCellSize = CGSize(width: collectionView.bounds.width, height: .greatestFiniteMagnitude)
                 cellSize = cell.contentView.systemLayoutSizeFitting(maximumCellSize,
-                                                                        withHorizontalFittingPriority: .required,
-                                                                        verticalFittingPriority: UILayoutPriority(1))
+                                                                    withHorizontalFittingPriority: .required,
+                                                                    verticalFittingPriority: UILayoutPriority(1))
             }
 
             return FillLayout.Item(with: indexPath, height: cellSize.height, alignment: alignment)
@@ -66,6 +66,9 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
         // Cache
         cachedBounds = collectionView.bounds
+
+        // Configure collection view
+        collectionView.scrollIndicatorInsets.bottom = result.stickyBottomHeight
     }
 
     override func prepare(forCollectionViewUpdates updateItems: [UICollectionViewUpdateItem]) {
@@ -129,8 +132,8 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-        ])
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            ])
 
     }
 
@@ -151,12 +154,14 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
 
     func collectionView(_ collectionView: UICollectionView, alignmentForItemAt indexPath: IndexPath) -> FillLayout.Alignment {
         switch indexPath.row {
+        case 0:
+            return .stickyBottom
+        case 1:
+            return .stickyBottom
         case 2:
             return .flexible
-        case 3:
-            return .stickyBottom
-        case 4:
-            return .stickyBottom
+        case i-1:
+            return .flexible
         default:
             return .default
         }
@@ -174,19 +179,17 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
             break
         }
 
-        switch indexPath.row % 5 {
+        switch indexPath.row {
         case 0:
-            cell.backgroundColor = .blue
+            cell.contentView.backgroundColor = .darkGray
         case 1:
-            cell.backgroundColor = .yellow
+            cell.contentView.backgroundColor = .black
         case 2:
-            cell.backgroundColor = .purple
-        case 3:
-            cell.backgroundColor = .orange
-        case 4:
-            cell.backgroundColor = .green
+            cell.contentView.backgroundColor = .lightGray
+        case i-1:
+            cell.contentView.backgroundColor = .lightGray
         default:
-            cell.backgroundColor = .black
+            cell.contentView.backgroundColor = .yellow
         }
     }
 
@@ -227,6 +230,7 @@ class TextCollectionViewCell: UICollectionViewCell {
             titleLabel.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
             titleLabel.topAnchor.constraint(equalTo: contentView.layoutMarginsGuide.topAnchor),
             titleLabel.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor)
-        ])
+            ])
     }
 }
+
