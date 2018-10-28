@@ -11,9 +11,9 @@ import UIKit
 enum FillLayout {
 
     enum Alignment {
-        case top
+        case `default`
         case flexible
-        case bottom
+        case stickyBottom
     }
 
     struct Item<T> {
@@ -45,7 +45,7 @@ enum FillLayout {
         let contentSize: CGSize
     }
 
-    static func solve<S:BidirectionalCollection, T>(with items: S, inside bounds: CGRect, offset: CGFloat) -> Result<T> where S.Element == Item<T>, S.Index == Int {
+    static func solve<S:BidirectionalCollection, T>(with items: S, inside bounds: CGRect, offset: CGFloat, safeArea: UIEdgeInsets = .zero) -> Result<T> where S.Element == Item<T>, S.Index == Int {
         var positionings = [Positioning<T>]()
 
         var lastTopFrame = CGRect(x: bounds.minX, y: bounds.minY - offset, width: bounds.width, height: 0)
@@ -63,7 +63,7 @@ enum FillLayout {
             let height = item.height
 
             switch item.alignment {
-            case .top, .flexible:
+            case .default, .flexible:
                 let y = lastTopFrame.maxY
                 let frame = CGRect(x: bounds.minX, y: y, width: bounds.width, height: height)
                 positioning = Positioning(for: item.object, frame: frame, alignment: item.alignment)
@@ -74,7 +74,7 @@ enum FillLayout {
                         firstFlexiblePositioning = index
                     }
                 }
-            case .bottom:
+            case .stickyBottom:
                 let y = lastBottomFrame.maxY
                 let frame = CGRect(x: bounds.minX, y: y, width: bounds.width, height: height)
                 positioning = Positioning(for: item.object, frame: frame, alignment: item.alignment)
@@ -90,7 +90,8 @@ enum FillLayout {
         // Change size and positions due flexible alignments
         let contentSize: CGSize
         if let firstFlexiblePositioning = firstFlexiblePositioning {
-            let freeSpace = bounds.height - combinedHeight
+            let availableHeight = bounds.height - safeArea.top - safeArea.bottom
+            let freeSpace = availableHeight - combinedHeight
             if freeSpace > 0 {
                 let extraHeightPerItem = freeSpace / flexiblePositioningCount
                 var additionalY = CGFloat(0)
@@ -98,7 +99,7 @@ enum FillLayout {
                     let item = items[index]
 
                     // Skip bottom alignments
-                    if item.alignment == .bottom {
+                    if item.alignment == .stickyBottom {
                         continue
                     }
 
@@ -112,7 +113,7 @@ enum FillLayout {
                     }
                 }
             }
-            contentSize = CGSize(width: bounds.width, height: max(bounds.height, combinedHeight))
+            contentSize = CGSize(width: bounds.width, height: max(availableHeight, combinedHeight))
         } else {
             contentSize = CGSize(width: bounds.width, height: combinedHeight)
         }

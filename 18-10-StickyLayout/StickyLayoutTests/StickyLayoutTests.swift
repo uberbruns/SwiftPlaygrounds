@@ -19,15 +19,15 @@ class StickyLayoutTests: XCTestCase {
     }
 
     func testOneParameter() {
-        let items = [FillLayout.Item(with: "A", height: 10, alignment: .top)]
+        let items = [FillLayout.Item(with: "A", height: 10, alignment: .default)]
         let result = FillLayout.solve(with: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
         XCTAssertEqual(result.positionings[0].frame, CGRect(x: 0, y: 0, width: 100, height: 10))
     }
 
     func testMultipleParameter() {
         let items = [
-            FillLayout.Item(with: "A", height: 10, alignment: .top),
-            FillLayout.Item(with: "B", height: 10, alignment: .top)
+            FillLayout.Item(with: "A", height: 10, alignment: .default),
+            FillLayout.Item(with: "B", height: 10, alignment: .default)
         ]
 
         let result = FillLayout.solve(with: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
@@ -37,8 +37,8 @@ class StickyLayoutTests: XCTestCase {
 
     func testOffset() {
         let items = [
-            FillLayout.Item(with: "A", height: 10, alignment: .top),
-            FillLayout.Item(with: "B", height: 10, alignment: .top)
+            FillLayout.Item(with: "A", height: 10, alignment: .default),
+            FillLayout.Item(with: "B", height: 10, alignment: .default)
         ]
 
         let result = FillLayout.solve(with: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 50)
@@ -48,7 +48,7 @@ class StickyLayoutTests: XCTestCase {
 
     func testFlexibleSizeAlignment() {
         let items = [
-            FillLayout.Item(with: "A", height: 10, alignment: .top),
+            FillLayout.Item(with: "A", height: 10, alignment: .default),
             FillLayout.Item(with: "B", height: 10, alignment: .flexible)
         ]
 
@@ -60,7 +60,7 @@ class StickyLayoutTests: XCTestCase {
     func testCenterAlignment() {
         let items = [
             FillLayout.Item(with: "A", height: 0, alignment: .flexible),
-            FillLayout.Item(with: "B", height: 20, alignment: .top),
+            FillLayout.Item(with: "B", height: 20, alignment: .default),
             FillLayout.Item(with: "C", height: 0, alignment: .flexible),
         ]
 
@@ -72,9 +72,9 @@ class StickyLayoutTests: XCTestCase {
 
     func testBottomAlignment() {
         let items = [
-            FillLayout.Item(with: "A", height: 20, alignment: .top),
-            FillLayout.Item(with: "B", height: 20, alignment: .bottom),
-            FillLayout.Item(with: "C", height: 20, alignment: .bottom),
+            FillLayout.Item(with: "A", height: 20, alignment: .default),
+            FillLayout.Item(with: "B", height: 20, alignment: .stickyBottom),
+            FillLayout.Item(with: "C", height: 20, alignment: .stickyBottom),
         ]
 
         let result = FillLayout.solve(with: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
@@ -85,9 +85,9 @@ class StickyLayoutTests: XCTestCase {
 
     func testMixedAlignment() {
         let items = [
-            FillLayout.Item(with: "A", height: 20, alignment: .top),
+            FillLayout.Item(with: "A", height: 20, alignment: .default),
             FillLayout.Item(with: "B", height: 20, alignment: .flexible),
-            FillLayout.Item(with: "C", height: 20, alignment: .bottom),
+            FillLayout.Item(with: "C", height: 20, alignment: .stickyBottom),
         ]
 
         let result = FillLayout.solve(with: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
@@ -98,10 +98,10 @@ class StickyLayoutTests: XCTestCase {
 
     func testMixedCenteringAlignment() {
         let items = [
-            FillLayout.Item(with: "A", height: 20, alignment: .top),
+            FillLayout.Item(with: "A", height: 20, alignment: .default),
             FillLayout.Item(with: "B1", height: 20, alignment: .flexible),
             FillLayout.Item(with: "B2", height: 0, alignment: .flexible),
-            FillLayout.Item(with: "C", height: 20, alignment: .bottom),
+            FillLayout.Item(with: "C", height: 20, alignment: .stickyBottom),
         ]
 
         let result = FillLayout.solve(with: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
@@ -118,7 +118,7 @@ class StickyLayoutTests: XCTestCase {
 
         let items = numbers.lazy.map { (number: Int) -> FillLayout.Item<Int> in
             iterations += 1
-            return FillLayout.Item(with: number, height: 20, alignment: .top)
+            return FillLayout.Item(with: number, height: 20, alignment: .default)
         }
 
         XCTAssertEqual(iterations, 0)
