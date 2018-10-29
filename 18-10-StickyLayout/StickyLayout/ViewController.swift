@@ -9,114 +9,12 @@
 import UIKit
 
 
-class CollectionViewFillLayout: UICollectionViewLayout {
-
-    private var cachedLayoutAttributes = [IndexPath: UICollectionViewLayoutAttributes]()
-    private var cachedContentSize = CGSize.zero
-    private var cachedBounds = CGRect.zero
-
-    override func prepare() {
-        guard let collectionView = collectionView,
-            let delegate = collectionView.delegate as? CollectionViewFillLayoutDelegate else { return }
-
-        if collectionView.bounds.size != cachedBounds.size {
-            invalidateCachedAttributes()
-        }
-
-        let numberOfItems = collectionView.numberOfItems(inSection: 0)
-        let itemRange = 0..<numberOfItems
-        let items = itemRange.lazy.map { (number: Int) -> FillLayout.Item<IndexPath> in
-            let indexPath = IndexPath(item: number, section: 0)
-
-            // Item Alignment
-            let alignment = delegate.collectionView(collectionView, alignmentForItemAt: indexPath)
-
-            // Item Size
-            let cellSize: CGSize
-            if let itemAttributes = self.cachedLayoutAttributes[indexPath] {
-                cellSize = itemAttributes.frame.size
-            } else {
-                // Getting cell size be configuring
-                let cellType = delegate.collectionView(collectionView, cellTypeForItemAt: indexPath)
-                let cell = cellType.init(frame: CGRect.zero)
-                delegate.collectionView(collectionView, configureCell: cell, forItemAt: indexPath)
-                let maximumCellSize = CGSize(width: collectionView.bounds.width, height: .greatestFiniteMagnitude)
-                cellSize = cell.contentView.systemLayoutSizeFitting(maximumCellSize,
-                                                                    withHorizontalFittingPriority: .required,
-                                                                    verticalFittingPriority: UILayoutPriority(1))
-            }
-
-            return FillLayout.Item(with: indexPath, height: cellSize.height, alignment: alignment)
-        }
-
-        // Solve layout
-        let bounds = CGRect(x: 0, y: 0, width: collectionView.bounds.width, height: collectionView.bounds.height)
-        let result = FillLayout.solve(with: items, inside: bounds, offset: collectionView.contentOffset.y, safeArea: collectionView.safeAreaInsets)
-        cachedContentSize = result.contentSize
-
-        // Build layout attributes
-        invalidateCachedAttributes()
-        for positioning in result.positionings {
-            let indexPath = positioning.object
-            let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-            itemAttributes.frame = positioning.frame
-            itemAttributes.zIndex = positioning.alignment == .stickyBottom ? 1 : 0
-            cachedLayoutAttributes[indexPath] = itemAttributes
-        }
-
-        // Cache
-        cachedBounds = collectionView.bounds
-
-        // Configure collection view
-        collectionView.scrollIndicatorInsets.bottom = result.stickyBottomHeight
-
-        dump(result)
-    }
-
-//    override func prepare(forCollectionViewUpdates updateItems: [UICollectionViewUpdateItem]) {
-//        invalidateCachedAttributes()
-//        super.prepare(forCollectionViewUpdates: updateItems)
-//    }
-
-
-    override var collectionViewContentSize: CGSize {
-        return cachedContentSize
-    }
-
-    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        return cachedLayoutAttributes.values.filter { $0.frame.intersects(rect) }
-    }
-
-    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-        return true
-    }
-
-    override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
-        super.invalidateLayout(with: context)
-        if context.invalidateEverything {
-            invalidateCachedAttributes()
-        }
-    }
-
-    func invalidateCachedAttributes() {
-        cachedLayoutAttributes.removeAll(keepingCapacity: true)
-    }
-}
-
-
-protocol CollectionViewFillLayoutDelegate: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, cellTypeForItemAt indexPath: IndexPath) -> UICollectionViewCell.Type
-    func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt indexPath: IndexPath)
-    func collectionView(_ collectionView: UICollectionView, alignmentForItemAt indexPath: IndexPath) -> FillLayout.Alignment
-}
-
-
 class ViewController: UIViewController, UICollectionViewDataSource, CollectionViewFillLayoutDelegate {
 
     private let layout = CollectionViewFillLayout()
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
 
-    var i = 5
+    var numberOfItems = 5
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -135,7 +33,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
             collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-        ])
+            ])
     }
 
     override func viewSafeAreaInsetsDidChange() {
@@ -144,7 +42,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
     }
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return i
+        return numberOfItems
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -153,15 +51,15 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         return cell
     }
 
-    func collectionView(_ collectionView: UICollectionView, alignmentForItemAt indexPath: IndexPath) -> FillLayout.Alignment {
+    func collectionView(_ collectionView: UICollectionView, alignmentForItemAt indexPath: IndexPath) -> CollectionViewFillLayout.Alignment {
         switch indexPath.row {
         case 0:
             return .flexible
-        case i-3:
+        case numberOfItems-3:
             return .flexible
-        case i-2:
+        case numberOfItems-2:
             return .stickyBottom
-        case i-1:
+        case numberOfItems-1:
             return .stickyBottom
         default:
             return .default
@@ -179,15 +77,15 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         default:
             break
         }
-        
+
         switch indexPath.row {
         case 0:
             cell.contentView.backgroundColor = .white
-        case i-3:
+        case numberOfItems-3:
             cell.contentView.backgroundColor = .white
-        case i-2:
+        case numberOfItems-2:
             cell.contentView.backgroundColor = .lightGray
-        case i-1:
+        case numberOfItems-1:
             cell.contentView.backgroundColor = .darkGray
         default:
             cell.contentView.backgroundColor = .yellow
@@ -195,12 +93,11 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if indexPath.row == i-1 {
-            i -= 1
+        if indexPath.row == numberOfItems-1 {
+            numberOfItems -= 1
         } else {
-            i += 1
+            numberOfItems += 1
         }
-        layout.invalidateCachedAttributes()
         collectionView.reloadData()
     }
 }
@@ -235,4 +132,3 @@ class TextCollectionViewCell: UICollectionViewCell {
             ])
     }
 }
-
