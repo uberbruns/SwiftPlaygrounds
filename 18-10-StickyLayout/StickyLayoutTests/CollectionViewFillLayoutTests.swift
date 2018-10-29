@@ -10,7 +10,7 @@ import Foundation
 import XCTest
 @testable import StickyLayout
 
-class StickyLayoutTests: XCTestCase {
+class CollectionViewFillLayoutTests: XCTestCase {
 
     override func setUp() {
     }

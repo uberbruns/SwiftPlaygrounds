@@ -14,7 +14,7 @@
 		9BD4E3F12183A074002FB3C4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9BD4E3EF2183A074002FB3C4 /* Main.storyboard */; };
 		9BD4E3F32183A075002FB3C4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9BD4E3F22183A075002FB3C4 /* Assets.xcassets */; };
 		9BD4E3F62183A075002FB3C4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9BD4E3F42183A075002FB3C4 /* LaunchScreen.storyboard */; };
-		9BD4E4012183A076002FB3C4 /* StickyLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD4E4002183A076002FB3C4 /* StickyLayoutTests.swift */; };
+		9BD4E4012183A076002FB3C4 /* CollectionViewFillLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD4E4002183A076002FB3C4 /* CollectionViewFillLayoutTests.swift */; };
 		9BD4E40C2183A089002FB3C4 /* CollectionViewFillLayout+Solver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD4E40B2183A089002FB3C4 /* CollectionViewFillLayout+Solver.swift */; };
 /* End PBXBuildFile section */
 
@@ -39,7 +39,7 @@
 		9BD4E3F52183A075002FB3C4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9BD4E3F72183A075002FB3C4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9BD4E3FC2183A076002FB3C4 /* StickyLayoutTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StickyLayoutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		9BD4E4002183A076002FB3C4 /* StickyLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyLayoutTests.swift; sourceTree = "<group>"; };
+		9BD4E4002183A076002FB3C4 /* CollectionViewFillLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewFillLayoutTests.swift; sourceTree = "<group>"; };
 		9BD4E4022183A076002FB3C4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9BD4E40B2183A089002FB3C4 /* CollectionViewFillLayout+Solver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CollectionViewFillLayout+Solver.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -107,7 +107,7 @@
 		9BD4E3FF2183A076002FB3C4 /* StickyLayoutTests */ = {
 			isa = PBXGroup;
 			children = (
-				9BD4E4002183A076002FB3C4 /* StickyLayoutTests.swift */,
+				9BD4E4002183A076002FB3C4 /* CollectionViewFillLayoutTests.swift */,
 				9BD4E4022183A076002FB3C4 /* Info.plist */,
 			);
 			path = StickyLayoutTests;
@@ -226,7 +226,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9BD4E4012183A076002FB3C4 /* StickyLayoutTests.swift in Sources */,
+				9BD4E4012183A076002FB3C4 /* CollectionViewFillLayoutTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
