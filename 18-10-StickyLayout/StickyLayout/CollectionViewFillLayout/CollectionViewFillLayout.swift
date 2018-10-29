@@ -13,6 +13,7 @@ protocol CollectionViewFillLayoutDelegate: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, cellTypeForItemAt indexPath: IndexPath) -> UICollectionViewCell.Type
     func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt indexPath: IndexPath)
     func collectionView(_ collectionView: UICollectionView, alignmentForItemAt indexPath: IndexPath) -> CollectionViewFillLayout.Alignment
+    func collectionView(_ collectionView: UICollectionView, minimumHeightForItemAt indexPath: IndexPath) -> CGFloat
 }
 
 
@@ -50,7 +51,14 @@ class CollectionViewFillLayout: UICollectionViewLayout {
                 // Getting cell size be configuring
                 let cellType = delegate.collectionView(collectionView, cellTypeForItemAt: indexPath)
                 let cell = cellType.init(frame: CGRect.zero)
+                let minimumHeight = delegate.collectionView(collectionView, minimumHeightForItemAt: indexPath)
                 delegate.collectionView(collectionView, configureCell: cell, forItemAt: indexPath)
+
+                NSLayoutConstraint.activate([
+                    { $0.priority = .defaultLow; return $0 }(cell.contentView.heightAnchor.constraint(equalToConstant: minimumHeight)),
+                    { $0.priority = .defaultHigh; return $0 }(cell.contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: minimumHeight)),
+                ])
+
                 let maximumCellSize = CGSize(width: collectionView.bounds.width, height: .greatestFiniteMagnitude)
                 cellSize = cell.contentView.systemLayoutSizeFitting(maximumCellSize,
                                                                     withHorizontalFittingPriority: .required,

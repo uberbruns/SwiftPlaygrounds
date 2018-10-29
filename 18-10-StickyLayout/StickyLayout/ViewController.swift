@@ -11,22 +11,34 @@ import UIKit
 
 class ViewController: UIViewController, UICollectionViewDataSource, CollectionViewFillLayoutDelegate {
 
+    enum Sections: CaseIterable {
+        case flexibleTop
+        case items
+        case flexibleBottom
+        case actions
+
+        enum Actions: CaseIterable {
+            case add
+            case remove
+        }
+    }
+
+    private var numberOfItems = 5
     private let layout = CollectionViewFillLayout()
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-
-    var numberOfItems = 5
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .red
+        collectionView.backgroundColor = .lightGray
         collectionView.dataSource = self
         collectionView.delegate = self
         view.addSubview(collectionView)
 
         collectionView.contentInsetAdjustmentBehavior = .always
         collectionView.register(TextCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        collectionView.register(FlexibleCollectionViewCell.self, forCellWithReuseIdentifier: "flex")
 
         NSLayoutConstraint.activate([
             collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
@@ -41,25 +53,38 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         collectionView.collectionViewLayout.invalidateLayout()
     }
 
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return Sections.allCases.count
+    }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return numberOfItems
+        switch Sections.allCases[section] {
+        case .items:
+            return numberOfItems
+        case .actions:
+            return Sections.Actions.allCases.count
+        default:
+            return 1
+        }
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
+        let cell: UICollectionViewCell
+        switch Sections.allCases[indexPath.section] {
+        case .flexibleTop, .flexibleBottom:
+            cell = collectionView.dequeueReusableCell(withReuseIdentifier: "flex", for: indexPath)
+        default:
+            cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
+        }
         self.collectionView(collectionView, configureCell: cell, forItemAt: indexPath)
         return cell
     }
 
     func collectionView(_ collectionView: UICollectionView, alignmentForItemAt indexPath: IndexPath) -> CollectionViewFillLayout.Alignment {
-        switch indexPath.row {
-        case 0:
+        switch Sections.allCases[indexPath.section] {
+        case .flexibleTop, .flexibleBottom:
             return .flexible
-        case numberOfItems-3:
-            return .flexible
-        case numberOfItems-2:
-            return .stickyBottom
-        case numberOfItems-1:
+        case .actions:
             return .stickyBottom
         default:
             return .default
@@ -67,44 +92,65 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
     }
 
     func collectionView(_ collectionView: UICollectionView, cellTypeForItemAt indexPath: IndexPath) -> UICollectionViewCell.Type {
-        return TextCollectionViewCell.self
+        switch Sections.allCases[indexPath.section] {
+        case .flexibleTop, .flexibleBottom:
+            return FlexibleCollectionViewCell.self
+        default:
+            return TextCollectionViewCell.self
+        }
     }
 
     func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        switch cell {
-        case let cell as TextCollectionViewCell:
+        switch (cell, Sections.allCases[indexPath.section]) {
+        case (let cell as FlexibleCollectionViewCell, .flexibleTop), (let cell as FlexibleCollectionViewCell, .flexibleBottom):
+            cell.contentView.backgroundColor = .lightGray
+
+        case (let cell as TextCollectionViewCell, .actions):
+            switch Sections.Actions.allCases[indexPath.row] {
+            case .add:
+                cell.titleLabel.text = "Add"
+                cell.contentView.backgroundColor = .green
+            case .remove:
+                cell.titleLabel.text = "Remove"
+                cell.contentView.backgroundColor = .red
+            }
+
+        case (let cell as TextCollectionViewCell, _):
             cell.titleLabel.text = "Sie sagen es kommt die Zeit in der Pole schmelzen, sich riesen Wassermassen über Küstenstädte wälzen."
+            cell.contentView.backgroundColor = .yellow
+
         default:
             break
-        }
-
-        switch indexPath.row {
-        case 0:
-            cell.contentView.backgroundColor = .white
-        case numberOfItems-3:
-            cell.contentView.backgroundColor = .white
-        case numberOfItems-2:
-            cell.contentView.backgroundColor = .lightGray
-        case numberOfItems-1:
-            cell.contentView.backgroundColor = .darkGray
-        default:
-            cell.contentView.backgroundColor = .yellow
         }
     }
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if indexPath.row == numberOfItems-1 {
-            numberOfItems -= 1
-        } else {
-            numberOfItems += 1
+        switch Sections.allCases[indexPath.section] {
+        case .actions:
+            switch Sections.Actions.allCases[indexPath.row] {
+            case .add:
+                numberOfItems += 1
+            case .remove:
+                numberOfItems -= 1
+            }
+            collectionView.reloadData()
+        default:
+            break
         }
-        collectionView.reloadData()
+    }
+
+    func collectionView(_ collectionView: UICollectionView, minimumHeightForItemAt indexPath: IndexPath) -> CGFloat {
+        switch Sections.allCases[indexPath.section] {
+        case .flexibleTop, .flexibleBottom:
+            return 0
+        default:
+            return 66
+        }
     }
 }
 
 
 class TextCollectionViewCell: UICollectionViewCell {
-
     let titleLabel = UILabel()
 
     override init(frame: CGRect) {
@@ -127,8 +173,19 @@ class TextCollectionViewCell: UICollectionViewCell {
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
             titleLabel.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
-            titleLabel.topAnchor.constraint(equalTo: contentView.layoutMarginsGuide.topAnchor),
-            titleLabel.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor)
-            ])
+            titleLabel.topAnchor.constraint(greaterThanOrEqualTo: contentView.layoutMarginsGuide.topAnchor),
+            titleLabel.centerYAnchor.constraint(equalTo: contentView.layoutMarginsGuide.centerYAnchor),
+        ])
+    }
+}
+
+
+class FlexibleCollectionViewCell: UICollectionViewCell {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
