@@ -20,18 +20,21 @@ protocol CollectionViewFillLayoutDelegate: UICollectionViewDelegate {
 class CollectionViewFillLayout: UICollectionViewLayout {
 
     private var cachedLayoutAttributes = [IndexPath: UICollectionViewLayoutAttributes]()
+    private var insertedDeletedOrMovedIndexPaths = Set<IndexPath>()
     private var cachedContentSize = CGSize.zero
     private var cachedBounds = CGRect.zero
     private var invalidateEverything = true
 
 
+    // MARK: Preparations
+
     override func prepare() {
         guard let collectionView = collectionView,
             let delegate = collectionView.delegate as? CollectionViewFillLayoutDelegate else { return }
 
-        if invalidateEverything || collectionView.bounds.size != cachedBounds.size {
-            invalidateCachedLayoutAttributes()
-        }
+        invalidateCachedLayoutAttributes()
+//        if invalidateEverything || collectionView.bounds.size != cachedBounds.size {
+//        }
 
         var indexPaths = [IndexPath]()
         for section in 0..<collectionView.numberOfSections {
@@ -80,13 +83,17 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
         // Build layout attributes
         invalidateCachedLayoutAttributes()
-        for positioning in result.positionings {
+
+        print("========================")
+        for (index, positioning) in result.positionings.enumerated() {
             let indexPath = positioning.object
             let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
             itemAttributes.frame = positioning.frame
-            itemAttributes.zIndex = positioning.alignment == .stickyBottom ? 1 : 0
+            itemAttributes.zIndex = positioning.alignment == .stickyBottom ? index + 1000 : index
             cachedLayoutAttributes[indexPath] = itemAttributes
+            print(indexPath, positioning.frame)
         }
+        print("========================")
 
         // Cache
         cachedBounds = collectionView.bounds
@@ -96,18 +103,31 @@ class CollectionViewFillLayout: UICollectionViewLayout {
         collectionView.scrollIndicatorInsets.bottom = result.stickyBottomHeight
     }
 
+    override func prepare(forAnimatedBoundsChange oldBounds: CGRect) {
+        invalidateEverything = true
+    }
+
     override func prepare(forCollectionViewUpdates updateItems: [UICollectionViewUpdateItem]) {
-        invalidateCachedLayoutAttributes()
         super.prepare(forCollectionViewUpdates: updateItems)
+
+        insertedDeletedOrMovedIndexPaths.removeAll()
+        for updateItem in updateItems {
+            switch updateItem.updateAction {
+            case .insert:
+                insertedDeletedOrMovedIndexPaths.insert(updateItem.indexPathAfterUpdate!)
+            case .delete:
+                insertedDeletedOrMovedIndexPaths.insert(updateItem.indexPathBeforeUpdate!)
+            case .move:
+                insertedDeletedOrMovedIndexPaths.insert(updateItem.indexPathAfterUpdate!)
+                insertedDeletedOrMovedIndexPaths.insert(updateItem.indexPathBeforeUpdate!)
+            default:
+                break
+            }
+        }
     }
 
-    override var collectionViewContentSize: CGSize {
-        return cachedContentSize
-    }
 
-    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        return cachedLayoutAttributes.values.filter { $0.frame.intersects(rect) }
-    }
+    // MARK: Invalidation
 
     override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
         return true
@@ -123,5 +143,37 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
     private func invalidateCachedLayoutAttributes() {
         cachedLayoutAttributes.removeAll(keepingCapacity: true)
+    }
+
+
+    // MARK: Layout
+
+    override var collectionViewContentSize: CGSize {
+        return cachedContentSize
+    }
+
+    override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
+        return cachedLayoutAttributes.values.filter { $0.frame.intersects(rect) }
+    }
+
+
+    // MARK: Animation
+
+    override func initialLayoutAttributesForAppearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        let layoutAttributes = cachedLayoutAttributes[itemIndexPath]
+        if insertedDeletedOrMovedIndexPaths.contains(itemIndexPath) {
+//            layoutAttributes?.alpha = 0
+            insertedDeletedOrMovedIndexPaths.remove(itemIndexPath)
+        }
+        return layoutAttributes
+    }
+
+    override func finalLayoutAttributesForDisappearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        let layoutAttributes = cachedLayoutAttributes[itemIndexPath]
+        if insertedDeletedOrMovedIndexPaths.contains(itemIndexPath) {
+//            layoutAttributes?.alpha = 0
+            insertedDeletedOrMovedIndexPaths.remove(itemIndexPath)
+        }
+        return layoutAttributes
     }
 }

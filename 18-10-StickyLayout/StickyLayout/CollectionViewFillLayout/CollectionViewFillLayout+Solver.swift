@@ -89,21 +89,28 @@ extension CollectionViewFillLayout {
             contentSize = CGSize(width: width, height: combinedHeight)
         }
 
-        // Move bottom items up
-        let clippedOffset: CGFloat
-        let maxOffset = contentSize.height - bounds.height
-        if clipOffset && offset > maxOffset {
-            clippedOffset = maxOffset
-        } else {
-            clippedOffset = offset
-        }
+        // Validate offset to avoid layout issues on complete layout invalidattion that create
+        // invalid content offsets. For example when the content is scrolled all the way down
+        // and items are removed.
+        let validatedOffset = { () -> CGFloat in
+            if clipOffset {
+                let maxOffset = contentSize.height - bounds.height
+                if offset > maxOffset {
+                    return maxOffset
+                } else if offset < 0 {
+                    return 0
+                }
+            }
+            return offset
+        }()
 
+        // Move bottom items up
         for index in bottomPositionings {
             positionings[index].frame.origin.y = positionings[index].frame.origin.y
                 + bounds.maxY
                 - safeArea.bottom
                 - combinedBottomHeight
-                + clippedOffset
+                + validatedOffset
         }
 
         return Result(positionings: positionings,

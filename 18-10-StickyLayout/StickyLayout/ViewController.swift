@@ -11,27 +11,32 @@ import UIKit
 
 class ViewController: UIViewController, UICollectionViewDataSource, CollectionViewFillLayoutDelegate {
 
-    enum Sections: CaseIterable {
+    enum Sections: Int, CaseIterable {
         case flexibleTop
         case items
+        case input
         case flexibleBottom
         case actions
 
-        enum Actions: CaseIterable {
+        enum Actions: Int, CaseIterable {
             case add
             case remove
         }
     }
 
     private var numberOfItems = 5
+    private var text = ""
     private let layout = CollectionViewFillLayout()
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        let keyboardLayoutGuide = KeyboardLayoutGuide()
+        view.addLayoutGuide(keyboardLayoutGuide)
+
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .lightGray
+        collectionView.backgroundColor = .darkGray
         collectionView.dataSource = self
         collectionView.delegate = self
         view.addSubview(collectionView)
@@ -39,18 +44,19 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         collectionView.contentInsetAdjustmentBehavior = .always
         collectionView.register(TextCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
         collectionView.register(FlexibleCollectionViewCell.self, forCellWithReuseIdentifier: "flex")
+        collectionView.register(InputCollectionViewCell.self, forCellWithReuseIdentifier: "input")
 
         NSLayoutConstraint.activate([
             collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
             collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            ])
-    }
+            collectionView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor),
 
-    override func viewSafeAreaInsetsDidChange() {
-        super.viewSafeAreaInsetsDidChange()
-        collectionView.collectionViewLayout.invalidateLayout()
+            keyboardLayoutGuide.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            keyboardLayoutGuide.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            keyboardLayoutGuide.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            keyboardLayoutGuide.heightConstraint
+        ])
     }
 
     func numberOfSections(in collectionView: UICollectionView) -> Int {
@@ -73,8 +79,10 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         switch Sections.allCases[indexPath.section] {
         case .flexibleTop, .flexibleBottom:
             cell = collectionView.dequeueReusableCell(withReuseIdentifier: "flex", for: indexPath)
-        default:
+        case .actions, .items:
             cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
+        case .input:
+            cell = collectionView.dequeueReusableCell(withReuseIdentifier: "input", for: indexPath)
         }
         self.collectionView(collectionView, configureCell: cell, forItemAt: indexPath)
         return cell
@@ -95,8 +103,10 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         switch Sections.allCases[indexPath.section] {
         case .flexibleTop, .flexibleBottom:
             return FlexibleCollectionViewCell.self
-        default:
+        case .actions, .items:
             return TextCollectionViewCell.self
+        case .input:
+            return InputCollectionViewCell.self
         }
     }
 
@@ -118,6 +128,12 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         case (let cell as TextCollectionViewCell, _):
             cell.titleLabel.text = "Sie sagen es kommt die Zeit in der Pole schmelzen, sich riesen Wassermassen über Küstenstädte wälzen."
             cell.contentView.backgroundColor = .yellow
+
+        case (let cell as InputCollectionViewCell, _):
+            cell.contentView.backgroundColor = .purple
+            cell.textField.text = text
+            cell.textField.delegate = self
+            cell.textField.addTarget(self, action: #selector(textFieldDidEdit), for: .allEditingEvents)
 
         default:
             break
@@ -142,10 +158,35 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
     func collectionView(_ collectionView: UICollectionView, minimumHeightForItemAt indexPath: IndexPath) -> CGFloat {
         switch Sections.allCases[indexPath.section] {
         case .flexibleTop, .flexibleBottom:
-            return 0
+            return 12
         default:
             return 66
         }
+    }
+
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        // Fixes a bug where some cells are not visible after the collection bounds change
+        cell.layer.isHidden = false
+    }
+}
+
+
+extension ViewController: UITextFieldDelegate {
+
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//            self.collectionView.scrollToItem(at: IndexPath(item: 0, section: Sections.input.rawValue), at: .top, animated: true)
+//        }
+        return true
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+
+    @objc func textFieldDidEdit(_ textField: UITextField) {
+        text = textField.text ?? ""
     }
 }
 
@@ -175,6 +216,44 @@ class TextCollectionViewCell: UICollectionViewCell {
             titleLabel.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
             titleLabel.topAnchor.constraint(greaterThanOrEqualTo: contentView.layoutMarginsGuide.topAnchor),
             titleLabel.centerYAnchor.constraint(equalTo: contentView.layoutMarginsGuide.centerYAnchor),
+        ])
+    }
+}
+
+
+class InputCollectionViewCell: UICollectionViewCell {
+
+    let textField = UITextField()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupViews()
+        setupConstraints()
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override var isHidden: Bool {
+        didSet {
+
+        }
+    }
+
+    func setupViews() {
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.backgroundColor = .white
+        contentView.addSubview(textField)
+    }
+
+    func setupConstraints() {
+        NSLayoutConstraint.activate([
+            textField.leadingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
+            textField.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
+            textField.topAnchor.constraint(equalTo: contentView.layoutMarginsGuide.topAnchor),
+            textField.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor),
+            textField.heightAnchor.constraint(equalToConstant: 32),
         ])
     }
 }

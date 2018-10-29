@@ -37,13 +37,13 @@ class CollectionViewFillLayoutTests: XCTestCase {
 
     func testOffset() {
         let items = [
-            CollectionViewFillLayout.Item(with: "A", height: 10, alignment: .default),
-            CollectionViewFillLayout.Item(with: "B", height: 10, alignment: .default)
+            CollectionViewFillLayout.Item(with: "A", height: 10, alignment: .stickyBottom),
+            CollectionViewFillLayout.Item(with: "B", height: 10, alignment: .stickyBottom)
         ]
 
         let result = CollectionViewFillLayout.solve(with: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 50)
-        XCTAssertEqual(result.positionings[0].frame, CGRect(x: 0, y: -50, width: 100, height: 10))
-        XCTAssertEqual(result.positionings[1].frame, CGRect(x: 0, y: -40, width: 100, height: 10))
+        XCTAssertEqual(result.positionings[0].frame, CGRect(x: 0, y: 130, width: 100, height: 10))
+        XCTAssertEqual(result.positionings[1].frame, CGRect(x: 0, y: 140, width: 100, height: 10))
     }
 
     func testFlexibleSizeAlignment() {

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9B0406662187991D00AEE55C /* KeyboardLayoutGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0406652187991D00AEE55C /* KeyboardLayoutGuide.swift */; };
 		9BB909DA21871754006DCF8B /* CollectionViewFillLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB909D921871754006DCF8B /* CollectionViewFillLayout.swift */; };
 		9BB909DC2187187F006DCF8B /* CollectionViewFillLayout+Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB909DB2187187F006DCF8B /* CollectionViewFillLayout+Types.swift */; };
 		9BD4E3EC2183A074002FB3C4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD4E3EB2183A074002FB3C4 /* AppDelegate.swift */; };
@@ -29,6 +30,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9B0406652187991D00AEE55C /* KeyboardLayoutGuide.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyboardLayoutGuide.swift; sourceTree = "<group>"; };
 		9BB909D921871754006DCF8B /* CollectionViewFillLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewFillLayout.swift; sourceTree = "<group>"; };
 		9BB909DB2187187F006DCF8B /* CollectionViewFillLayout+Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CollectionViewFillLayout+Types.swift"; sourceTree = "<group>"; };
 		9BD4E3E82183A074002FB3C4 /* StickyLayout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StickyLayout.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -95,6 +97,7 @@
 			children = (
 				9BB909D82187173F006DCF8B /* CollectionViewFillLayout */,
 				9BD4E3EB2183A074002FB3C4 /* AppDelegate.swift */,
+				9B0406652187991D00AEE55C /* KeyboardLayoutGuide.swift */,
 				9BD4E3ED2183A074002FB3C4 /* ViewController.swift */,
 				9BD4E3EF2183A074002FB3C4 /* Main.storyboard */,
 				9BD4E3F22183A075002FB3C4 /* Assets.xcassets */,
@@ -217,6 +220,7 @@
 				9BD4E3EE2183A074002FB3C4 /* ViewController.swift in Sources */,
 				9BB909DA21871754006DCF8B /* CollectionViewFillLayout.swift in Sources */,
 				9BD4E40C2183A089002FB3C4 /* CollectionViewFillLayout+Solver.swift in Sources */,
+				9B0406662187991D00AEE55C /* KeyboardLayoutGuide.swift in Sources */,
 				9BD4E3EC2183A074002FB3C4 /* AppDelegate.swift in Sources */,
 				9BB909DC2187187F006DCF8B /* CollectionViewFillLayout+Types.swift in Sources */,
 			);
