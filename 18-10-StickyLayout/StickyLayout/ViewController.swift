@@ -9,7 +9,7 @@
 import UIKit
 
 
-class ViewController: UIViewController, UICollectionViewDataSource, CollectionViewFillLayoutDelegate {
+class ViewController: UIViewController, UICollectionViewDataSource, CollectionViewFillLayoutDelegate, KeyboardLayoutGuideDelegate {
 
     enum Sections: Int, CaseIterable {
         case flexibleTop
@@ -27,18 +27,23 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
     private var numberOfItems = 5
     private var text = ""
     private let layout = CollectionViewFillLayout()
+    private let keyboardLayoutGuide = KeyboardLayoutGuide()
+
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+    private var focusedIndexPath: IndexPath?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let keyboardLayoutGuide = KeyboardLayoutGuide()
+        keyboardLayoutGuide.delegate = self
         view.addLayoutGuide(keyboardLayoutGuide)
 
         collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.backgroundColor = .darkGray
+        collectionView.backgroundColor = .lightGray
         collectionView.dataSource = self
         collectionView.delegate = self
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.isPrefetchingEnabled = false // Removing this or setting it to true -> Dragons (Invisible and/or unresponsive cells when bounds are changing)
         view.addSubview(collectionView)
 
         collectionView.contentInsetAdjustmentBehavior = .always
@@ -85,6 +90,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
             cell = collectionView.dequeueReusableCell(withReuseIdentifier: "input", for: indexPath)
         }
         self.collectionView(collectionView, configureCell: cell, forItemAt: indexPath)
+
         return cell
     }
 
@@ -164,9 +170,20 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         }
     }
 
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        // Fixes a bug where some cells are not visible after the collection bounds change
-        cell.layer.isHidden = false
+    // MARK: KeyboardLayoutGuideDelegate
+
+    func keyboardLayoutGuide(_ keyboardLayoutGuide: KeyboardLayoutGuide, willChangeFrom heightBefore: CGFloat, to heightAfter: CGFloat, animated: Bool) {
+    }
+
+    func keyboardLayoutGuide(_ keyboardLayoutGuide: KeyboardLayoutGuide, isChangingFrom heightBefore: CGFloat, to heightAfter: CGFloat, animated: Bool) {
+        if let focusedIndexPath = focusedIndexPath, let cell = collectionView.cellForItem(at: focusedIndexPath) {
+            if heightAfter > 0 {
+                let max = (collectionView.contentSize.height + collectionView.adjustedContentInset.top + collectionView.adjustedContentInset.bottom) - collectionView.bounds.height
+                collectionView.contentOffset = CGPoint(x: 0, y: min(max, cell.frame.minY))
+                collectionView.setNeedsLayout()
+                collectionView.layoutIfNeeded()
+            }
+        }
     }
 }
 
@@ -174,14 +191,13 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
 extension ViewController: UITextFieldDelegate {
 
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-//            self.collectionView.scrollToItem(at: IndexPath(item: 0, section: Sections.input.rawValue), at: .top, animated: true)
-//        }
+        focusedIndexPath = collectionView.indexPath(forCellContaining: textField)
         return true
     }
 
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
+        focusedIndexPath = nil
         return true
     }
 
@@ -266,5 +282,21 @@ class FlexibleCollectionViewCell: UICollectionViewCell {
 
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+
+extension UICollectionView {
+    func indexPath(forCellContaining view: UIView) -> IndexPath? {
+        var superview = view
+        while true {
+            if let cell = superview as? UICollectionViewCell {
+                return indexPath(for: cell)
+            } else if let next = superview.superview {
+                superview = next
+            } else {
+                return nil
+            }
+        }
     }
 }

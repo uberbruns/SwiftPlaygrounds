@@ -4,6 +4,7 @@ import UIKit
 
 class KeyboardLayoutGuide: UILayoutGuide {
     private(set) var heightConstraint: NSLayoutConstraint!
+    weak var delegate: KeyboardLayoutGuideDelegate?
 
     override init() {
         super.init()
@@ -33,19 +34,34 @@ class KeyboardLayoutGuide: UILayoutGuide {
         if let owningView = owningView, owningView.window != nil {
             let frameInWindow = owningView.convert(owningView.bounds, to: nil)
             let intersection = frameInWindow.intersection(keyboardFrame)
+            let oldHeight = self.heightConstraint.constant
+            let newHeight = intersection.height
+            delegate?.keyboardLayoutGuide(self, willChangeFrom: oldHeight, to: newHeight, animated: true)
             UIView.animate(withDuration: animationDuration, delay: 0, options: animationOptions, animations: {
                 self.heightConstraint.constant = intersection.height
                 owningView.setNeedsLayout()
                 owningView.layoutIfNeeded()
+                self.delegate?.keyboardLayoutGuide(self, isChangingFrom: oldHeight, to: newHeight, animated: true)
             }, completion: nil)
         } else {
-            heightConstraint.constant = keyboardFrame.height
+            let oldHeight = self.heightConstraint.constant
+            let newHeight = keyboardFrame.height
+            delegate?.keyboardLayoutGuide(self, willChangeFrom: oldHeight, to: newHeight, animated: false)
+            heightConstraint.constant = newHeight
+            delegate?.keyboardLayoutGuide(self, isChangingFrom: oldHeight, to: newHeight, animated: false)
         }
     }
 }
 
-public extension UIView.AnimationOptions {
-    public func byInserting(_ curve: UIView.AnimationCurve) -> UIView.AnimationOptions {
+
+protocol KeyboardLayoutGuideDelegate: AnyObject {
+    func keyboardLayoutGuide(_ keyboardLayoutGuide: KeyboardLayoutGuide, willChangeFrom heightBefore: CGFloat, to heightAfter: CGFloat, animated: Bool)
+    func keyboardLayoutGuide(_ keyboardLayoutGuide: KeyboardLayoutGuide, isChangingFrom heightBefore: CGFloat, to heightAfter: CGFloat, animated: Bool)
+}
+
+
+private extension UIView.AnimationOptions {
+    func byInserting(_ curve: UIView.AnimationCurve) -> UIView.AnimationOptions {
         var new = self
         switch curve.rawValue {
         case UIView.AnimationCurve.easeIn.rawValue:

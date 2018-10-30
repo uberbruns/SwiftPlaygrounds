@@ -32,9 +32,9 @@ class CollectionViewFillLayout: UICollectionViewLayout {
         guard let collectionView = collectionView,
             let delegate = collectionView.delegate as? CollectionViewFillLayoutDelegate else { return }
 
-        invalidateCachedLayoutAttributes()
-//        if invalidateEverything || collectionView.bounds.size != cachedBounds.size {
-//        }
+        if invalidateEverything || collectionView.bounds.size != cachedBounds.size {
+            invalidateCachedLayoutAttributes()
+        }
 
         var indexPaths = [IndexPath]()
         for section in 0..<collectionView.numberOfSections {
@@ -85,6 +85,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
         invalidateCachedLayoutAttributes()
 
         print("========================")
+        print(collectionView.bounds.size)
         for (index, positioning) in result.positionings.enumerated() {
             let indexPath = positioning.object
             let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
@@ -104,7 +105,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
     }
 
     override func prepare(forAnimatedBoundsChange oldBounds: CGRect) {
-        invalidateEverything = true
+        super.prepare(forAnimatedBoundsChange: oldBounds)
     }
 
     override func prepare(forCollectionViewUpdates updateItems: [UICollectionViewUpdateItem]) {
@@ -153,7 +154,9 @@ class CollectionViewFillLayout: UICollectionViewLayout {
     }
 
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
-        return cachedLayoutAttributes.values.filter { $0.frame.intersects(rect) }
+        return cachedLayoutAttributes.values.filter {
+            $0.frame.intersects(rect)
+        }
     }
 
 
@@ -162,7 +165,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
     override func initialLayoutAttributesForAppearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         let layoutAttributes = cachedLayoutAttributes[itemIndexPath]
         if insertedDeletedOrMovedIndexPaths.contains(itemIndexPath) {
-//            layoutAttributes?.alpha = 0
+            layoutAttributes?.alpha = 0
             insertedDeletedOrMovedIndexPaths.remove(itemIndexPath)
         }
         return layoutAttributes
@@ -171,7 +174,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
     override func finalLayoutAttributesForDisappearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         let layoutAttributes = cachedLayoutAttributes[itemIndexPath]
         if insertedDeletedOrMovedIndexPaths.contains(itemIndexPath) {
-//            layoutAttributes?.alpha = 0
+            layoutAttributes?.alpha = 0
             insertedDeletedOrMovedIndexPaths.remove(itemIndexPath)
         }
         return layoutAttributes
