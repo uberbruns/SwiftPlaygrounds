@@ -19,12 +19,19 @@ protocol CollectionViewFillLayoutDelegate: UICollectionViewDelegate {
 
 class CollectionViewFillLayout: UICollectionViewLayout {
 
-    private var cachedLayoutAttributes = [IndexPath: UICollectionViewLayoutAttributes]()
+    // MARK: Properties
+
+    // State
     private var insertedDeletedOrMovedIndexPaths = Set<IndexPath>()
-    private var cachedContentSize = CGSize.zero
-    private var cachedBounds = CGRect.zero
     private var invalidateEverything = true
 
+    // Cache
+    private var cachedContentSize = CGSize.zero
+    private var cachedBounds = CGRect.zero
+    private var cachedLayoutAttributes = [IndexPath: UICollectionViewLayoutAttributes]()
+
+    // Configuration
+    var automaticallyAdjustScrollIndicatorInsets = true
 
     // MARK: Preparations
 
@@ -100,11 +107,9 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
         // Configure collection view
         collectionView.isPrefetchingEnabled = false // Removing this or setting it to true -> Dragons (Invisible and/or unresponsive cells when bounds are changing)
-        collectionView.scrollIndicatorInsets.bottom = result.stickyBottomHeight
-    }
-
-    override func prepare(forAnimatedBoundsChange oldBounds: CGRect) {
-        super.prepare(forAnimatedBoundsChange: oldBounds)
+        if automaticallyAdjustScrollIndicatorInsets {
+            collectionView.scrollIndicatorInsets.bottom = result.stickyBottomHeight
+        }
     }
 
     override func prepare(forCollectionViewUpdates updateItems: [UICollectionViewUpdateItem]) {

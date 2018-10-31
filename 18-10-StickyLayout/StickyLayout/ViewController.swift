@@ -146,21 +146,25 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
             case .add:
                 cell.titleLabel.text = "Add"
                 cell.titleLabel.textColor = .black
+                cell.titleLabel.textAlignment = .center
                 cell.contentView.backgroundColor = .green
             case .remove:
                 cell.titleLabel.text = "Remove"
-                cell.titleLabel.textColor = .white
-                cell.contentView.backgroundColor = .red
+                cell.titleLabel.textColor = .red
+                cell.titleLabel.textAlignment = .center
+                cell.contentView.backgroundColor = .lightGray
             }
 
         case (let cell as TextCollectionViewCell, .header):
             cell.titleLabel.text = "Header"
             cell.titleLabel.textColor = .white
+            cell.titleLabel.textAlignment = .left
             cell.contentView.backgroundColor = .black
 
         case (let cell as TextCollectionViewCell, _):
             cell.titleLabel.text = "Sie sagen es kommt die Zeit in der Pole schmelzen, sich riesen Wassermassen über Küstenstädte wälzen."
             cell.titleLabel.textColor = .black
+            cell.titleLabel.textAlignment = .left
             cell.contentView.backgroundColor = .yellow
 
         case (let cell as InputCollectionViewCell, _):
