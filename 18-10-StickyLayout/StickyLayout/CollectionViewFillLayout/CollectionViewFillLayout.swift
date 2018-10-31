@@ -32,21 +32,24 @@ class CollectionViewFillLayout: UICollectionViewLayout {
         guard let collectionView = collectionView,
             let delegate = collectionView.delegate as? CollectionViewFillLayoutDelegate else { return }
 
+        // Cache invalidation
         if invalidateEverything || collectionView.bounds.size != cachedBounds.size {
             invalidateCachedLayoutAttributes()
         }
 
+        // Build an array of index paths
         var indexPaths = [IndexPath]()
         for section in 0..<collectionView.numberOfSections {
             let items = 0..<collectionView.numberOfItems(inSection: section)
             indexPaths += items.map { IndexPath(item: $0, section: section) }
         }
 
+        // Map index paths to Fill Layout Items
         let items = indexPaths.lazy.map { (indexPath: IndexPath) -> CollectionViewFillLayout.Item<IndexPath> in
-            // Item Alignment
+            // Item alignment
             let alignment = delegate.collectionView(collectionView, alignmentForItemAt: indexPath)
 
-            // Item Size
+            // Item size
             let cellSize: CGSize
             if let itemAttributes = self.cachedLayoutAttributes[indexPath] {
                 cellSize = itemAttributes.frame.size
@@ -79,28 +82,24 @@ class CollectionViewFillLayout: UICollectionViewLayout {
                                                     clipOffset: invalidateEverything,
                                                     safeArea: collectionView.safeAreaInsets)
 
+        // Cache
+        cachedBounds = collectionView.bounds
         cachedContentSize = result.contentSize
-
-        // Build layout attributes
         invalidateCachedLayoutAttributes()
 
-        print("========================")
-        print(collectionView.bounds.size)
         for (index, positioning) in result.positionings.enumerated() {
             let indexPath = positioning.object
             let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
             itemAttributes.frame = positioning.frame
             itemAttributes.zIndex = positioning.alignment == .stickyBottom ? index + 1000 : index
             cachedLayoutAttributes[indexPath] = itemAttributes
-            print(indexPath, positioning.frame)
         }
-        print("========================")
 
-        // Cache
-        cachedBounds = collectionView.bounds
+        // Reset state
         invalidateEverything = false
 
         // Configure collection view
+        collectionView.isPrefetchingEnabled = false // Removing this or setting it to true -> Dragons (Invisible and/or unresponsive cells when bounds are changing)
         collectionView.scrollIndicatorInsets.bottom = result.stickyBottomHeight
     }
 

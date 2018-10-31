@@ -12,6 +12,7 @@ import UIKit
 class ViewController: UIViewController, UICollectionViewDataSource, CollectionViewFillLayoutDelegate, KeyboardLayoutGuideDelegate {
 
     enum Sections: Int, CaseIterable {
+        case header
         case flexibleTop
         case items
         case input
@@ -19,12 +20,12 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         case actions
 
         enum Actions: Int, CaseIterable {
-            case add
             case remove
+            case add
         }
     }
 
-    private var numberOfItems = 5
+    private var numberOfItems = 3
     private var text = ""
     private let layout = CollectionViewFillLayout()
     private let keyboardLayoutGuide = KeyboardLayoutGuide()
@@ -43,7 +44,6 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.isPrefetchingEnabled = false // Removing this or setting it to true -> Dragons (Invisible and/or unresponsive cells when bounds are changing)
         view.addSubview(collectionView)
 
         collectionView.contentInsetAdjustmentBehavior = .always
@@ -84,7 +84,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         switch Sections.allCases[indexPath.section] {
         case .flexibleTop, .flexibleBottom:
             cell = collectionView.dequeueReusableCell(withReuseIdentifier: "flex", for: indexPath)
-        case .actions, .items:
+        case .header, .actions, .items:
             cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
         case .input:
             cell = collectionView.dequeueReusableCell(withReuseIdentifier: "input", for: indexPath)
@@ -99,7 +99,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         case .flexibleTop, .flexibleBottom:
             return .flexible
         case .actions:
-            return .stickyBottom
+            return indexPath.item == 0 ? .default : .stickyBottom
         default:
             return .default
         }
@@ -109,7 +109,7 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         switch Sections.allCases[indexPath.section] {
         case .flexibleTop, .flexibleBottom:
             return FlexibleCollectionViewCell.self
-        case .actions, .items:
+        case .header, .actions, .items:
             return TextCollectionViewCell.self
         case .input:
             return InputCollectionViewCell.self
@@ -125,14 +125,22 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
             switch Sections.Actions.allCases[indexPath.row] {
             case .add:
                 cell.titleLabel.text = "Add"
+                cell.titleLabel.textColor = .black
                 cell.contentView.backgroundColor = .green
             case .remove:
                 cell.titleLabel.text = "Remove"
+                cell.titleLabel.textColor = .white
                 cell.contentView.backgroundColor = .red
             }
 
+        case (let cell as TextCollectionViewCell, .header):
+            cell.titleLabel.text = "Header"
+            cell.titleLabel.textColor = .white
+            cell.contentView.backgroundColor = .black
+
         case (let cell as TextCollectionViewCell, _):
             cell.titleLabel.text = "Sie sagen es kommt die Zeit in der Pole schmelzen, sich riesen Wassermassen über Küstenstädte wälzen."
+            cell.titleLabel.textColor = .black
             cell.contentView.backgroundColor = .yellow
 
         case (let cell as InputCollectionViewCell, _):
