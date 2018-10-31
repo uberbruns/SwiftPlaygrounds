@@ -184,13 +184,19 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
     }
 
     func keyboardLayoutGuide(_ keyboardLayoutGuide: KeyboardLayoutGuide, isChangingFrom heightBefore: CGFloat, to heightAfter: CGFloat, animated: Bool) {
-        if let focusedIndexPath = focusedIndexPath, let cell = collectionView.cellForItem(at: focusedIndexPath) {
-            if heightAfter > 0 {
-                let max = (collectionView.contentSize.height + collectionView.adjustedContentInset.top + collectionView.adjustedContentInset.bottom) - collectionView.bounds.height
-                collectionView.contentOffset = CGPoint(x: 0, y: min(max, cell.frame.minY))
-                collectionView.setNeedsLayout()
-                collectionView.layoutIfNeeded()
-            }
+        let maxContentOffsetY = collectionView.contentSize.height - collectionView.bounds.height
+        let preferredContentOffsetY: CGFloat
+        let newContentOffset: CGPoint
+        if let focusedIndexPath = focusedIndexPath, let cell = collectionView.cellForItem(at: focusedIndexPath), heightAfter > 0 {
+            preferredContentOffsetY = cell.frame.minY
+        } else {
+            preferredContentOffsetY = collectionView.contentOffset.y
+        }
+        newContentOffset = CGPoint(x: 0, y: min(maxContentOffsetY, preferredContentOffsetY))
+        if newContentOffset != collectionView.contentOffset {
+            collectionView.contentOffset = newContentOffset
+            collectionView.setNeedsLayout()
+            collectionView.layoutIfNeeded()
         }
     }
 }
