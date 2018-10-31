@@ -62,8 +62,8 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         view.addSubview(unsafeAreaBottom)
 
         NSLayoutConstraint.activate([
-            collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor),
 
@@ -72,13 +72,13 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
             keyboardLayoutGuide.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             keyboardLayoutGuide.heightConstraint,
 
-            unsafeAreaTop.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            unsafeAreaTop.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            unsafeAreaTop.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            unsafeAreaTop.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             unsafeAreaTop.topAnchor.constraint(equalTo: view.topAnchor),
             unsafeAreaTop.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
 
-            unsafeAreaBottom.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            unsafeAreaBottom.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            unsafeAreaBottom.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            unsafeAreaBottom.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             unsafeAreaBottom.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             unsafeAreaBottom.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
@@ -204,15 +204,11 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
     }
 
     func keyboardLayoutGuide(_ keyboardLayoutGuide: KeyboardLayoutGuide, isChangingFrom heightBefore: CGFloat, to heightAfter: CGFloat, animated: Bool) {
-        let preferredContentOffsetY: CGFloat
-        if let focusedIndexPath = focusedIndexPath, let cell = collectionView.cellForItem(at: focusedIndexPath), heightAfter > 0 {
-            preferredContentOffsetY = cell.center.y + (collectionView.bounds.height / 2)
-        } else {
-            preferredContentOffsetY = collectionView.contentOffset.y
+        if let focusedIndexPath = focusedIndexPath, heightAfter > 0 {
+            collectionView.scrollToItem(at: focusedIndexPath, at: .centeredVertically, animated: false)
+            collectionView.setNeedsLayout()
+            collectionView.layoutIfNeeded()
         }
-        collectionView.setPreferredContentOffset(.init(x: 0, y: preferredContentOffsetY))
-        collectionView.setNeedsLayout()
-        collectionView.layoutIfNeeded()
     }
 }
 
@@ -326,16 +322,6 @@ extension UICollectionView {
             } else {
                 return nil
             }
-        }
-    }
-
-    func setPreferredContentOffset(_ preferredContentOffset: CGPoint) {
-        let newContentOffset: CGPoint
-        let minContentOffsetY = -safeAreaInsets.top
-        let maxContentOffsetY = contentSize.height - bounds.height - safeAreaInsets.bottom
-        newContentOffset = CGPoint(x: 0, y: max(minContentOffsetY, min(maxContentOffsetY, preferredContentOffset.y)))
-        if newContentOffset != contentOffset {
-            contentOffset = newContentOffset
         }
     }
 }

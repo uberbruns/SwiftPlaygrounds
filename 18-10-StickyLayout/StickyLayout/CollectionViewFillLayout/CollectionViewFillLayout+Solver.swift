@@ -14,11 +14,11 @@ extension CollectionViewFillLayout {
                                                     inside bounds: CGRect,
                                                     offset: CGFloat,
                                                     clipOffset: Bool = false,
-                                                    safeArea: UIEdgeInsets = .zero) -> Result<T> where S.Element == Item<T>, S.Index == Int {
+                                                    contentInsets: UIEdgeInsets = .zero) -> Result<T> where S.Element == Item<T>, S.Index == Int {
         var positionings = [Positioning<T>]()
 
-        let x = bounds.minX + safeArea.left
-        let width = bounds.width - safeArea.left - safeArea.right
+        let x = CGFloat(0)
+        let width = bounds.width - contentInsets.left - contentInsets.right
         var lastTopFrame = CGRect(x: x, y: bounds.minY, width: width, height: 0)
         var lastBottomFrame = CGRect(x: x, y: 0, width: width, height: 0)
 
@@ -61,7 +61,7 @@ extension CollectionViewFillLayout {
         // Change size and positions due flexible alignments
         let contentSize: CGSize
         if let firstFlexiblePositioning = firstFlexiblePositioning {
-            let availableHeight = bounds.height - safeArea.top - safeArea.bottom
+            let availableHeight = bounds.height - contentInsets.top - contentInsets.bottom
             let freeSpace = availableHeight - combinedHeight
             if freeSpace > 0 {
                 let extraHeightPerItem = freeSpace / flexiblePositioningCount
@@ -98,10 +98,10 @@ extension CollectionViewFillLayout {
                 if offset > maxOffset {
                     return maxOffset
                 } else if offset < 0 {
-                    return 0 - safeArea.top - safeArea.bottom
+                    return 0 - contentInsets.top - contentInsets.bottom
                 }
             }
-            return offset - safeArea.bottom
+            return offset - contentInsets.bottom
         }()
 
         // Move bottom items up

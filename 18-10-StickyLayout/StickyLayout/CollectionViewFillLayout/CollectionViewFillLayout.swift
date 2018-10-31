@@ -65,7 +65,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
                     { $0.priority = .defaultHigh; return $0 }(cell.contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: minimumHeight)),
                 ])
 
-                let maximumCellSize = CGSize(width: collectionView.bounds.width, height: .greatestFiniteMagnitude)
+                let maximumCellSize = CGSize(width: collectionView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
                 cellSize = cell.contentView.systemLayoutSizeFitting(maximumCellSize,
                                                                     withHorizontalFittingPriority: .required,
                                                                     verticalFittingPriority: UILayoutPriority(1))
@@ -80,7 +80,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
                                                     inside: bounds,
                                                     offset: collectionView.contentOffset.y,
                                                     clipOffset: invalidateEverything,
-                                                    safeArea: collectionView.safeAreaInsets)
+                                                    contentInsets: collectionView.adjustedContentInset)
 
         // Cache
         cachedBounds = collectionView.bounds
