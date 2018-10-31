@@ -51,16 +51,36 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
         collectionView.register(FlexibleCollectionViewCell.self, forCellWithReuseIdentifier: "flex")
         collectionView.register(InputCollectionViewCell.self, forCellWithReuseIdentifier: "input")
 
+        let unsafeAreaTop = UIView()
+        unsafeAreaTop.backgroundColor = UIColor.purple.withAlphaComponent(0.5)
+        unsafeAreaTop.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(unsafeAreaTop)
+
+        let unsafeAreaBottom = UIView()
+        unsafeAreaBottom.backgroundColor = UIColor.purple.withAlphaComponent(0.5)
+        unsafeAreaBottom.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(unsafeAreaBottom)
+
         NSLayoutConstraint.activate([
             collectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor),
 
             keyboardLayoutGuide.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             keyboardLayoutGuide.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             keyboardLayoutGuide.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            keyboardLayoutGuide.heightConstraint
+            keyboardLayoutGuide.heightConstraint,
+
+            unsafeAreaTop.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            unsafeAreaTop.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            unsafeAreaTop.topAnchor.constraint(equalTo: view.topAnchor),
+            unsafeAreaTop.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+
+            unsafeAreaBottom.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            unsafeAreaBottom.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            unsafeAreaBottom.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            unsafeAreaBottom.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
     }
 
@@ -184,20 +204,15 @@ class ViewController: UIViewController, UICollectionViewDataSource, CollectionVi
     }
 
     func keyboardLayoutGuide(_ keyboardLayoutGuide: KeyboardLayoutGuide, isChangingFrom heightBefore: CGFloat, to heightAfter: CGFloat, animated: Bool) {
-        let maxContentOffsetY = collectionView.contentSize.height - collectionView.bounds.height
         let preferredContentOffsetY: CGFloat
-        let newContentOffset: CGPoint
         if let focusedIndexPath = focusedIndexPath, let cell = collectionView.cellForItem(at: focusedIndexPath), heightAfter > 0 {
-            preferredContentOffsetY = cell.frame.minY
+            preferredContentOffsetY = cell.center.y + (collectionView.bounds.height / 2)
         } else {
             preferredContentOffsetY = collectionView.contentOffset.y
         }
-        newContentOffset = CGPoint(x: 0, y: min(maxContentOffsetY, preferredContentOffsetY))
-        if newContentOffset != collectionView.contentOffset {
-            collectionView.contentOffset = newContentOffset
-            collectionView.setNeedsLayout()
-            collectionView.layoutIfNeeded()
-        }
+        collectionView.setPreferredContentOffset(.init(x: 0, y: preferredContentOffsetY))
+        collectionView.setNeedsLayout()
+        collectionView.layoutIfNeeded()
     }
 }
 
@@ -311,6 +326,16 @@ extension UICollectionView {
             } else {
                 return nil
             }
+        }
+    }
+
+    func setPreferredContentOffset(_ preferredContentOffset: CGPoint) {
+        let newContentOffset: CGPoint
+        let minContentOffsetY = -safeAreaInsets.top
+        let maxContentOffsetY = contentSize.height - bounds.height - safeAreaInsets.bottom
+        newContentOffset = CGPoint(x: 0, y: max(minContentOffsetY, min(maxContentOffsetY, preferredContentOffset.y)))
+        if newContentOffset != contentOffset {
+            contentOffset = newContentOffset
         }
     }
 }

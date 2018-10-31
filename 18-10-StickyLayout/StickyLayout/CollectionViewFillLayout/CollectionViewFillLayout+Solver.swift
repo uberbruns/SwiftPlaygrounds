@@ -98,17 +98,16 @@ extension CollectionViewFillLayout {
                 if offset > maxOffset {
                     return maxOffset
                 } else if offset < 0 {
-                    return 0
+                    return 0 - safeArea.top - safeArea.bottom
                 }
             }
-            return offset
+            return offset - safeArea.bottom
         }()
 
         // Move bottom items up
         for index in bottomPositionings {
             positionings[index].frame.origin.y = positionings[index].frame.origin.y
                 + bounds.maxY
-                - safeArea.bottom
                 - combinedBottomHeight
                 + validatedOffset
         }
