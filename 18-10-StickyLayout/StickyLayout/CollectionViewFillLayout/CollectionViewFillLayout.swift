@@ -9,11 +9,21 @@
 import UIKit
 
 
-protocol CollectionViewFillLayoutDelegate: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, cellTypeForItemAt indexPath: IndexPath) -> UICollectionViewCell.Type
-    func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt indexPath: IndexPath)
-    func collectionView(_ collectionView: UICollectionView, alignmentForItemAt indexPath: IndexPath) -> CollectionViewFillLayout.Alignment
-    func collectionView(_ collectionView: UICollectionView, minimumHeightForItemAt indexPath: IndexPath) -> CGFloat
+protocol CollectionViewDataSourceFillLayout: UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, cellTypeAt indexPath: IndexPath) -> UICollectionViewCell.Type
+    func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, for indexPath: IndexPath)
+
+    func collectionView(_ collectionView: UICollectionView, supplementaryViewTypeAt indexPath: IndexPath, kind: String) -> UICollectionReusableView.Type?
+    func collectionView(_ collectionView: UICollectionView, configureSupplementaryView view: UICollectionReusableView, for indexPath: IndexPath, kind: String)
+}
+
+
+protocol CollectionViewDelegateFillLayout: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, alignmentForCellAt indexPath: IndexPath) -> CollectionViewFillLayout.Alignment
+    func collectionView(_ collectionView: UICollectionView, minimumHeightForCellAt indexPath: IndexPath) -> CGFloat
+
+    func collectionView(_ collectionView: UICollectionView, alignmentForSupplementaryViewAt indexPath: IndexPath) -> CollectionViewFillLayout.Alignment
+    func collectionView(_ collectionView: UICollectionView, minimumHeightForSupplementaryViewAt indexPath: IndexPath) -> CGFloat
 }
 
 
@@ -23,21 +33,22 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
     // State
     private var insertedDeletedOrMovedIndexPaths = Set<IndexPath>()
-    private var invalidateEverything = true
+    var invalidateEverything = true
 
     // Cache
     private var cachedContentSize = CGSize.zero
     private var cachedBounds = CGRect.zero
-    private var cachedLayoutAttributes = [IndexPath: UICollectionViewLayoutAttributes]()
+    private var cachedLayoutAttributes = [TaggedIndexPath: UICollectionViewLayoutAttributes]()
 
     // Configuration
     var automaticallyAdjustScrollIndicatorInsets = true
 
+    
     // MARK: Preparations
 
     override func prepare() {
         guard let collectionView = collectionView,
-            let delegate = collectionView.delegate as? CollectionViewFillLayoutDelegate else { return }
+            let delegate = collectionView.delegate as? CollectionViewDelegateFillLayout & CollectionViewDataSourceFillLayout else { return }
 
         // Cache invalidation
         if invalidateEverything || collectionView.bounds.size != cachedBounds.size {
@@ -45,45 +56,66 @@ class CollectionViewFillLayout: UICollectionViewLayout {
         }
 
         // Build an array of index paths
-        var indexPaths = [IndexPath]()
+        var layoutItems = [CollectionViewFillLayout.Item<TaggedIndexPath>]()
         for section in 0..<collectionView.numberOfSections {
-            let items = 0..<collectionView.numberOfItems(inSection: section)
-            indexPaths += items.map { IndexPath(item: $0, section: section) }
-        }
+            for item in 0..<collectionView.numberOfItems(inSection: section) {
+                for tag in TaggedIndexPath.Tag.allCases {
+                    let indexPath = TaggedIndexPath(item: item, section: section, tag: tag)
 
-        // Map index paths to Fill Layout Items
-        let items = indexPaths.lazy.map { (indexPath: IndexPath) -> CollectionViewFillLayout.Item<IndexPath> in
-            // Item alignment
-            let alignment = delegate.collectionView(collectionView, alignmentForItemAt: indexPath)
+                    // Item size
+                    let cellSize: CGSize
+                    if let itemAttributes = self.cachedLayoutAttributes[indexPath] {
+                        cellSize = itemAttributes.frame.size
+                    } else {
+                        // Getting cell size be configuring
+                        let contentView: UIView
+                        let minimumHeight: CGFloat
+                        switch tag {
+                        case .header, .footer:
+                            guard let viewType = delegate.collectionView(collectionView, supplementaryViewTypeAt: indexPath.native, kind: tag.rawValue) else {
+                                continue
+                            }
+                            let supplementaryView = viewType.init(frame: .zero)
+                            minimumHeight = delegate.collectionView(collectionView, minimumHeightForSupplementaryViewAt: indexPath.native)
+                            delegate.collectionView(collectionView, configureSupplementaryView: supplementaryView, for: indexPath.native, kind: tag.rawValue)
+                            contentView = supplementaryView
+                        case .item:
+                            let cellType = delegate.collectionView(collectionView, cellTypeAt: indexPath.native)
+                            let cell = cellType.init(frame: .zero)
+                            minimumHeight = delegate.collectionView(collectionView, minimumHeightForCellAt: indexPath.native)
+                            delegate.collectionView(collectionView, configureCell: cell, for: indexPath.native)
+                            contentView = cell.contentView
+                        }
 
-            // Item size
-            let cellSize: CGSize
-            if let itemAttributes = self.cachedLayoutAttributes[indexPath] {
-                cellSize = itemAttributes.frame.size
-            } else {
-                // Getting cell size be configuring
-                let cellType = delegate.collectionView(collectionView, cellTypeForItemAt: indexPath)
-                let cell = cellType.init(frame: CGRect.zero)
-                let minimumHeight = delegate.collectionView(collectionView, minimumHeightForItemAt: indexPath)
-                delegate.collectionView(collectionView, configureCell: cell, forItemAt: indexPath)
+                        NSLayoutConstraint.activate([
+                            { $0.priority = .defaultLow; return $0 }(contentView.heightAnchor.constraint(equalToConstant: minimumHeight)),
+                            { $0.priority = .defaultHigh; return $0 }(contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: minimumHeight)),
+                            ])
 
-                NSLayoutConstraint.activate([
-                    { $0.priority = .defaultLow; return $0 }(cell.contentView.heightAnchor.constraint(equalToConstant: minimumHeight)),
-                    { $0.priority = .defaultHigh; return $0 }(cell.contentView.heightAnchor.constraint(greaterThanOrEqualToConstant: minimumHeight)),
-                ])
+                        let maximumCellSize = CGSize(width: collectionView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+                        cellSize = contentView.systemLayoutSizeFitting(maximumCellSize,
+                                                                            withHorizontalFittingPriority: .required,
+                                                                            verticalFittingPriority: UILayoutPriority(1))
+                    }
 
-                let maximumCellSize = CGSize(width: collectionView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
-                cellSize = cell.contentView.systemLayoutSizeFitting(maximumCellSize,
-                                                                    withHorizontalFittingPriority: .required,
-                                                                    verticalFittingPriority: UILayoutPriority(1))
+                    // Item alignment
+                    let alignment: CollectionViewFillLayout.Alignment
+                    switch tag {
+                    case .header, .footer:
+                        alignment = delegate.collectionView(collectionView, alignmentForSupplementaryViewAt: indexPath.native)
+                    case .item:
+                        alignment = delegate.collectionView(collectionView, alignmentForCellAt: indexPath.native)
+                    }
+
+                    let layoutItem = CollectionViewFillLayout.Item(with: indexPath, height: cellSize.height, alignment: alignment)
+                    layoutItems.append(layoutItem)
+                }
             }
-
-            return CollectionViewFillLayout.Item(with: indexPath, height: cellSize.height, alignment: alignment)
         }
 
         // Solve layout
         let bounds = CGRect(x: 0, y: 0, width: collectionView.bounds.width, height: collectionView.bounds.height)
-        let result = CollectionViewFillLayout.solve(with: items,
+        let result = CollectionViewFillLayout.solve(with: layoutItems,
                                                     inside: bounds,
                                                     offset: collectionView.contentOffset.y,
                                                     clipOffset: invalidateEverything,
@@ -96,7 +128,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
         for (index, positioning) in result.positionings.enumerated() {
             let indexPath = positioning.object
-            let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
+            let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: indexPath.native)
             itemAttributes.frame = positioning.frame
             itemAttributes.zIndex = positioning.alignment == .stickyBottom ? index + 1000 : index
             cachedLayoutAttributes[indexPath] = itemAttributes
@@ -115,16 +147,20 @@ class CollectionViewFillLayout: UICollectionViewLayout {
     override func prepare(forCollectionViewUpdates updateItems: [UICollectionViewUpdateItem]) {
         super.prepare(forCollectionViewUpdates: updateItems)
 
+        invalidateCachedLayoutAttributes()
         insertedDeletedOrMovedIndexPaths.removeAll()
-        for updateItem in updateItems {
-            switch updateItem.updateAction {
+
+        for updatedItem in updateItems {
+            switch updatedItem.updateAction {
             case .insert:
-                insertedDeletedOrMovedIndexPaths.insert(updateItem.indexPathAfterUpdate!)
+                insertedDeletedOrMovedIndexPaths.insert(updatedItem.indexPathAfterUpdate!)
             case .delete:
-                insertedDeletedOrMovedIndexPaths.insert(updateItem.indexPathBeforeUpdate!)
+                insertedDeletedOrMovedIndexPaths.insert(updatedItem.indexPathBeforeUpdate!)
             case .move:
-                insertedDeletedOrMovedIndexPaths.insert(updateItem.indexPathAfterUpdate!)
-                insertedDeletedOrMovedIndexPaths.insert(updateItem.indexPathBeforeUpdate!)
+                insertedDeletedOrMovedIndexPaths.insert(updatedItem.indexPathAfterUpdate!)
+                insertedDeletedOrMovedIndexPaths.insert(updatedItem.indexPathBeforeUpdate!)
+            case .reload:
+                break
             default:
                 break
             }
@@ -136,6 +172,14 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
     override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
         return true
+    }
+
+    override func shouldInvalidateLayout(forPreferredLayoutAttributes preferredAttributes: UICollectionViewLayoutAttributes, withOriginalAttributes originalAttributes: UICollectionViewLayoutAttributes) -> Bool {
+        print("================================================")
+        dump(originalAttributes.frame.height)
+        dump(preferredAttributes.frame.height)
+        print("================================================")
+        return false
     }
 
     override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
@@ -167,7 +211,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
     // MARK: Animation
 
     override func initialLayoutAttributesForAppearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        let layoutAttributes = cachedLayoutAttributes[itemIndexPath]
+        let layoutAttributes = cachedLayoutAttributes[itemIndexPath.tagged(with: .item)]
         if insertedDeletedOrMovedIndexPaths.contains(itemIndexPath) {
             layoutAttributes?.alpha = 0
             insertedDeletedOrMovedIndexPaths.remove(itemIndexPath)
@@ -176,11 +220,55 @@ class CollectionViewFillLayout: UICollectionViewLayout {
     }
 
     override func finalLayoutAttributesForDisappearingItem(at itemIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        let layoutAttributes = cachedLayoutAttributes[itemIndexPath]
+        let layoutAttributes = cachedLayoutAttributes[itemIndexPath.tagged(with: .item)]
         if insertedDeletedOrMovedIndexPaths.contains(itemIndexPath) {
             layoutAttributes?.alpha = 0
             insertedDeletedOrMovedIndexPaths.remove(itemIndexPath)
         }
         return layoutAttributes
+    }
+}
+
+
+extension CollectionViewFillLayout {
+    struct TaggedIndexPath: Hashable {
+        enum Tag: String, Hashable, CaseIterable {
+            case header
+            case item
+            case footer
+        }
+
+        let item: Int
+        let section: Int
+        let tag: Tag
+        let native: IndexPath
+
+        init(item: Int, section: Int, tag: Tag) {
+            self.item = item
+            self.section = section
+            self.tag = tag
+            self.native = IndexPath(item: item, section: section)
+        }
+    }
+}
+
+
+extension UICollectionViewLayoutAttributes {
+    convenience init(taggedIndexPath: CollectionViewFillLayout.TaggedIndexPath) {
+        switch taggedIndexPath.tag {
+        case .header:
+            self.init(forSupplementaryViewOfKind: "Header", with: taggedIndexPath.native)
+        case .footer:
+            self.init(forSupplementaryViewOfKind: "Footer", with: taggedIndexPath.native)
+        case .item:
+            self.init(forCellWith: taggedIndexPath.native)
+        }
+    }
+}
+
+
+private extension IndexPath {
+    func tagged(with tag: CollectionViewFillLayout.TaggedIndexPath.Tag) -> CollectionViewFillLayout.TaggedIndexPath {
+        return CollectionViewFillLayout.TaggedIndexPath.init(item: item, section: section, tag: tag)
     }
 }
