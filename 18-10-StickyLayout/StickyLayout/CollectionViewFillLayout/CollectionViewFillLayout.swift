@@ -219,6 +219,24 @@ class CollectionViewFillLayout: UICollectionViewLayout {
         }
         return layoutAttributes
     }
+
+    override func initialLayoutAttributesForAppearingSupplementaryElement(ofKind elementKind: String, at elementIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        let layoutAttributes = cachedLayoutAttributes[elementIndexPath.tagged(with: CollectionViewFillLayout.TaggedIndexPath.Tag.init(rawValue: elementKind)!)]
+        if insertedDeletedOrMovedIndexPaths.contains(elementIndexPath) {
+            layoutAttributes?.alpha = 0
+            insertedDeletedOrMovedIndexPaths.remove(elementIndexPath)
+        }
+        return layoutAttributes
+    }
+
+    override func finalLayoutAttributesForDisappearingSupplementaryElement(ofKind elementKind: String, at elementIndexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+        let layoutAttributes = cachedLayoutAttributes[elementIndexPath.tagged(with: CollectionViewFillLayout.TaggedIndexPath.Tag.init(rawValue: elementKind)!)]
+        if insertedDeletedOrMovedIndexPaths.contains(elementIndexPath) {
+            layoutAttributes?.alpha = 0
+            insertedDeletedOrMovedIndexPaths.remove(elementIndexPath)
+        }
+        return layoutAttributes
+    }
 }
 
 
