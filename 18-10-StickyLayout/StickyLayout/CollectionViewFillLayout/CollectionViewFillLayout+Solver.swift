@@ -45,7 +45,7 @@ extension CollectionViewFillLayout {
                         firstFlexiblePositioning = index
                     }
                 }
-            case .stickyBottom:
+            case .pinnedToBottom:
                 let y = lastBottomFrame.maxY
                 let frame = CGRect(x: x, y: y, width: width, height: height)
                 positioning = Positioning(for: item.object, frame: frame, alignment: item.alignment)
@@ -70,7 +70,7 @@ extension CollectionViewFillLayout {
                     let item = items[index]
 
                     // Skip bottom alignments
-                    if item.alignment == .stickyBottom {
+                    if item.alignment == .pinnedToBottom {
                         continue
                     }
 

@@ -37,8 +37,8 @@ class CollectionViewFillLayoutTests: XCTestCase {
 
     func testOffset() {
         let items = [
-            CollectionViewFillLayout.Item(with: "A", height: 10, alignment: .stickyBottom),
-            CollectionViewFillLayout.Item(with: "B", height: 10, alignment: .stickyBottom)
+            CollectionViewFillLayout.Item(with: "A", height: 10, alignment: .pinnedToBottom),
+            CollectionViewFillLayout.Item(with: "B", height: 10, alignment: .pinnedToBottom)
         ]
 
         let result = CollectionViewFillLayout.solve(with: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 50)
@@ -73,8 +73,8 @@ class CollectionViewFillLayoutTests: XCTestCase {
     func testBottomAlignment() {
         let items = [
             CollectionViewFillLayout.Item(with: "A", height: 20, alignment: .default),
-            CollectionViewFillLayout.Item(with: "B", height: 20, alignment: .stickyBottom),
-            CollectionViewFillLayout.Item(with: "C", height: 20, alignment: .stickyBottom),
+            CollectionViewFillLayout.Item(with: "B", height: 20, alignment: .pinnedToBottom),
+            CollectionViewFillLayout.Item(with: "C", height: 20, alignment: .pinnedToBottom),
         ]
 
         let result = CollectionViewFillLayout.solve(with: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
@@ -87,7 +87,7 @@ class CollectionViewFillLayoutTests: XCTestCase {
         let items = [
             CollectionViewFillLayout.Item(with: "A", height: 20, alignment: .default),
             CollectionViewFillLayout.Item(with: "B", height: 20, alignment: .flexible),
-            CollectionViewFillLayout.Item(with: "C", height: 20, alignment: .stickyBottom),
+            CollectionViewFillLayout.Item(with: "C", height: 20, alignment: .pinnedToBottom),
         ]
 
         let result = CollectionViewFillLayout.solve(with: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)
@@ -101,7 +101,7 @@ class CollectionViewFillLayoutTests: XCTestCase {
             CollectionViewFillLayout.Item(with: "A", height: 20, alignment: .default),
             CollectionViewFillLayout.Item(with: "B1", height: 20, alignment: .flexible),
             CollectionViewFillLayout.Item(with: "B2", height: 0, alignment: .flexible),
-            CollectionViewFillLayout.Item(with: "C", height: 20, alignment: .stickyBottom),
+            CollectionViewFillLayout.Item(with: "C", height: 20, alignment: .pinnedToBottom),
         ]
 
         let result = CollectionViewFillLayout.solve(with: items, inside: CGRect(x: 0, y: 0, width: 100, height: 100), offset: 0)

@@ -13,8 +13,8 @@ protocol CollectionViewDataSourceFillLayout: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellTypeAt indexPath: IndexPath) -> UICollectionViewCell.Type
     func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, for indexPath: IndexPath)
 
-    func collectionView(_ collectionView: UICollectionView, supplementaryViewTypeAt indexPath: IndexPath, kind: String) -> UICollectionReusableView.Type?
-    func collectionView(_ collectionView: UICollectionView, configureSupplementaryView view: UICollectionReusableView, for indexPath: IndexPath, kind: String)
+    func collectionView(_ collectionView: UICollectionView, supplementaryViewTypeAt indexPath: IndexPath, position: CollectionViewFillLayout.SupplementaryViewPosition) -> UICollectionReusableView.Type?
+    func collectionView(_ collectionView: UICollectionView, configureSupplementaryView view: UICollectionReusableView, for indexPath: IndexPath, position: CollectionViewFillLayout.SupplementaryViewPosition)
 }
 
 
@@ -59,7 +59,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
         var layoutItems = [CollectionViewFillLayout.Item<TaggedIndexPath>]()
         for section in 0..<collectionView.numberOfSections {
             for item in 0..<collectionView.numberOfItems(inSection: section) {
-                for tag in TaggedIndexPath.Tag.allCases {
+                for tag in [TaggedIndexPath.Tag.before, .item, .after] {
                     let indexPath = TaggedIndexPath(item: item, section: section, tag: tag)
 
                     // Item size
@@ -71,13 +71,13 @@ class CollectionViewFillLayout: UICollectionViewLayout {
                         let contentView: UIView
                         let minimumHeight: CGFloat
                         switch tag {
-                        case .header, .footer:
-                            guard let viewType = delegate.collectionView(collectionView, supplementaryViewTypeAt: indexPath.native, kind: tag.rawValue) else {
+                        case .before, .after:
+                            guard let viewType = delegate.collectionView(collectionView, supplementaryViewTypeAt: indexPath.native, position: .init(tag: tag)) else {
                                 continue
                             }
                             let supplementaryView = viewType.init(frame: .zero)
                             minimumHeight = delegate.collectionView(collectionView, minimumHeightForSupplementaryViewAt: indexPath.native)
-                            delegate.collectionView(collectionView, configureSupplementaryView: supplementaryView, for: indexPath.native, kind: tag.rawValue)
+                            delegate.collectionView(collectionView, configureSupplementaryView: supplementaryView, for: indexPath.native, position: .init(tag: tag))
                             contentView = supplementaryView
                         case .item:
                             let cellType = delegate.collectionView(collectionView, cellTypeAt: indexPath.native)
@@ -94,14 +94,14 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
                         let maximumCellSize = CGSize(width: collectionView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
                         cellSize = contentView.systemLayoutSizeFitting(maximumCellSize,
-                                                                            withHorizontalFittingPriority: .required,
-                                                                            verticalFittingPriority: UILayoutPriority(1))
+                                                                       withHorizontalFittingPriority: .required,
+                                                                       verticalFittingPriority: UILayoutPriority(1))
                     }
 
                     // Item alignment
                     let alignment: CollectionViewFillLayout.Alignment
                     switch tag {
-                    case .header, .footer:
+                    case .before, .after:
                         alignment = delegate.collectionView(collectionView, alignmentForSupplementaryViewAt: indexPath.native)
                     case .item:
                         alignment = delegate.collectionView(collectionView, alignmentForCellAt: indexPath.native)
@@ -128,9 +128,9 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
         for (index, positioning) in result.positionings.enumerated() {
             let indexPath = positioning.object
-            let itemAttributes = UICollectionViewLayoutAttributes(forCellWith: indexPath.native)
+            let itemAttributes = UICollectionViewLayoutAttributes(taggedIndexPath: indexPath)
             itemAttributes.frame = positioning.frame
-            itemAttributes.zIndex = positioning.alignment == .stickyBottom ? index + 1000 : index
+            itemAttributes.zIndex = positioning.alignment == .pinnedToBottom ? index + 1000 : index
             cachedLayoutAttributes[indexPath] = itemAttributes
         }
 
@@ -172,14 +172,6 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
     override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
         return true
-    }
-
-    override func shouldInvalidateLayout(forPreferredLayoutAttributes preferredAttributes: UICollectionViewLayoutAttributes, withOriginalAttributes originalAttributes: UICollectionViewLayoutAttributes) -> Bool {
-        print("================================================")
-        dump(originalAttributes.frame.height)
-        dump(preferredAttributes.frame.height)
-        print("================================================")
-        return false
     }
 
     override func invalidateLayout(with context: UICollectionViewLayoutInvalidationContext) {
@@ -233,9 +225,9 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 extension CollectionViewFillLayout {
     struct TaggedIndexPath: Hashable {
         enum Tag: String, Hashable, CaseIterable {
-            case header
+            case before
             case item
-            case footer
+            case after
         }
 
         let item: Int
@@ -250,16 +242,28 @@ extension CollectionViewFillLayout {
             self.native = IndexPath(item: item, section: section)
         }
     }
+
+    enum SupplementaryViewPosition: String {
+        case before
+        case after
+
+        init(tag: TaggedIndexPath.Tag) {
+            switch tag {
+            case .after:
+                self = .after
+            default:
+                self = .before
+            }
+        }
+    }
 }
 
 
 extension UICollectionViewLayoutAttributes {
     convenience init(taggedIndexPath: CollectionViewFillLayout.TaggedIndexPath) {
         switch taggedIndexPath.tag {
-        case .header:
-            self.init(forSupplementaryViewOfKind: "Header", with: taggedIndexPath.native)
-        case .footer:
-            self.init(forSupplementaryViewOfKind: "Footer", with: taggedIndexPath.native)
+        case .before, .after:
+            self.init(forSupplementaryViewOfKind: CollectionViewFillLayout.SupplementaryViewPosition(tag: taggedIndexPath.tag).rawValue, with: taggedIndexPath.native)
         case .item:
             self.init(forCellWith: taggedIndexPath.native)
         }

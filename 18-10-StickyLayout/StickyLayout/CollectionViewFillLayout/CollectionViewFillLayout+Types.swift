@@ -13,7 +13,7 @@ extension CollectionViewFillLayout {
     enum Alignment {
         case `default`
         case flexible
-        case stickyBottom
+        case pinnedToBottom
     }
 
     struct Item<T> {
