@@ -170,6 +170,11 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
     // MARK: Invalidation
 
+    func invalidateCellSizes() {
+        invalidateEverything = true
+        invalidateLayout()
+    }
+
     override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
         return true
     }
@@ -241,7 +246,7 @@ class CollectionViewFillLayout: UICollectionViewLayout {
 
 
 extension CollectionViewFillLayout {
-    struct TaggedIndexPath: Hashable {
+    fileprivate struct TaggedIndexPath: Hashable {
         enum Tag: String, Hashable, CaseIterable {
             case before
             case item
@@ -265,7 +270,7 @@ extension CollectionViewFillLayout {
         case before
         case after
 
-        init(tag: TaggedIndexPath.Tag) {
+        fileprivate init(tag: TaggedIndexPath.Tag) {
             switch tag {
             case .after:
                 self = .after
@@ -277,7 +282,7 @@ extension CollectionViewFillLayout {
 }
 
 
-extension UICollectionViewLayoutAttributes {
+private extension UICollectionViewLayoutAttributes {
     convenience init(taggedIndexPath: CollectionViewFillLayout.TaggedIndexPath) {
         switch taggedIndexPath.tag {
         case .before, .after:

@@ -218,13 +218,11 @@ class ViewController: UIViewController, CollectionViewDataSourceFillLayout, Coll
         case .items:
             items[indexPath.row] += " " + ViewController.text
             let cell = collectionView.cellForItem(at: indexPath)!
-            UIView.animate(withDuration: 0.2) {
+            UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 0.25, options: .allowAnimatedContent, animations: {
                 self.collectionView(collectionView, configureCell: cell, for: indexPath)
-                self.layout.invalidateEverything = true
-                self.layout.invalidateLayout()
-                collectionView.setNeedsLayout()
+                self.layout.invalidateCellSizes()
                 collectionView.layoutIfNeeded()
-            }
+            }, completion: nil)
         default:
             break
         }
@@ -268,7 +266,6 @@ class ViewController: UIViewController, CollectionViewDataSourceFillLayout, Coll
     func keyboardLayoutGuide(_ keyboardLayoutGuide: KeyboardLayoutGuide, isChangingFrom heightBefore: CGFloat, to heightAfter: CGFloat, animated: Bool) {
         if let focusedIndexPath = focusedIndexPath, heightAfter > 0 {
             collectionView.scrollToItem(at: focusedIndexPath, at: .centeredVertically, animated: false)
-            collectionView.setNeedsLayout()
             collectionView.layoutIfNeeded()
         }
     }
