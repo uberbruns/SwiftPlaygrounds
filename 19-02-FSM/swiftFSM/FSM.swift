@@ -9,7 +9,7 @@
 import Foundation
 
 
-class FiniteStateMachine<FS: FSMState>: ObservableFiniteStateMachine {
+class FiniteStateMachine<FS: FSMState> {
 
   typealias TransitionHandler = (FS.TransitionType, FS, FS) -> Void
 
@@ -58,46 +58,42 @@ class FiniteStateMachine<FS: FSMState>: ObservableFiniteStateMachine {
 
 // MARK: - Observability -
 
-private protocol ObservableFiniteStateMachine: AnyObject{
-  func removeObserver(_ token: FSMObservationToken)
-}
-
-
 class FSMObservationToken {
 
-  private weak var stateMachine: ObservableFiniteStateMachine?
-  let uid: Int
+  fileprivate let uid: Int
+  fileprivate var deinitialization: (() -> Void)?
 
-  fileprivate init(uid: Int, stateMachine: ObservableFiniteStateMachine) {
+  fileprivate init(uid: Int) {
     self.uid = uid
   }
 
   deinit {
-    stateMachine?.removeObserver(self)
+    deinitialization?()
   }
 
-  func append(to array: inout [FSMObservationToken]) {
-    array.append(self)
-  }
-
-  func retain(in array: inout [Any]) {
-    array.append(self)
+  func retain(in tokenPool: FSMObservationTokenPool) {
+    tokenPool.tokens.append(self)
   }
 }
 
+
+class FSMObservationTokenPool {
+  fileprivate var tokens = [Any]()
+
+  init() { }
+}
 
 extension FiniteStateMachine {
 
   typealias Observation = (FSMLifeCycleEvent<FS>) -> Void
 
   func addObserver(_ block: @escaping Observation) -> FSMObservationToken {
-    let token = FSMObservationToken(uid: observerUIDs, stateMachine: self)
+    let token = FSMObservationToken(uid: observerUIDs)
+    token.deinitialization = { [weak self] in
+      self?.observations.removeValue(forKey: token.uid)
+    }
     observations[token.uid] = block
     observerUIDs += 1
     return token
-  }
-
-  fileprivate func removeObserver(_ token: FSMObservationToken) {
-    observations.removeValue(forKey: token.uid)
   }
 }

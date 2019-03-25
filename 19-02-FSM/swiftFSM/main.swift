@@ -12,7 +12,19 @@ import Foundation
 enum Trip: FSMState, Hashable {
   typealias TransitionType = Transition
 
+  case booking(destination: String)
+  case waiting
+  case traveling
+  case arrived
+}
+
+
+extension Trip {
   enum Transition: FSMTransition {
+    case ordering
+    case entering
+    case exiting
+
     func transformer() -> (Trip) throws -> Trip {
       switch self {
       case .entering:
@@ -32,29 +44,20 @@ enum Trip: FSMState, Hashable {
         }
       }
     }
-
-    case ordering
-    case entering
-    case exiting
   }
-
-  case booking(destination: String)
-  case waiting
-  case traveling
-  case arrived
 }
 
 
 var tripStateMachine = FiniteStateMachine(state: Trip.booking(destination: "Beethovenstraße"))
-var tokenBin = [Any]()
+var tokenPool = FSMObservationTokenPool()
 
 tripStateMachine.will(perform: .ordering) {
   print("Will order trip 1.")
-}.retain(in: &tokenBin)
+}.retain(in: tokenPool)
 
 tripStateMachine.will(perform: .ordering) {
   print("Will order trip 2.")
-}.retain(in: &tokenBin)
+}.retain(in: tokenPool)
 
 tripStateMachine.handle(.ordering) {
   print("Ordering trip.")
@@ -62,11 +65,11 @@ tripStateMachine.handle(.ordering) {
 
 tripStateMachine.did(perform: .ordering) {
   print("Did order trip.")
-}.retain(in: &tokenBin)
+}.retain(in: tokenPool)
 
 tripStateMachine.did(enter: .traveling) {
   print("I started traveling.")
-}.retain(in: &tokenBin)
+}.retain(in: tokenPool)
 
 tripStateMachine.addHandler { transistion, oldState, newState in
   switch transistion {
@@ -79,11 +82,11 @@ tripStateMachine.addHandler { transistion, oldState, newState in
 
 tripStateMachine.did(leave: .traveling) {
   print("I stopped traveling.")
-}.retain(in: &tokenBin)
+}.retain(in: tokenPool)
 
 tripStateMachine.did(enter: .arrived) {
   print("I arrived!")
-}.retain(in: &tokenBin)
+}.retain(in: tokenPool)
 
 do {
   if !tripStateMachine.can(.entering) {
