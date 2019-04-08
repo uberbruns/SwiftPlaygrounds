@@ -41,7 +41,6 @@ let myStateGroup = MyStateGroup(externalStateGroup: externalStateGroup)
 myStateGroup.sum.observe { sum in
   print("Sum changed to: \(sum) (\(externalStateGroup.apples.value)+\(myStateGroup.pears.value))")
   print("AppleJuice: \(externalStateGroup.appleJuice.value) ml")
-
 }.retain(in: observationPool)
 
 myStateGroup.pears.value += 2

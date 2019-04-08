@@ -15,7 +15,7 @@ class FiniteStateMachine<FS: FSMState> {
 
   private var transitionHandlers = [TransitionHandler]()
 
-  private var observerUIDs = 0
+  private var lastTokenUID = 0
   private var observations = [Int: Observation]() {
     didSet {
       sortedObservations = observations.sorted(by: { $0.key < $1.key }).map({ $0.value })
@@ -88,12 +88,13 @@ extension FiniteStateMachine {
   typealias Observation = (FSMLifeCycleEvent<FS>) -> Void
 
   func addObserver(_ block: @escaping Observation) -> FSMObservationToken {
-    let token = FSMObservationToken(uid: observerUIDs)
+    let tokenUID = lastTokenUID + 1
+    let token = FSMObservationToken(uid: tokenUID)
     token.deinitialization = { [weak self] in
-      self?.observations.removeValue(forKey: token.uid)
+      self?.observations.removeValue(forKey: tokenUID)
     }
-    observations[token.uid] = block
-    observerUIDs += 1
+    observations[tokenUID] = block
+    lastTokenUID = tokenUID
     return token
   }
 }

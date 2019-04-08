@@ -173,9 +173,8 @@ extension StateGroup {
 
     func reset() { }
 
-    func callObserver() { }
+    fileprivate func callObserver() { }
   }
-
 
   class State<T>: Node {
     fileprivate var nextObserverUID = 0
@@ -202,6 +201,11 @@ extension StateGroup {
   class Variable<T>: State<T> {
     private var _value: T
 
+    // Technically this type is never unresolved, but the
+    // state group expects nodes to be unresolved, after it
+    // invalideted them. This var 'fakes' the isResolved state.
+    private var _isResolved = false
+
     override var value: T {
       get {
         return _value
@@ -217,12 +221,24 @@ extension StateGroup {
       super.init()
       self.stateGroup = stateGroup
     }
+
+    override func reset() {
+      _isResolved = false
+    }
+
+    override func isResolved() -> Bool {
+      return _isResolved
+    }
+
+    override func resolve() {
+      _isResolved = true
+    }
   }
 
 
   fileprivate class Map<A, T>: State<T> {
-    let a: State<A>
-    let body: (A) -> T
+    private let a: State<A>
+    private let body: (A) -> T
 
     private let _edges: [Node]
 
@@ -260,9 +276,9 @@ extension StateGroup {
 
 
   fileprivate class Zip<A, B, T>: State<T> {
-    let a: State<A>
-    let b: State<B>
-    let body: (A, B) -> T
+    private let a: State<A>
+    private let b: State<B>
+    private let body: (A, B) -> T
 
     private let _edges: [Node]
 
@@ -334,7 +350,6 @@ class ObservationPool {
 
 extension StateGroup.State {
   class Token {
-
     fileprivate let uid: Int
     fileprivate var deinitialization: (() -> Void)?
 
@@ -356,15 +371,14 @@ extension StateGroup.State {
 extension StateGroup.State {
   typealias Observation = (T) -> Void
 
-
   func observe(_ block: @escaping Observation) -> Token {
-    let token = Token(uid: nextObserverUID)
+    let tokenUID = nextObserverUID
+    let token = Token(uid: tokenUID)
     token.deinitialization = { [weak self] in
-      self?.observations.removeValue(forKey: token.uid)
+      self?.observations.removeValue(forKey: tokenUID)
     }
     observations[token.uid] = block
     nextObserverUID += 1
     return token
   }
 }
-
