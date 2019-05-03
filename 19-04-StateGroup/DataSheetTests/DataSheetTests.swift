@@ -10,8 +10,8 @@ import XCTest
 
 
 protocol AppStateProtocol: StateGroup {
-  var isNetworkAvailable: Variable<Bool> { get }
-  var isLoggedIn: Variable<Bool> { get }
+  var isNetworkAvailable: State<Bool> { get }
+  var isLoggedIn: State<Bool> { get }
   var isReady: State<Bool> { get }
 }
 
@@ -55,33 +55,33 @@ class DataSheetTests: XCTestCase {
   }
 
   func test_valueAccess() {
-    XCTAssertFalse(appState.isReady.value)
+    XCTAssertEqual(appState.isReady.value, false)
   }
 
   func test_zip1() {
     appState.isNetworkAvailable.value = true
-    XCTAssertFalse(appState.isReady.value)
+    XCTAssertEqual(appState.isReady.value, false)
   }
 
   func test_zip2() {
     appState.isLoggedIn.value = true
-    XCTAssertFalse(appState.isReady.value)
-    XCTAssertFalse(viewState.showContent.value)
+    XCTAssertEqual(appState.isReady.value, false)
+    XCTAssertEqual(viewState.showContent.value, false)
   }
 
   func test_zip3() {
     appState.isNetworkAvailable.value = true
     appState.isLoggedIn.value = true
-    XCTAssertTrue(appState.isReady.value)
+    XCTAssertEqual(appState.isReady.value, true)
   }
 
   func test_map1() {
-    XCTAssertTrue(viewState.showNetworkUnavailableMessage.value)
+    XCTAssertEqual(viewState.showNetworkUnavailableMessage.value, true)
   }
 
   func test_map2() {
     appState.isNetworkAvailable.value = true
-    XCTAssertFalse(viewState.showNetworkUnavailableMessage.value)
+    XCTAssertEqual(viewState.showNetworkUnavailableMessage.value, false)
   }
 
   func test_map3() {
@@ -116,13 +116,43 @@ class DataSheetTests: XCTestCase {
     }.retain(in: observationPool)
 
     appState.isNetworkAvailable.value = true
-    XCTAssertFalse(showContent)
+    XCTAssertEqual(showContent, false)
 
+    appState.isLoggedIn.value = true
+    XCTAssertEqual(showContent, true)
+
+    XCTAssertEqual(showContentVisits, 1)
+    XCTAssertEqual(appState.isReadyVisits, 3)
+  }
+
+  func test_observation_visits() {
+    var showContent = false
+    var showContentVisits = 0
+
+    viewState.showContent.observe { value in
+      showContent = value
+      showContentVisits += 1
+      }.retain(in: observationPool)
+
+    // Not changing `isNetworkAvailable` values should not increase `isReadyVisits` visits
+    appState.isNetworkAvailable.value = true
+    appState.isNetworkAvailable.value = true
+    appState.isNetworkAvailable.value = true
+    appState.isNetworkAvailable.value = true
+
+    // Changing `isNetworkAvailable` values should increase `isReadyVisits` visits, but
+    // not trigger the `showContent` observation
+    appState.isNetworkAvailable.value = false
+    appState.isNetworkAvailable.value = true
+
+    // Changing `isNetworkAvailable` and `isLoggedIn` value to true should
+    // trigger the `showContent` observation
+    appState.isNetworkAvailable.value = true
     appState.isLoggedIn.value = true
     XCTAssertTrue(showContent)
 
-    XCTAssertEqual(showContentVisits, 2)
-    XCTAssertEqual(appState.isReadyVisits, 3)
+    XCTAssertEqual(showContentVisits, 1)
+    XCTAssertEqual(appState.isReadyVisits, 5)
   }
 
   func test_observation_memory1() {

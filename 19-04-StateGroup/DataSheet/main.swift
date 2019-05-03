@@ -10,7 +10,7 @@ import Foundation
 
 
 protocol ExternalStateGroupProtocol: StateGroup {
-  var apples: Variable<Int> { get }
+  var apples: State<Int> { get }
   var appleJuice: State<Double> { get }
 }
 
