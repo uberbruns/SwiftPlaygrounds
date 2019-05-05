@@ -17,8 +17,8 @@ protocol AppStateProtocol: StateGroup {
 
 
 class AppState: StateGroup, AppStateProtocol {
-  lazy var isNetworkAvailable = variable(false)
-  lazy var isLoggedIn = variable(false)
+  lazy var isNetworkAvailable = value(false)
+  lazy var isLoggedIn = value(false)
   lazy var isReady = zip(isNetworkAvailable, isLoggedIn) { (isNetworkAvailable, isLoggedIn) -> Bool in
     self.isReadyVisits += 1
     return isNetworkAvailable && isLoggedIn
@@ -132,7 +132,7 @@ class DataSheetTests: XCTestCase {
     viewState.showContent.observe { value in
       showContent = value
       showContentVisits += 1
-      }.retain(in: observationPool)
+    }.retain(in: observationPool)
 
     // Not changing `isNetworkAvailable` values should not increase `isReadyVisits` visits
     appState.isNetworkAvailable.value = true

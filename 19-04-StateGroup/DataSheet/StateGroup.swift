@@ -26,7 +26,7 @@ class StateGroup {
 
   deinit {
     for node in nodes {
-      for edge in node.edges() where edge.stateGroup != self {
+      for edge in node.edges where edge.stateGroup != self {
         guard let edgeStateGroup = edge.stateGroup else { continue }
         edgeStateGroup.linkedGroups.removeValue(forKey: identifier)
       }
@@ -38,7 +38,7 @@ class StateGroup {
 
     nodes.append(node)
 
-    for edge in node.edges() {
+    for edge in node.edges {
       if edge.stateGroup != self && edge.stateGroup?.linkedGroups[identifier] == nil {
         let linkedGroup = LinkedGroup(self)
         edge.stateGroup?.linkedGroups[identifier] = linkedGroup
@@ -66,14 +66,12 @@ class StateGroup {
       }
     }
 
-    for affectedNode in nodes where affectedNode.edges().contains(where: { $0 === invalidNode }) {
+    for affectedNode in nodes where affectedNode.edges.contains(where: { $0 === invalidNode }) {
       invalidate(affectedNode)
     }
   }
 
   private func resolve(resolvedNodes: inout [Node]) {
-    // This algorithm is just a proof of concept and should be replace with
-    // a proper graph resolver.
     var unresolvedNodes = nodes.filter { !$0.isResolved() }
     var solvedSomething = true
     var localResolvedNodes = [Node]()
@@ -83,7 +81,7 @@ class StateGroup {
 
       for valueIndex in unresolvedNodes.indices.reversed() {
         let node = unresolvedNodes[valueIndex]
-        let edges = node.edges()
+        let edges = node.edges
 
         let resolveNode = {
           node.resolve()
@@ -96,7 +94,8 @@ class StateGroup {
           resolveNode()
         } else {
           let hasUnresolvedEdge = edges.contains { !$0.isResolved() }
-          if !hasUnresolvedEdge {
+          let isResolvable = !hasUnresolvedEdge
+          if isResolvable {
             resolveNode()
           }
         }
@@ -111,7 +110,7 @@ class StateGroup {
   }
 
   private func callObservers(nodes: [Node]) {
-    for node in nodes where node.valueChanged() {
+    for node in nodes where node.valueChanged {
       node.callObserver()
     }
   }
@@ -143,17 +142,24 @@ extension StateGroup: Equatable {
 // MARK: - Node Types -
 
 extension StateGroup {
+
+  // MARK: - Root Node -
+
   class Node: Hashable {
 
     weak var stateGroup: StateGroup?
+    fileprivate var valueChanged = false
+    fileprivate var edges: [Node]
+
     private static var nextNodeIdentifier = 0
     private let nodeIdentifier: Int
 
-    static func == (lhs: StateGroup.Node, rhs: StateGroup.Node) -> Bool {
+    static func ==(lhs: StateGroup.Node, rhs: StateGroup.Node) -> Bool {
       return lhs.hashValue == rhs.hashValue
     }
 
-    init() {
+    fileprivate init(edges: [Node]) {
+      self.edges = edges
       self.nodeIdentifier = Node.nextNodeIdentifier
       Node.nextNodeIdentifier += 1
     }
@@ -166,19 +172,11 @@ extension StateGroup {
       fatalError("Node is not meant to be used directly. Use subclass instead.")
     }
 
-    func edges() -> [Node] {
-      fatalError("Node is not meant to be used directly. Use subclass instead.")
-    }
-
     func resolve() {
       fatalError("Node is not meant to be used directly. Use subclass instead.")
     }
 
     func reset() {
-      fatalError("Node is not meant to be used directly. Use subclass instead.")
-    }
-
-    fileprivate func valueChanged() -> Bool {
       fatalError("Node is not meant to be used directly. Use subclass instead.")
     }
 
@@ -188,7 +186,13 @@ extension StateGroup {
   }
 
 
+  // MARK: - State Node -
+
   class State<T: Equatable>: Node {
+
+    // MARK: Properties
+
+    // Observability
     fileprivate var nextObserverUID = 0
     fileprivate var observations = [Int: Observation]() {
       didSet {
@@ -197,20 +201,46 @@ extension StateGroup {
     }
     fileprivate var sortedObservations = [Observation]()
 
+    // Node Evaluation
+    fileprivate var evaluate: ([Node]) -> T
+    private var storedValue: T?
+    private var oldValue: T?
+
     var value: T {
       get {
-        fatalError("State<T> is not meant to be used directly. Use subclass instead.")
+        return storedValue!
       }
       set {
-        fatalError("State<T> is not meant to be used directly. Use subclass instead.")
+        assertionFailure("This node does not provide a setter.")
       }
     }
 
-    fileprivate override init() {
-      super.init()
+    // MARK: Life Cycle
+
+    fileprivate init(stateGroup: StateGroup, edges: [Node], eval: @escaping ([Node]) -> T) {
+      self.evaluate = eval
+      super.init(edges: edges)
+      self.stateGroup = stateGroup
     }
 
-    override func callObserver() {
+    // MARK: Node Characteristics
+
+    final override func reset() {
+      oldValue = storedValue
+      storedValue = nil
+    }
+
+    final override func isResolved() -> Bool {
+      return storedValue != nil
+    }
+
+    final override func resolve() {
+      storedValue = evaluate(edges)
+      valueChanged = oldValue != storedValue
+      oldValue = nil
+    }
+
+    final override func callObserver() {
       for observation in sortedObservations {
         observation(value)
       }
@@ -218,160 +248,76 @@ extension StateGroup {
   }
 
 
-  class Variable<T: Equatable>: State<T> {
-    private var _value: T?
-    private var _oldValue: T?
-    private var _newValue: T?
-    private var _valueChanged: Bool
+  // MARK: - Map Node -
 
-    override var value: T {
+  final fileprivate class Map<A: Equatable, T: Equatable>: State<T> {
+    init(stateGroup: StateGroup, a: State<A>, body: @escaping (A) -> T) {
+      super.init(stateGroup: stateGroup, edges: [a]) { edges -> T in
+        let a = edges[0] as! State<A>
+        return body(a.value)
+      }
+    }
+  }
+
+
+  // MARK: - Zip Nodes -
+
+  final fileprivate class Zip2<A: Equatable, B: Equatable, T: Equatable>: State<T> {
+    init(stateGroup: StateGroup, a: State<A>, b: State<B>, body: @escaping (A, B) -> T) {
+      super.init(stateGroup: stateGroup, edges: [a, b]) { edges -> T in
+        let a = edges[0] as! State<A>
+        let b = edges[1] as! State<B>
+        return body(a.value, b.value)
+      }
+    }
+  }
+
+  final fileprivate class Zip3<A: Equatable, B: Equatable, C: Equatable, T: Equatable>: State<T> {
+    init(stateGroup: StateGroup, a: State<A>, b: State<B>, c: State<C>, body: @escaping (A, B, C) -> T) {
+      super.init(stateGroup: stateGroup, edges: [a, b, c]) { edges -> T in
+        let a = edges[0] as! State<A>
+        let b = edges[1] as! State<B>
+        let c = edges[2] as! State<C>
+        return body(a.value, b.value, c.value)
+      }
+    }
+  }
+
+  final fileprivate class Zip4<A: Equatable, B: Equatable, C: Equatable, D: Equatable, T: Equatable>: State<T> {
+    init(stateGroup: StateGroup, a: State<A>, b: State<B>, c: State<C>, d: State<D>, body: @escaping (A, B, C, D) -> T) {
+      super.init(stateGroup: stateGroup, edges: [a, b, c, d]) { edges -> T in
+        let a = edges[0] as! State<A>
+        let b = edges[1] as! State<B>
+        let c = edges[2] as! State<C>
+        let d = edges[3] as! State<D>
+        return body(a.value, b.value, c.value, d.value)
+      }
+    }
+  }
+
+  // MARK: - Var Node -
+
+  final fileprivate class Value<T: Equatable>: State<T> {
+    private var newValue: T?
+
+    final override var value: T {
       get {
-        return _value!
+        return super.value
       }
       set {
-        if newValue != _value {
-          _newValue = newValue
+        if newValue != super.value {
+          self.newValue = newValue
           stateGroup?.update(with: self)
         }
       }
     }
 
     init(stateGroup: StateGroup, value: T) {
-      self._value = value
-      self._newValue = nil
-      self._valueChanged = true
-      super.init()
-      self.stateGroup = stateGroup
-    }
-
-    override func edges() -> [StateGroup.Node] {
-      return []
-    }
-
-    override func valueChanged() -> Bool {
-      return _valueChanged
-    }
-
-    override func reset() {
-      _oldValue = _value
-      _value = nil
-    }
-
-    override func isResolved() -> Bool {
-      return _value != nil
-    }
-
-    override func resolve() {
-      _value = _newValue
-      _valueChanged = _oldValue != _value
-      _newValue = nil
-      _oldValue = nil
-    }
-  }
-
-
-  fileprivate class Map<A: Equatable, T: Equatable>: State<T> {
-    private let a: State<A>
-    private let body: (A) -> T
-
-    private let _edges: [Node]
-    private var _value: T?
-    private var _oldValue: T?
-    private var _valueChanged: Bool
-
-    override var value: T {
-      get {
-        return _value!
+      self.newValue = value
+      super.init(stateGroup: stateGroup, edges: []) { _ in fatalError() }
+      evaluate = { [unowned self] edges -> T in
+          return self.newValue!
       }
-      set {
-        assertionFailure("A map node does not provide a setter.")
-      }
-    }
-
-    init(stateGroup: StateGroup, a: State<A>, body: @escaping (A) -> T) {
-      self._edges = [a]
-      self._valueChanged = true
-      self.a = a
-      self.body = body
-      super.init()
-      self.stateGroup = stateGroup
-    }
-
-    override func edges() -> [Node] {
-      return _edges
-    }
-
-    override func valueChanged() -> Bool {
-      return _valueChanged
-    }
-
-    override func reset() {
-      _oldValue = _value
-      _value = nil
-    }
-
-    override func isResolved() -> Bool {
-      return _value != nil
-    }
-
-    override func resolve() {
-      _value = body(a.value)
-      _valueChanged = _oldValue != _value
-      _oldValue = nil
-    }
-  }
-
-
-  fileprivate class Zip<A: Equatable, B: Equatable, T: Equatable>: State<T> {
-    private let _edges: [Node]
-    private var _value: T?
-    private var _valueChanged: Bool
-    private var _oldValue: T?
-
-    private let a: State<A>
-    private let b: State<B>
-    private let body: (A, B) -> T
-
-    override var value: T {
-      get {
-        return _value!
-      }
-      set {
-        assertionFailure("A zip node does not provide a setter.")
-      }
-    }
-
-    init(stateGroup: StateGroup, a: State<A>, b: State<B>, body: @escaping (A, B) -> T) {
-      self.a = a
-      self.b = b
-      self._edges = [a, b]
-      self._valueChanged = true
-      self.body = body
-      super.init()
-      self.stateGroup = stateGroup
-    }
-
-    override func edges() -> [Node] {
-      return _edges
-    }
-
-    override func valueChanged() -> Bool {
-      return _valueChanged
-    }
-
-    override func reset() {
-      _oldValue = _value
-      _value = nil
-    }
-
-    override func isResolved() -> Bool {
-      return _value != nil
-    }
-
-    override func resolve() {
-      _value = body(a.value, b.value)
-      _valueChanged = _oldValue != _value
-      _oldValue = nil
     }
   }
 }
@@ -380,8 +326,8 @@ extension StateGroup {
 // MARK: Convenience Extensions
 
 extension StateGroup {
-  func variable<T: Equatable>(_ value: T) -> State<T> {
-    let node = Variable(stateGroup: self, value: value)
+  func value<T: Equatable>(_ value: T) -> State<T> {
+    let node = Value(stateGroup: self, value: value)
     register(node)
     return node
   }
@@ -392,8 +338,41 @@ extension StateGroup {
     return node
   }
 
-  func zip<A: Equatable, B: Equatable, T: Equatable>(_ a: State<A>, _ b: State<B>, body: @escaping (A, B) -> T) -> State<T> {
-    let node = Zip(stateGroup: self, a: a, b: b, body: body)
+  func zip<A: Equatable,
+    B: Equatable,
+    T: Equatable>
+    (_ a: State<A>,
+     _ b: State<B>,
+     body: @escaping (A, B) -> T) -> State<T> {
+    let node = Zip2(stateGroup: self, a: a, b: b, body: body)
+    register(node)
+    return node
+  }
+
+  func zip<
+    A: Equatable,
+    B: Equatable,
+    C: Equatable, T: Equatable>
+    (_ a: State<A>,
+     _ b: State<B>,
+     _ c: State<C>,
+     body: @escaping (A, B, C) -> T) -> State<T> {
+    let node = Zip3(stateGroup: self, a: a, b: b, c: c, body: body)
+    register(node)
+    return node
+  }
+
+  func zip<A: Equatable,
+    B: Equatable,
+    C: Equatable,
+    D: Equatable,
+    T: Equatable>
+    (_ a: State<A>,
+     _ b: State<B>,
+     _ c: State<C>,
+     _ d: State<D>,
+     body: @escaping (A, B, C, D) -> T) -> State<T> {
+    let node = Zip4(stateGroup: self, a: a, b: b, c: c, d: d, body: body)
     register(node)
     return node
   }
@@ -411,14 +390,14 @@ class ObservationPool {
 extension StateGroup.State {
   class Token {
     fileprivate let uid: Int
-    fileprivate var deinitialization: (() -> Void)?
+    fileprivate var deinitBlock: (() -> Void)?
 
     fileprivate init(uid: Int) {
       self.uid = uid
     }
 
     deinit {
-      deinitialization?()
+      deinitBlock?()
     }
 
     func retain(in observationPool: ObservationPool) {
@@ -434,7 +413,7 @@ extension StateGroup.State {
   func observe(_ block: @escaping Observation) -> Token {
     let tokenUID = nextObserverUID
     let token = Token(uid: tokenUID)
-    token.deinitialization = { [weak self] in
+    token.deinitBlock = { [weak self] in
       self?.observations.removeValue(forKey: tokenUID)
     }
     observations[token.uid] = block
