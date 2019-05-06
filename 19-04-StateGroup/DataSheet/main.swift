@@ -16,13 +16,13 @@ protocol ExternalStateGroupProtocol: StateGroup {
 
 
 class ExternalStateGroup: StateGroup, ExternalStateGroupProtocol {
-  lazy var apples = variable(2)
+  lazy var apples = value(2)
   lazy var appleJuice = map(apples) { Double($0) * 50 }
 }
 
 
 class MyStateGroup: StateGroup {
-  lazy var pears = variable(2)
+  lazy var pears = value(2)
   lazy var sum = zip(externalStateGroup.apples, pears) { $0 + $1 }
 
   let externalStateGroup: ExternalStateGroupProtocol
