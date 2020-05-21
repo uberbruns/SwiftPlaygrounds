@@ -34,14 +34,14 @@ class MyStateGroup: StateGroup {
 }
 
 
-let observationPool = ObservationPool()
+let holder = Holder()
 let externalStateGroup: ExternalStateGroupProtocol = ExternalStateGroup()
 let myStateGroup = MyStateGroup(externalStateGroup: externalStateGroup)
 
 myStateGroup.sum.observe { sum in
   print("Sum changed to: \(sum) (\(externalStateGroup.apples.value)+\(myStateGroup.pears.value))")
   print("AppleJuice: \(externalStateGroup.appleJuice.value) ml")
-}.retain(in: observationPool)
+}.attach(to: holder)
 
 myStateGroup.pears.value += 2
 myStateGroup.externalStateGroup.apples.value = 9
