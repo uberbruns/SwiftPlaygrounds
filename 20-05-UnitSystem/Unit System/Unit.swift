@@ -10,20 +10,13 @@ import Foundation
 
 
 protocol Unit: AnyObject, Identifiable {
-    init(requirement: Requirement) throws
+    init(requirement: Requirement<Self>, control: UnitControl) throws
 
-    func requirements() -> [Requirement]
+    var control: UnitControl { get }
 
     func requirementsSatisfied(resolvedUnits: ResolvedUnits)
 
     func requirementsSatisfactionLost()
-}
-
-
-extension Unit {
-    func requirements() -> [Requirement] {
-        []
-    }
 }
 
 
@@ -46,18 +39,19 @@ extension Unit {
 
 struct AnyUnit: Hashable, Identifiable {
     let id: Int
-    let requirements: [Requirement]
+    let control: UnitControl
     let base: Any
 
-    private let requirementsSatisfiedHandler: (ResolvedUnits) -> Void
+    private let requirementsSatisfiedHandler: (Any) -> Void
     private let requirementsSatisfactionLostHandler: () -> Void
 
     init<U: Unit>(_ base: U) {
-        self.requirements = base.requirements()
+        self.control = base.control
         self.base = base
         self.id = base.id
 
-        self.requirementsSatisfiedHandler = { resolvedUnits in
+        self.requirementsSatisfiedHandler = { anyResolvedUnits in
+            guard let resolvedUnits = anyResolvedUnits as? ResolvedUnits else { fatalError() }
             base.requirementsSatisfied(resolvedUnits: resolvedUnits)
         }
 
@@ -74,7 +68,7 @@ struct AnyUnit: Hashable, Identifiable {
         hasher.combine(id)
     }
 
-    func requirementsSatisfied(resolvedUnits: ResolvedUnits) {
+    func requirementsSatisfied(resolvedUnits: Any) {
         requirementsSatisfiedHandler(resolvedUnits)
     }
 

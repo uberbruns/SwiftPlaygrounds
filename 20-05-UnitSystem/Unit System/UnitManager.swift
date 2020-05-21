@@ -9,44 +9,43 @@
 import Foundation
 
 
-class UnitRegistry {
+class UnitManager {
 
     private var registeredUnits = [Any]()
     private var unsatisfiedUnits = Set<AnyUnit>()
     private var unsatisfiableUnits = Set<AnyUnit>()
     private var satisfiedUnits = Set<AnyUnit>()
 
+    private var needsUpdate = false
+    private var isUpdating = false
 
     func register<U: Unit>(_ unitType: U.Type) {
         registeredUnits.append(unitType)
     }
 
 
-    func dequeue<U: Unit>(_ unitType: U.Type) -> U {
-        dequeue(unitType, for: unitType.required())
+    func resolve<U: Unit>(_ unitType: U.Type) -> U {
+        resolve(unitType.requirement())
     }
 
 
-    func dequeue<U: Unit, V: Hashable>(_ keyPath: KeyPath<U, Output<V>>, _ value: V) -> U {
-        dequeue(U.self, for: U.required(where: keyPath, equals: value))
-    }
-
-
-    func dequeue<U: Unit>(_ unitType: U.Type, for requirement: Requirement) -> U {
+    func resolve<U: Unit>(_ requirement: Requirement<U>) -> U {
         for unit in satisfiedUnits where requirement.isSatisfied(unit) {
             return unit.base as! U
         }
 
-        if let unit = requirement.instantiateUnit(unitType) {
-            dequeueUnit(unit)
-            return unit.base as! U
+
+        let control = UnitControl(manager: self)
+        if let unit = requirement.instantiateUnit(control: control) {
+            startUnit(AnyUnit(unit))
+            return unit
         }
 
         fatalError()
     }
 
 
-    private func dequeueUnit(_ anyUnit: AnyUnit) {
+    private func startUnit(_ anyUnit: AnyUnit) {
         unsatisfiedUnits.insert(anyUnit)
         update()
     }
@@ -58,28 +57,50 @@ class UnitRegistry {
     }
 
 
+    func setNeedsUpdate() {
+        guard needsUpdate == false else { return }
+        
+        needsUpdate = true
+        update()
+    }
+
+
     private func update() {
+        guard !isUpdating else {
+            setNeedsUpdate()
+            return
+        }
+
+        defer {
+            isUpdating = false
+            if needsUpdate {
+                update()
+            }
+        }
+
+        isUpdating = true
+        needsUpdate = false
+
         // A list of unsatisfied requirements across multiple units used
         // to instantiate new units.
-        var allUnsatisfiedRequirements = Set<Requirement>()
+        var allUnsatisfiedRequirements = Set<AnyRequirement>()
 
         // Try to resolve all unsatisfied units by resolving their unsatisfied requirements
-        // with the set of satisfied units.
+        // using the set of satisfied units.
         for unsatisfiedUnit in unsatisfiedUnits {
             var resolvedUnits = ResolvedUnits()
-            var unsatisfiedRequirements = unsatisfiedUnit.requirements
 
             // Iterate over unsatisfied requirements and remove a requirement
-            // when it could be satisfied.
-            unsatisfiedRequirements.removeAll { unsatisfiedRequirement in
+            // when it was satisfied.
+            let unsatisfiedRequirements = unsatisfiedUnit.control.requirements.filter { unsatisfiedRequirement in
                 for satisfiedUnit in satisfiedUnits {
                     if unsatisfiedRequirement.isSatisfied(satisfiedUnit) {
                         resolvedUnits.store[unsatisfiedRequirement] = satisfiedUnit
-                        return true
+                        return false
                     }
                 }
                 allUnsatisfiedRequirements.insert(unsatisfiedRequirement)
-                return false
+                return true
             }
 
             let allRequirementsSatisfied = unsatisfiedRequirements.isEmpty
@@ -97,7 +118,7 @@ class UnitRegistry {
                 unsatisfiedUnit.requirementsSatisfied(resolvedUnits: resolvedUnits)
 
                 // Kick off fresh update cycle
-                update()
+                setNeedsUpdate()
                 return
             } else {
                 // The unit is considered _unsatisfiable_ until another unit
@@ -110,17 +131,14 @@ class UnitRegistry {
         // Try to instantiate new units based upon unsatisfied requirements and
         // the registered units.
         if !allUnsatisfiedRequirements.isEmpty {
-            var needsUpdate = false
             for registeredUnit in registeredUnits {
                 for newRequirement in allUnsatisfiedRequirements {
-                    if let newUnit = newRequirement.instantiateUnit(registeredUnit) {
+                    let control = UnitControl(manager: self)
+                    if let newUnit = newRequirement.instantiateUnit(registeredUnit, control: control) {
                         unsatisfiedUnits.insert(newUnit)
-                        needsUpdate = true
+                        setNeedsUpdate()
                     }
                 }
-            }
-            if needsUpdate {
-                update()
             }
         }
     }
@@ -129,14 +147,8 @@ class UnitRegistry {
 
 
 struct ResolvedUnits {
-    fileprivate var store = [Requirement: AnyUnit]()
-    subscript <U>(_ requirement: Requirement) -> U {
-        return store[requirement]!.base as! U
+    fileprivate var store = [AnyRequirement: AnyUnit]()
+    subscript <U>(_ requirement: Requirement<U>) -> U {
+        return store[AnyRequirement(requirement)]!.base as! U
     }
-}
-
-
-
-struct UnitControl {
-    fileprivate weak var system: UnitRegistry?
 }

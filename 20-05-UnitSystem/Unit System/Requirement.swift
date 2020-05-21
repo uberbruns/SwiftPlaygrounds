@@ -9,14 +9,13 @@
 import Foundation
 
 
-struct Requirement: Hashable {
+struct Requirement<U: Unit>: Hashable {
     
     private let isSatisfiedHandler: (AnyUnit) -> Bool
-    private let instantiateUnitHandler: (Any, Requirement) throws -> AnyUnit?
     private let keyPathValuePairs: [(keyPath: AnyKeyPath, value: AnyHashable)]
 
 
-    fileprivate init<U: Unit, V: Hashable, UP: UnitProperty>(_ keyPath: KeyPath<U, UP>, _ value: V) where UP.Value == V {
+    fileprivate init<V: Hashable, UP: UnitProperty>(_ keyPath: KeyPath<U, UP>, _ value: V) where UP.Value == V {
         self.keyPathValuePairs = [(keyPath, value)]
 
         self.isSatisfiedHandler = { anyUnit in
@@ -25,44 +24,24 @@ struct Requirement: Hashable {
             }
             return unit[keyPath: keyPath].wrappedValue == value
         }
-
-        self.instantiateUnitHandler = { any, requirement in
-            guard let unitType = any as? U.Type else {
-                return nil
-            }
-
-            let unit = try unitType.init(requirement: requirement)
-            return AnyUnit(unit)
-        }
     }
 
 
-    fileprivate init<U: Unit>(_ type: U.Type) {
+    fileprivate init(_ type: U.Type) {
         self.keyPathValuePairs = []
 
         self.isSatisfiedHandler = { anyUnit in
             return anyUnit.base is U.Type
-        }
-
-        self.instantiateUnitHandler = { any, requirement in
-            guard let unitType = any as? U.Type else {
-                return nil
-            }
-
-            let unit = try unitType.init(requirement: requirement)
-            return AnyUnit(unit)
         }
     }
 
 
     fileprivate init(
         isSatisfiedHandler: @escaping (AnyUnit) -> Bool,
-        instantiateUnitHandler: @escaping (Any, Requirement) throws -> AnyUnit?,
         keyPathValuePairs: [(keyPath: AnyKeyPath, value: AnyHashable)]
     ) {
         self.keyPathValuePairs = keyPathValuePairs
         self.isSatisfiedHandler = isSatisfiedHandler
-        self.instantiateUnitHandler = instantiateUnitHandler
     }
 
 
@@ -71,21 +50,21 @@ struct Requirement: Hashable {
     }
 
 
-    func isSatisfied<U: Unit>(_ unit: U) -> Bool {
+    func isSatisfied(_ unit: U) -> Bool {
         isSatisfiedHandler(AnyUnit(unit))
     }
 
 
-    func instantiateUnit(_ unitType: Any) -> AnyUnit? {
+    func instantiateUnit(control: UnitControl) -> U? {
         do {
-            return try instantiateUnitHandler(unitType, self)
+            return try U.self.init(requirement: self, control: control)
         } catch {
             return nil
         }
     }
 
 
-    func get<U: Unit, V: Equatable>(_ keyPath: KeyPath<U, Id<V>>) throws -> V {
+    func value<V: Equatable>(for keyPath: KeyPath<U, Id<V>>) throws -> V {
         for (thisKeyPath, thisValue) in keyPathValuePairs {
             if keyPath == thisKeyPath, let value = thisValue.base as? V {
                 return value
@@ -111,28 +90,55 @@ struct Requirement: Hashable {
     func union(_ otherRequirement: Requirement) -> Requirement {
         Requirement(
             isSatisfiedHandler: { self.isSatisfiedHandler($0) && otherRequirement.isSatisfiedHandler($0) },
-            instantiateUnitHandler: instantiateUnitHandler,
             keyPathValuePairs: keyPathValuePairs + otherRequirement.keyPathValuePairs
         )
     }
 
 
-    func and<U: Unit, V: Hashable, UP: UnitProperty>(where keyPath: KeyPath<U, UP>, equals value: V) -> Requirement where UP.Value == V {
+    func and<V: Hashable, UP: UnitProperty>(where keyPath: KeyPath<U, UP>, equals value: V) -> Requirement where UP.Value == V {
         let newRequirement = Requirement(keyPath, value)
         return union(newRequirement)
     }
 }
 
 
-struct RequirementsTable<Key> {
+struct AnyRequirement: Hashable {
+    let base: Any
 
-    subscript(_ key: Key) -> Requirement {
-        get {
-            fatalError()
+    private let _hashValue: Int
+    private let isSatisfiedHandler: (AnyUnit) -> Bool
+    private let instantiateUnitHandler: (UnitControl) -> AnyUnit?
+
+
+    init<U: Unit>(_ base: Requirement<U>) {
+        self.base = base
+        self._hashValue = base.hashValue
+        self.isSatisfiedHandler = { anyUnit in
+            base.isSatisfied(anyUnit)
         }
-        set {
-            fatalError()
+        self.instantiateUnitHandler = { unitControl in
+            base.instantiateUnit(control: unitControl).map(AnyUnit.init)
         }
+    }
+
+
+    func isSatisfied(_ unit: AnyUnit) -> Bool {
+        isSatisfiedHandler(unit)
+    }
+
+
+    func instantiateUnit(_ unitType: Any, control: UnitControl) -> AnyUnit? {
+        instantiateUnitHandler(control)
+    }
+
+
+    static func ==(lhs: AnyRequirement, rhs: AnyRequirement) -> Bool {
+        lhs._hashValue == rhs._hashValue
+    }
+
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(_hashValue)
     }
 }
 
@@ -143,11 +149,11 @@ enum RequirementError: Error {
 
 
 extension Unit {
-    static func required() -> Requirement {
+    static func requirement() -> Requirement<Self> {
         Requirement(Self.self)
     }
 
-    static func required<V: Hashable, UP: UnitProperty>(where keyPath: KeyPath<Self, UP>, equals value: V) -> Requirement where UP.Value == V {
+    static func requirement<V: Hashable, UP: UnitProperty>(where keyPath: KeyPath<Self, UP>, equals value: V) -> Requirement<Self> where UP.Value == V {
         Requirement(keyPath, value)
     }
 }
