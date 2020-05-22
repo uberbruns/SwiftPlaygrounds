@@ -13,7 +13,7 @@
 		9B8B61CC2468917A0015DA36 /* Unit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8B61CB2468917A0015DA36 /* Unit.swift */; };
 		9B8B61CE246891850015DA36 /* Requirement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8B61CD246891850015DA36 /* Requirement.swift */; };
 		9B8B61D0246892160015DA36 /* UnitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8B61CF246892160015DA36 /* UnitManager.swift */; };
-		9BD00AAD24770042003BBF70 /* UnitControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD00AAC24770042003BBF70 /* UnitControl.swift */; };
+		9BD00AAD24770042003BBF70 /* UnitLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD00AAC24770042003BBF70 /* UnitLink.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,7 +36,7 @@
 		9B8B61CB2468917A0015DA36 /* Unit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unit.swift; sourceTree = "<group>"; };
 		9B8B61CD246891850015DA36 /* Requirement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Requirement.swift; sourceTree = "<group>"; };
 		9B8B61CF246892160015DA36 /* UnitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitManager.swift; sourceTree = "<group>"; };
-		9BD00AAC24770042003BBF70 /* UnitControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitControl.swift; sourceTree = "<group>"; };
+		9BD00AAC24770042003BBF70 /* UnitLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitLink.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,8 +74,8 @@
 				9B8B61CD246891850015DA36 /* Requirement.swift */,
 				9B1A6210247073B4006FE162 /* Swift+Extensions.swift */,
 				9B8B61CB2468917A0015DA36 /* Unit.swift */,
+				9BD00AAC24770042003BBF70 /* UnitLink.swift */,
 				9B8B61CF246892160015DA36 /* UnitManager.swift */,
-				9BD00AAC24770042003BBF70 /* UnitControl.swift */,
 			);
 			path = "Unit System";
 			sourceTree = "<group>";
@@ -139,7 +139,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B1A62132471BB6F006FE162 /* PropertyWrappers.swift in Sources */,
-				9BD00AAD24770042003BBF70 /* UnitControl.swift in Sources */,
+				9BD00AAD24770042003BBF70 /* UnitLink.swift in Sources */,
 				9B8B61C524688F2D0015DA36 /* main.swift in Sources */,
 				9B1A6211247073B4006FE162 /* Swift+Extensions.swift in Sources */,
 				9B8B61CE246891850015DA36 /* Requirement.swift in Sources */,

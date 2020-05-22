@@ -30,13 +30,12 @@ class UnitManager {
 
 
     func resolve<U: Unit>(_ requirement: Requirement<U>) -> U {
-        for unit in satisfiedUnits where requirement.isSatisfied(unit) {
+        for unit in satisfiedUnits where requirement.satisfactionLevel(for: unit).isIdentitySatisfied {
             return unit.base as! U
         }
 
-
-        let control = UnitControl(manager: self)
-        if let unit = requirement.instantiateUnit(control: control) {
+        let link = UnitLink(manager: self)
+        if let unit = requirement.instantiateUnit(link: link) {
             startUnit(AnyUnit(unit))
             return unit
         }
@@ -92,9 +91,9 @@ class UnitManager {
 
             // Iterate over unsatisfied requirements and remove a requirement
             // when it was satisfied.
-            let unsatisfiedRequirements = unsatisfiedUnit.control.requirements.filter { unsatisfiedRequirement in
+            let unsatisfiedRequirements = unsatisfiedUnit.requirements.filter { unsatisfiedRequirement in
                 for satisfiedUnit in satisfiedUnits {
-                    if unsatisfiedRequirement.isSatisfied(satisfiedUnit) {
+                    if unsatisfiedRequirement.satisfactionLevel(with: satisfiedUnit).isIdentitySatisfied {
                         resolvedUnits.store[unsatisfiedRequirement] = satisfiedUnit
                         return false
                     }
@@ -133,8 +132,8 @@ class UnitManager {
         if !allUnsatisfiedRequirements.isEmpty {
             for registeredUnit in registeredUnits {
                 for newRequirement in allUnsatisfiedRequirements {
-                    let control = UnitControl(manager: self)
-                    if let newUnit = newRequirement.instantiateUnit(registeredUnit, control: control) {
+                    let link = UnitLink(manager: self)
+                    if let newUnit = newRequirement.instantiateUnit(registeredUnit, link: link) {
                         unsatisfiedUnits.insert(newUnit)
                         setNeedsUpdate()
                     }

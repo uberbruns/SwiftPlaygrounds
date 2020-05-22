@@ -1,5 +1,5 @@
 //
-//  UnitControl.swift
+//  UnitLink.swift
 //  Unit System
 //
 //  Created by Karsten Bruns on 21.05.20.
@@ -9,9 +9,9 @@
 import Foundation
 
 
-class UnitControl {
-    private(set) var requirements = Set<AnyRequirement>()
-    weak var manager: UnitManager?
+class UnitLink {
+    fileprivate var requirements = Set<AnyRequirement>()
+    private weak var manager: UnitManager?
 
     init(manager: UnitManager) {
         self.manager = manager
@@ -35,11 +35,15 @@ class UnitControl {
 
 
 extension Unit {
+    var requirements: Set<AnyRequirement> {
+        link.requirements
+    }
+
     func addRequirement<U>(_ requirement: Requirement<U>) {
-        control.addRequirement(requirement)
+        link.addRequirement(requirement)
     }
 
     func addRequirement<U>(_ requirement: Requirement<U>, _ requirementRefinements: Requirement<U>...) {
-        control.addRequirement(requirement, requirementRefinements)
+        link.addRequirement(requirement, requirementRefinements)
     }
 }

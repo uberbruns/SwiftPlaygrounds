@@ -10,12 +10,12 @@ import Foundation
 
 final class BluetoothAvailabilityUnit: Unit {
 
-    let control: UnitControl
+    let link: UnitLink
 
     @Output private(set) var isAvailable = true
 
-    init(requirement: Requirement<BluetoothAvailabilityUnit>, control: UnitControl) {
-        self.control = control
+    init(requirement: Requirement<BluetoothAvailabilityUnit>, link: UnitLink) {
+        self.link = link
     }
 
     func requirementsSatisfied(resolvedUnits: ResolvedUnits) {
@@ -29,14 +29,14 @@ final class BluetoothAvailabilityUnit: Unit {
 
 final class UserTokenUnit: Unit {
 
-    let control: UnitControl
+    let link: UnitLink
 
     @Output private(set) var isAvailable = true
     @Id private(set) var userName: String
 
-    init(requirement: Requirement<UserTokenUnit>, control: UnitControl) throws {
+    init(requirement: Requirement<UserTokenUnit>, link: UnitLink) throws {
+        self.link = link
         self.userName = try requirement.value(for: \.$userName)
-        self.control = control
     }
 
     func requirementsSatisfied(resolvedUnits: ResolvedUnits) {
@@ -50,15 +50,15 @@ final class UserTokenUnit: Unit {
 
 final class DeviceConnectionUnit: Unit {
 
-    let control: UnitControl
+    let link: UnitLink
 
     @Id private(set) var deviceUUID: UUID
     @Output private(set) var isConnected: Bool
 
-    init(requirement: Requirement<DeviceConnectionUnit>, control: UnitControl) throws {
+    init(requirement: Requirement<DeviceConnectionUnit>, link: UnitLink) throws {
+        self.link = link
         self.deviceUUID = try requirement.value(for: \.$deviceUUID)
         self.isConnected = true
-        self.control = control
 
         addRequirement(BluetoothAvailabilityUnit.requirement(where: \.$isAvailable, equals: true))
         addRequirement(UserTokenUnit.requirement(where: \.$userName, equals: "Hello"))
@@ -79,12 +79,12 @@ final class DeviceConnectionUnit: Unit {
 
 final class DeviceScannerUnit: Unit {
 
-    let control: UnitControl
+    let link: UnitLink
 
     private(set) var foundDeviceUUIDs = [UUID]()
 
-    init(requirement: Requirement<DeviceScannerUnit>, control: UnitControl) throws {
-        self.control = control
+    init(requirement: Requirement<DeviceScannerUnit>, link: UnitLink) throws {
+        self.link = link
         addRequirement(BluetoothAvailabilityUnit.requirement(where: \.$isAvailable, equals: true))
     }
 
@@ -105,7 +105,7 @@ final class SendMessage: Unit {
         let content: String
     }
 
-    let control: UnitControl
+    let link: UnitLink
 
     @Id private(set) var message: Message
 
@@ -113,15 +113,15 @@ final class SendMessage: Unit {
         .requirement(where: \.$deviceUUID, equals: message.deviceUUID)
         .and(where: \.$isConnected, equals: true)
 
-    init(requirement: Requirement<SendMessage>, control: UnitControl) throws {
-        message = try requirement.value(for: \.$message)
-        self.control = control
+    init(requirement: Requirement<SendMessage>, link: UnitLink) throws {
+        self.link = link
+        self.message = try requirement.value(for: \.$message)
         addRequirement(connectedDevice)
     }
 
     func requirementsSatisfied(resolvedUnits: ResolvedUnits) {
         print("SendMessage satisfied")
-        let connectedDeviceUnit: DeviceConnectionUnit = resolvedUnits[connectedDevice]
+        let connectedDeviceUnit = resolvedUnits[connectedDevice]
         connectedDeviceUnit.sendMessage(rawMessage: message.content)
     }
 
@@ -148,6 +148,5 @@ if let deviceUUID = deviceScannerUnit.foundDeviceUUIDs.first {
     )
 
     _ = unitManager.resolve(SendMessage.requirement(where: \.$message, equals: message))
-    // SendMessage.dequeue(from: unitManager, where: \.$message, equals: message)
 }
 
