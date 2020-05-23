@@ -7,12 +7,13 @@
 //
 
 import Foundation
+import Combine
 
 final class BluetoothAvailabilityUnit: Unit {
 
     let link: UnitLink
 
-    @Output private(set) var isAvailable = true
+    @Output private(set) var isAvailable = false
 
     init(requirement: Requirement<BluetoothAvailabilityUnit>, link: UnitLink) {
         self.link = link
@@ -20,6 +21,10 @@ final class BluetoothAvailabilityUnit: Unit {
 
     func requirementsSatisfied(resolvedUnits: ResolvedUnits) {
         print("BluetoothAvailabilityUnit satisfied")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.isAvailable = true
+            self.link.manager?.setNeedsUpdate()
+        }
     }
 
     func requirementsSatisfactionLost() { }
@@ -72,6 +77,7 @@ final class DeviceConnectionUnit: Unit {
 
     func sendMessage(rawMessage: String) {
         print(rawMessage)
+        exit(0)
     }
 }
 
@@ -81,7 +87,7 @@ final class DeviceScannerUnit: Unit {
 
     let link: UnitLink
 
-    private(set) var foundDeviceUUIDs = [UUID]()
+    @Published private(set) var foundDeviceUUIDs = [UUID]()
 
     init(requirement: Requirement<DeviceScannerUnit>, link: UnitLink) throws {
         self.link = link
@@ -90,7 +96,7 @@ final class DeviceScannerUnit: Unit {
 
     func requirementsSatisfied(resolvedUnits: ResolvedUnits) {
         print("DeviceScannerUnit satisfied")
-        foundDeviceUUIDs = [UUID()]
+        foundDeviceUUIDs.append(UUID())
     }
 
     func requirementsSatisfactionLost() { }
@@ -130,6 +136,7 @@ final class SendMessage: Unit {
 
 
 
+
 let unitManager = UnitManager()
 unitManager.register(UserTokenUnit.self)
 unitManager.register(BluetoothAvailabilityUnit.self)
@@ -138,15 +145,19 @@ unitManager.register(DeviceScannerUnit.self)
 unitManager.register(SendMessage.self)
 
 
+var cancellables = Set<AnyCancellable>()
 let deviceScannerUnit = unitManager.resolve(DeviceScannerUnit.self)
+deviceScannerUnit.$foundDeviceUUIDs.sink { (foundDeviceUUIDs) in
+    if let deviceUUID = foundDeviceUUIDs.first {
+        let message = SendMessage.Message(
+            deviceUUID: deviceUUID,
+            userName: "karsten@bruns.me",
+            content: "Hello, World!"
+        )
 
-if let deviceUUID = deviceScannerUnit.foundDeviceUUIDs.first {
-    let message = SendMessage.Message(
-        deviceUUID: deviceUUID,
-        userName: "karsten@bruns.me",
-        content: "Hello, World!"
-    )
+        _ = unitManager.resolve(SendMessage.requirement(where: \.$message, equals: message))
+    }
+}.store(in: &cancellables)
 
-    _ = unitManager.resolve(SendMessage.requirement(where: \.$message, equals: message))
-}
 
+RunLoop.main.run()

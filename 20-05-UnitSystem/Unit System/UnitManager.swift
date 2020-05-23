@@ -14,11 +14,13 @@ class UnitManager {
     private var registeredUnits = [Any]()
     private var unsatisfiedUnits = Set<AnyUnit>()
     private var unsatisfiableUnits = Set<AnyUnit>()
-    private var satisfiedUnits = Set<AnyUnit>()
+    private var satisfiedUnits = [AnyUnit]()
+    private var fullySatisfiedSet = Set<Int>()
 
     private var needsUpdate = false
     private var isUpdating = false
 
+    
     func register<U: Unit>(_ unitType: U.Type) {
         registeredUnits.append(unitType)
     }
@@ -51,7 +53,9 @@ class UnitManager {
 
 
     private func stopUnit(_ anyUnit: AnyUnit) {
-        satisfiedUnits.remove(anyUnit)
+        if let index = satisfiedUnits.firstIndex(of: anyUnit) {
+            satisfiedUnits.remove(at: index)
+        }
         update()
     }
 
@@ -87,14 +91,11 @@ class UnitManager {
         // Try to resolve all unsatisfied units by resolving their unsatisfied requirements
         // using the set of satisfied units.
         for unsatisfiedUnit in unsatisfiedUnits {
-            var resolvedUnits = ResolvedUnits()
-
             // Iterate over unsatisfied requirements and remove a requirement
             // when it was satisfied.
             let unsatisfiedRequirements = unsatisfiedUnit.requirements.filter { unsatisfiedRequirement in
                 for satisfiedUnit in satisfiedUnits {
                     if unsatisfiedRequirement.satisfactionLevel(with: satisfiedUnit).isIdentitySatisfied {
-                        resolvedUnits.store[unsatisfiedRequirement] = satisfiedUnit
                         return false
                     }
                 }
@@ -106,15 +107,12 @@ class UnitManager {
             if allRequirementsSatisfied {
                 // Move unit from the unsatisfied set into the satisfied one.
                 unsatisfiedUnits.remove(unsatisfiedUnit)
-                satisfiedUnits.insert(unsatisfiedUnit)
+                satisfiedUnits.append(unsatisfiedUnit)
 
                 // Move unsatisfiable units to unsatisfied set, so they are
                 // reevaluated again.
                 unsatisfiedUnits.formUnion(unsatisfiableUnits)
                 unsatisfiableUnits.removeAll()
-
-                // Notify satisfied unit
-                unsatisfiedUnit.requirementsSatisfied(resolvedUnits: resolvedUnits)
 
                 // Kick off fresh update cycle
                 setNeedsUpdate()
@@ -134,10 +132,41 @@ class UnitManager {
                 for newRequirement in allUnsatisfiedRequirements {
                     let link = UnitLink(manager: self)
                     if let newUnit = newRequirement.instantiateUnit(registeredUnit, link: link) {
+                        assert(newRequirement.satisfactionLevel(with: newUnit).isIdentitySatisfied)
                         unsatisfiedUnits.insert(newUnit)
                         setNeedsUpdate()
                     }
                 }
+            }
+        }
+
+        // Check if all requirements (incl. output requirements) are satisfied
+        for unit in satisfiedUnits {
+            var resolvedUnits = ResolvedUnits()
+
+            let requirements = unit.requirements.filter { requirement in
+                for otherUnit in satisfiedUnits {
+                    if requirement.satisfactionLevel(with: otherUnit) == .full {
+                        resolvedUnits.store[requirement] = otherUnit
+                        return false
+                    }
+                }
+                allUnsatisfiedRequirements.insert(requirement)
+                return true
+            }
+
+            let isFullySatisfied = fullySatisfiedSet.contains(unit.id)
+            let canBeFullySatisfied = requirements.isEmpty
+
+            if isFullySatisfied != canBeFullySatisfied {
+                if canBeFullySatisfied {
+                    fullySatisfiedSet.insert(unit.id)
+                    unit.requirementsSatisfied(resolvedUnits: resolvedUnits)
+                } else {
+                    fullySatisfiedSet.remove(unit.id)
+                    unit.requirementsSatisfactionLost()
+                }
+                setNeedsUpdate()
             }
         }
     }

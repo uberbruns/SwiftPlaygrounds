@@ -335,7 +335,7 @@ final class Computed<R: Equatable>: State<R> {
 
 // MARK: Supporting Types
 
-fileprivate protocol StateObject: AnyObject {
+private protocol StateObject: AnyObject {
     var stateGroup: StateGroup? { get }
     var valueChanged: Bool { get }
     var dependencies: [StateObject]? { get }
@@ -348,12 +348,12 @@ fileprivate protocol StateObject: AnyObject {
 }
 
 
-fileprivate enum StateStatics {
+private enum StateStatics {
     static var nextIdentifier: UInt = 0
 }
 
 
-fileprivate class WeakState {
+private class WeakState {
     weak var state: StateObject?
 
     init(_ state: StateObject) {

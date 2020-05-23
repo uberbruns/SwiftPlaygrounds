@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9B1A6211247073B4006FE162 /* Swift+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B1A6210247073B4006FE162 /* Swift+Extensions.swift */; };
-		9B1A62132471BB6F006FE162 /* PropertyWrappers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B1A62122471BB6F006FE162 /* PropertyWrappers.swift */; };
+		9B1A62132471BB6F006FE162 /* UnitProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B1A62122471BB6F006FE162 /* UnitProperty.swift */; };
 		9B8B61C524688F2D0015DA36 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8B61C424688F2D0015DA36 /* main.swift */; };
 		9B8B61CC2468917A0015DA36 /* Unit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8B61CB2468917A0015DA36 /* Unit.swift */; };
 		9B8B61CE246891850015DA36 /* Requirement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8B61CD246891850015DA36 /* Requirement.swift */; };
 		9B8B61D0246892160015DA36 /* UnitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8B61CF246892160015DA36 /* UnitManager.swift */; };
 		9BD00AAD24770042003BBF70 /* UnitLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD00AAC24770042003BBF70 /* UnitLink.swift */; };
+		9BD00AAF2477BDE1003BBF70 /* UnitProperty+Id.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD00AAE2477BDE1003BBF70 /* UnitProperty+Id.swift */; };
+		9BD00AB12477BDEC003BBF70 /* UnitProperty+Output.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BD00AB02477BDEC003BBF70 /* UnitProperty+Output.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,14 +30,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		9B1A6210247073B4006FE162 /* Swift+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Swift+Extensions.swift"; sourceTree = "<group>"; };
-		9B1A62122471BB6F006FE162 /* PropertyWrappers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyWrappers.swift; sourceTree = "<group>"; };
+		9B1A62122471BB6F006FE162 /* UnitProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitProperty.swift; sourceTree = "<group>"; };
 		9B8B61C124688F2D0015DA36 /* Unit System */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Unit System"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B8B61C424688F2D0015DA36 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		9B8B61CB2468917A0015DA36 /* Unit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Unit.swift; sourceTree = "<group>"; };
 		9B8B61CD246891850015DA36 /* Requirement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Requirement.swift; sourceTree = "<group>"; };
 		9B8B61CF246892160015DA36 /* UnitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitManager.swift; sourceTree = "<group>"; };
 		9BD00AAC24770042003BBF70 /* UnitLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitLink.swift; sourceTree = "<group>"; };
+		9BD00AAE2477BDE1003BBF70 /* UnitProperty+Id.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnitProperty+Id.swift"; sourceTree = "<group>"; };
+		9BD00AB02477BDEC003BBF70 /* UnitProperty+Output.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UnitProperty+Output.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,12 +72,13 @@
 			isa = PBXGroup;
 			children = (
 				9B8B61C424688F2D0015DA36 /* main.swift */,
-				9B1A62122471BB6F006FE162 /* PropertyWrappers.swift */,
 				9B8B61CD246891850015DA36 /* Requirement.swift */,
-				9B1A6210247073B4006FE162 /* Swift+Extensions.swift */,
 				9B8B61CB2468917A0015DA36 /* Unit.swift */,
 				9BD00AAC24770042003BBF70 /* UnitLink.swift */,
 				9B8B61CF246892160015DA36 /* UnitManager.swift */,
+				9B1A62122471BB6F006FE162 /* UnitProperty.swift */,
+				9BD00AAE2477BDE1003BBF70 /* UnitProperty+Id.swift */,
+				9BD00AB02477BDEC003BBF70 /* UnitProperty+Output.swift */,
 			);
 			path = "Unit System";
 			sourceTree = "<group>";
@@ -138,11 +141,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9B1A62132471BB6F006FE162 /* PropertyWrappers.swift in Sources */,
+				9B1A62132471BB6F006FE162 /* UnitProperty.swift in Sources */,
 				9BD00AAD24770042003BBF70 /* UnitLink.swift in Sources */,
+				9BD00AB12477BDEC003BBF70 /* UnitProperty+Output.swift in Sources */,
 				9B8B61C524688F2D0015DA36 /* main.swift in Sources */,
-				9B1A6211247073B4006FE162 /* Swift+Extensions.swift in Sources */,
 				9B8B61CE246891850015DA36 /* Requirement.swift in Sources */,
+				9BD00AAF2477BDE1003BBF70 /* UnitProperty+Id.swift in Sources */,
 				9B8B61D0246892160015DA36 /* UnitManager.swift in Sources */,
 				9B8B61CC2468917A0015DA36 /* Unit.swift in Sources */,
 			);

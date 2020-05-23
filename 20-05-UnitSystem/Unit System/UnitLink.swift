@@ -11,7 +11,7 @@ import Foundation
 
 class UnitLink {
     fileprivate var requirements = Set<AnyRequirement>()
-    private weak var manager: UnitManager?
+    weak var manager: UnitManager?
 
     init(manager: UnitManager) {
         self.manager = manager

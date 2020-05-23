@@ -143,6 +143,7 @@
 				TargetAttributes = {
 					9B87F99E22511B2B00440B63 = {
 						CreatedOnToolsVersion = 10.1;
+						LastSwiftMigration = 1140;
 					};
 					9BE5EEEC2259E73C00BABF19 = {
 						CreatedOnToolsVersion = 10.2;
@@ -323,7 +324,7 @@
 				DEVELOPMENT_TEAM = MVV99M56UM;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -334,7 +335,7 @@
 				DEVELOPMENT_TEAM = MVV99M56UM;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};

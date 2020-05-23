@@ -26,8 +26,8 @@ extension Unit {
         hasher.combine(String(describing: self))
         for child in Mirror(reflecting: self).children {
             switch child.value {
-            case let id as UnitIdentifier:
-                hasher.combine(id.rawId)
+            case let id as UnitId:
+                hasher.combine(id.hashValue)
             default:
                 break
             }
