@@ -13,7 +13,7 @@ final class BluetoothAvailabilityUnit: Unit {
 
     let link: UnitLink
 
-    @Output private(set) var isAvailable = false
+    @Changing private(set) var isAvailable = false
 
     init(requirement: Requirement<BluetoothAvailabilityUnit>, link: UnitLink) {
         self.link = link
@@ -36,8 +36,8 @@ final class UserTokenUnit: Unit {
 
     let link: UnitLink
 
-    @Output private(set) var isAvailable = true
-    @Id private(set) var userName: String
+    @Changing private(set) var isAvailable = true
+    @Fixed private(set) var userName: String
 
     init(requirement: Requirement<UserTokenUnit>, link: UnitLink) throws {
         self.link = link
@@ -57,8 +57,8 @@ final class DeviceConnectionUnit: Unit {
 
     let link: UnitLink
 
-    @Id private(set) var deviceUUID: UUID
-    @Output private(set) var isConnected: Bool
+    @Fixed private(set) var deviceUUID: UUID
+    @Changing private(set) var isConnected: Bool
 
     init(requirement: Requirement<DeviceConnectionUnit>, link: UnitLink) throws {
         self.link = link
@@ -77,7 +77,7 @@ final class DeviceConnectionUnit: Unit {
 
     func sendMessage(rawMessage: String) {
         print(rawMessage)
-        exit(0)
+        Program.shared.sendMessageUnit = nil
     }
 }
 
@@ -113,7 +113,7 @@ final class SendMessage: Unit {
 
     let link: UnitLink
 
-    @Id private(set) var message: Message
+    @Fixed private(set) var message: Message
 
     lazy var connectedDevice = DeviceConnectionUnit
         .requirement(where: \.$deviceUUID, equals: message.deviceUUID)
@@ -123,6 +123,10 @@ final class SendMessage: Unit {
         self.link = link
         self.message = try requirement.value(for: \.$message)
         addRequirement(connectedDevice)
+    }
+
+    deinit {
+        
     }
 
     func requirementsSatisfied(resolvedUnits: ResolvedUnits) {
@@ -135,29 +139,41 @@ final class SendMessage: Unit {
 }
 
 
+class Program {
+    var cancellables = Set<AnyCancellable>()
+    var deviceScannerUnit: DeviceScannerUnit?
+    var sendMessageUnit: SendMessage?
+
+    static let shared = Program()
+
+    func main() {
+        let unitManager = UnitManager()
+        unitManager.register(UserTokenUnit.self)
+        unitManager.register(BluetoothAvailabilityUnit.self)
+        unitManager.register(DeviceConnectionUnit.self)
+        unitManager.register(DeviceScannerUnit.self)
+        unitManager.register(SendMessage.self)
 
 
-let unitManager = UnitManager()
-unitManager.register(UserTokenUnit.self)
-unitManager.register(BluetoothAvailabilityUnit.self)
-unitManager.register(DeviceConnectionUnit.self)
-unitManager.register(DeviceScannerUnit.self)
-unitManager.register(SendMessage.self)
+        let deviceScannerUnit = unitManager.resolve(DeviceScannerUnit.self)
+        deviceScannerUnit.$foundDeviceUUIDs.sink { (foundDeviceUUIDs) in
+            if let deviceUUID = foundDeviceUUIDs.first {
+                let message = SendMessage.Message(
+                    deviceUUID: deviceUUID,
+                    userName: "karsten@bruns.me",
+                    content: "Hello, World!"
+                )
 
+                _ = unitManager.resolve(SendMessage.requirement(where: \.$message, equals: message))
+            }
+        }.store(in: &cancellables)
 
-var cancellables = Set<AnyCancellable>()
-let deviceScannerUnit = unitManager.resolve(DeviceScannerUnit.self)
-deviceScannerUnit.$foundDeviceUUIDs.sink { (foundDeviceUUIDs) in
-    if let deviceUUID = foundDeviceUUIDs.first {
-        let message = SendMessage.Message(
-            deviceUUID: deviceUUID,
-            userName: "karsten@bruns.me",
-            content: "Hello, World!"
-        )
-
-        _ = unitManager.resolve(SendMessage.requirement(where: \.$message, equals: message))
+        self.deviceScannerUnit = deviceScannerUnit
     }
-}.store(in: &cancellables)
+}
+
+
+Program.shared.main()
 
 
 RunLoop.main.run()

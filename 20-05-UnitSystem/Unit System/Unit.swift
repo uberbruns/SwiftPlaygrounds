@@ -9,8 +9,13 @@
 import Foundation
 
 
-protocol Unit: AnyObject, Identifiable {
+protocol UnitObject: AnyObject {
+    var id: Int { get }
     var link: UnitLink { get }
+}
+
+
+protocol Unit: UnitObject, Identifiable {
 
     init(requirement: Requirement<Self>, link: UnitLink) throws
 
@@ -26,7 +31,7 @@ extension Unit {
         hasher.combine(String(describing: self))
         for child in Mirror(reflecting: self).children {
             switch child.value {
-            case let id as UnitId:
+            case let id as FixedUnitProperty:
                 hasher.combine(id.hashValue)
             default:
                 break
@@ -37,33 +42,33 @@ extension Unit {
 }
 
 
-struct AnyUnit: Hashable, Identifiable {
+struct UnitRef: Hashable, Identifiable {
     let id: Int
-    let base: Any
 
-    private let requirementsSatisfiedHandler: (Any) -> Void
+    weak var object: UnitObject!
+
+    private let requirementsSatisfiedHandler: (ResolvedUnits) -> Void
     private let requirementsSatisfactionLostHandler: () -> Void
     private let requirementsHandler: () -> Set<AnyRequirement>
 
-    init<U: Unit>(_ base: U) {
-        self.base = base
-        self.id = base.id
+    init<U: Unit>(_ unit: U) {
+        self.object = unit
+        self.id = unit.id
 
-        self.requirementsSatisfiedHandler = { anyResolvedUnits in
-            guard let resolvedUnits = anyResolvedUnits as? ResolvedUnits else { fatalError() }
-            base.requirementsSatisfied(resolvedUnits: resolvedUnits)
+        self.requirementsSatisfiedHandler = { [unowned unit] resolvedUnits in
+            unit.requirementsSatisfied(resolvedUnits: resolvedUnits)
         }
 
-        self.requirementsSatisfactionLostHandler = {
-            base.requirementsSatisfactionLost()
+        self.requirementsSatisfactionLostHandler = { [unowned unit] in
+            unit.requirementsSatisfactionLost()
         }
 
-        self.requirementsHandler = {
-            base.requirements
+        self.requirementsHandler = { [unowned unit] in
+            unit.requirements
         }
     }
 
-    static func == (lhs: AnyUnit, rhs: AnyUnit) -> Bool {
+    static func == (lhs: UnitRef, rhs: UnitRef) -> Bool {
         lhs.id == rhs.id
     }
 
@@ -75,7 +80,7 @@ struct AnyUnit: Hashable, Identifiable {
         requirementsHandler()
     }
 
-    func requirementsSatisfied(resolvedUnits: Any) {
+    func requirementsSatisfied(resolvedUnits: ResolvedUnits) {
         requirementsSatisfiedHandler(resolvedUnits)
     }
 

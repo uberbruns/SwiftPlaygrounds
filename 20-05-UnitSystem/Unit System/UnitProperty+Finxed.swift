@@ -1,5 +1,5 @@
 //
-//  UnitProperty+Id.swift
+//  UnitProperty+Fixed.swift
 //  Unit System
 //
 //  Created by Karsten Bruns on 22.05.20.
@@ -9,13 +9,13 @@
 import Foundation
 
 
-protocol UnitId {
+protocol FixedUnitProperty {
     var hashValue: Int { get }
 }
 
 
 @propertyWrapper
-final class Id<V: Hashable>: UnitProperty, UnitId {
+final class Fixed<V: Hashable>: UnitProperty, FixedUnitProperty {
     var hashValue: Int {
         value.hashValue
     }
@@ -31,7 +31,7 @@ final class Id<V: Hashable>: UnitProperty, UnitId {
         }
     }
 
-    public var projectedValue: Id<V> {
+    public var projectedValue: Fixed<V> {
         get { self }
     }
 

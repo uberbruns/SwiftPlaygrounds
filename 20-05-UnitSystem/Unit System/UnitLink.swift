@@ -12,9 +12,27 @@ import Foundation
 class UnitLink {
     fileprivate var requirements = Set<AnyRequirement>()
     weak var manager: UnitManager?
+    var unitRef: UnitRef? {
+        didSet {
+            guard let unit = unitRef?.object else { return }
+            if oldValue == nil {
+                unitName = "\(unit.self)".split(separator: ".").last.map(String.init) ?? "\(unit.self)"
+            }
+            print("\(unitName): init")
+        }
+    }
+    var unitName = "?"
+    var resolvedUnits: ResolvedUnits?
 
     init(manager: UnitManager) {
         self.manager = manager
+    }
+
+    deinit {
+        print("\(unitName): \(#function)")
+        if let unitRef = unitRef, let manager = manager {
+            manager.removeUnit(unitRef)
+        }
     }
 
     fileprivate func addRequirement<U>(_ requirement: Requirement<U>) {

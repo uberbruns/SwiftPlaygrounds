@@ -1,5 +1,5 @@
 //
-//  UnitProperty+Output.swift
+//  UnitProperty+Changing.swift
 //  Unit System
 //
 //  Created by Karsten Bruns on 22.05.20.
@@ -11,7 +11,7 @@ import Foundation
 
 
 @propertyWrapper
-final class Output<V: Equatable>: UnitProperty {
+final class Changing<V: Equatable>: UnitProperty {
 
     // Property
     private var value: V
@@ -32,7 +32,7 @@ final class Output<V: Equatable>: UnitProperty {
         }
     }
 
-    public var projectedValue: Unit_System.Output<V> {
+    public var projectedValue: Changing<V> {
         get { self }
     }
 
@@ -56,7 +56,7 @@ final class Output<V: Equatable>: UnitProperty {
 
 // MARK: - Combine -
 
-final class OutputSubscription<V: Equatable, SB: Subscriber, O: Output<V>>: Subscription where SB.Input == V {
+final class OutputSubscription<V: Equatable, SB: Subscriber, O: Changing<V>>: Subscription where SB.Input == V {
     private var subscriber: SB?
     private weak var output: O?
 

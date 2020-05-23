@@ -12,10 +12,11 @@ import Foundation
 class UnitManager {
 
     private var registeredUnits = [Any]()
-    private var unsatisfiedUnits = Set<AnyUnit>()
-    private var unsatisfiableUnits = Set<AnyUnit>()
-    private var satisfiedUnits = [AnyUnit]()
+    private var unsatisfiedUnits = Set<UnitRef>()
+    private var unsatisfiableUnits = Set<UnitRef>()
+    private var satisfiedUnits = [UnitRef]()
     private var fullySatisfiedSet = Set<Int>()
+    private var capturedUnits = [Int: UnitObject]()
 
     private var needsUpdate = false
     private var isUpdating = false
@@ -33,30 +34,28 @@ class UnitManager {
 
     func resolve<U: Unit>(_ requirement: Requirement<U>) -> U {
         for unit in satisfiedUnits where requirement.satisfactionLevel(for: unit).isIdentitySatisfied {
-            return unit.base as! U
+            return unit.object as! U
         }
 
         let link = UnitLink(manager: self)
-        if let unit = requirement.instantiateUnit(link: link) {
-            startUnit(AnyUnit(unit))
+        if let (unit, unitRef) = requirement.instantiateUnit(link: link) {
+            unsatisfiedUnits.insert(unitRef)
+            capturedUnits[unit.id] = unit
+            update()
             return unit
         }
 
         fatalError()
     }
 
-
-    private func startUnit(_ anyUnit: AnyUnit) {
-        unsatisfiedUnits.insert(anyUnit)
-        update()
-    }
-
-
-    private func stopUnit(_ anyUnit: AnyUnit) {
-        if let index = satisfiedUnits.firstIndex(of: anyUnit) {
+    func removeUnit(_ unitRef: UnitRef) {
+        if let index = satisfiedUnits.firstIndex(of: unitRef)  {
             satisfiedUnits.remove(at: index)
         }
-        update()
+
+        if let index = unsatisfiedUnits.firstIndex(of: unitRef)  {
+            unsatisfiedUnits.remove(at: index)
+        }
     }
 
 
@@ -76,8 +75,11 @@ class UnitManager {
 
         defer {
             isUpdating = false
+
             if needsUpdate {
                 update()
+            } else {
+                capturedUnits.removeAll()
             }
         }
 
@@ -129,11 +131,20 @@ class UnitManager {
         // the registered units.
         if !allUnsatisfiedRequirements.isEmpty {
             for registeredUnit in registeredUnits {
-                for newRequirement in allUnsatisfiedRequirements {
+                for unsatisfiedRequirement in allUnsatisfiedRequirements {
+                    let isInstantiated = unsatisfiedUnits.contains {
+                        unsatisfiedRequirement.satisfactionLevel(with: $0).isIdentitySatisfied
+                    }
+
+                    if isInstantiated {
+                        continue
+                    }
+
                     let link = UnitLink(manager: self)
-                    if let newUnit = newRequirement.instantiateUnit(registeredUnit, link: link) {
-                        assert(newRequirement.satisfactionLevel(with: newUnit).isIdentitySatisfied)
-                        unsatisfiedUnits.insert(newUnit)
+                    if let (newUnitObject, newUnitRef) = unsatisfiedRequirement.instantiateUnit(registeredUnit, link: link) {
+                        assert(unsatisfiedRequirement.satisfactionLevel(with: newUnitRef).isIdentitySatisfied)
+                        unsatisfiedUnits.insert(newUnitRef)
+                        capturedUnits[newUnitObject.id] = newUnitObject
                         setNeedsUpdate()
                     }
                 }
@@ -147,13 +158,15 @@ class UnitManager {
             let requirements = unit.requirements.filter { requirement in
                 for otherUnit in satisfiedUnits {
                     if requirement.satisfactionLevel(with: otherUnit) == .full {
-                        resolvedUnits.store[requirement] = otherUnit
+                        resolvedUnits.store[requirement] = otherUnit.object
                         return false
                     }
                 }
                 allUnsatisfiedRequirements.insert(requirement)
                 return true
             }
+
+            unit.object.link.resolvedUnits = resolvedUnits
 
             let isFullySatisfied = fullySatisfiedSet.contains(unit.id)
             let canBeFullySatisfied = requirements.isEmpty
@@ -175,8 +188,10 @@ class UnitManager {
 
 
 struct ResolvedUnits {
-    fileprivate var store = [AnyRequirement: AnyUnit]()
+    fileprivate var store = [AnyRequirement: UnitObject]()
+
     subscript <U>(_ requirement: Requirement<U>) -> U {
-        return store[AnyRequirement(requirement)]!.base as! U
+        return store[AnyRequirement(requirement)] as! U
     }
+
 }
