@@ -11,7 +11,7 @@ import Foundation
 
 
 @propertyWrapper
-final class Changing<V: Equatable>: UnitProperty {
+final class Soft<V: Equatable>: UnitProperty {
 
     // Property
     private var value: V
@@ -32,7 +32,7 @@ final class Changing<V: Equatable>: UnitProperty {
         }
     }
 
-    public var projectedValue: Changing<V> {
+    public var projectedValue: Soft<V> {
         get { self }
     }
 
@@ -48,7 +48,7 @@ final class Changing<V: Equatable>: UnitProperty {
 
     public func receive<S>(subscriber: S) where S : Subscriber, S.Failure == Failure, S.Input == Output {
         subscriber.receive(
-            subscription: OutputSubscription(subscriber: subscriber, stateObject: self)
+            subscription: SoftPropertySubscription(subscriber: subscriber, stateObject: self)
         )
     }
 }
@@ -56,7 +56,7 @@ final class Changing<V: Equatable>: UnitProperty {
 
 // MARK: - Combine -
 
-final class OutputSubscription<V: Equatable, SB: Subscriber, O: Changing<V>>: Subscription where SB.Input == V {
+final class SoftPropertySubscription<V: Equatable, SB: Subscriber, O: Soft<V>>: Subscription where SB.Input == V {
     private var subscriber: SB?
     private weak var output: O?
 

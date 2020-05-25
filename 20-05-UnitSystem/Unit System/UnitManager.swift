@@ -16,7 +16,7 @@ class UnitManager {
     private var unsatisfiableUnits = Set<UnitRef>()
     private var satisfiedUnits = [UnitRef]()
     private var fullySatisfiedSet = Set<Int>()
-    private var capturedUnits = [Int: UnitObject]()
+    private var stronglyReferencedUnits = [Int: UnitObject]()
 
     private var needsUpdate = false
     private var isUpdating = false
@@ -27,20 +27,22 @@ class UnitManager {
     }
 
 
+    @discardableResult
     func resolve<U: Unit>(_ unitType: U.Type) -> U {
         resolve(unitType.requirement())
     }
 
-
+    
+    @discardableResult
     func resolve<U: Unit>(_ requirement: Requirement<U>) -> U {
-        for unit in satisfiedUnits where requirement.satisfactionLevel(for: unit).isIdentitySatisfied {
+        for unit in satisfiedUnits where requirement.satisfaction(with: unit).hardPropertiesAreSatisfied {
             return unit.object as! U
         }
 
         let link = UnitLink(manager: self)
         if let (unit, unitRef) = requirement.instantiateUnit(link: link) {
             unsatisfiedUnits.insert(unitRef)
-            capturedUnits[unit.id] = unit
+            stronglyReferencedUnits[unit.id] = unit
             update()
             return unit
         }
@@ -79,7 +81,7 @@ class UnitManager {
             if needsUpdate {
                 update()
             } else {
-                capturedUnits.removeAll()
+                stronglyReferencedUnits.removeAll()
             }
         }
 
@@ -97,7 +99,7 @@ class UnitManager {
             // when it was satisfied.
             let unsatisfiedRequirements = unsatisfiedUnit.requirements.filter { unsatisfiedRequirement in
                 for satisfiedUnit in satisfiedUnits {
-                    if unsatisfiedRequirement.satisfactionLevel(with: satisfiedUnit).isIdentitySatisfied {
+                    if unsatisfiedRequirement.satisfaction(with: satisfiedUnit).hardPropertiesAreSatisfied {
                         return false
                     }
                 }
@@ -132,32 +134,37 @@ class UnitManager {
         if !allUnsatisfiedRequirements.isEmpty {
             for registeredUnit in registeredUnits {
                 for unsatisfiedRequirement in allUnsatisfiedRequirements {
-                    let isInstantiated = unsatisfiedUnits.contains {
-                        unsatisfiedRequirement.satisfactionLevel(with: $0).isIdentitySatisfied
+                    let isAlreadyInstantiated = unsatisfiedUnits.contains {
+                        unsatisfiedRequirement.satisfaction(with: $0).hardPropertiesAreSatisfied
                     }
 
-                    if isInstantiated {
+                    guard !isAlreadyInstantiated else {
                         continue
                     }
 
                     let link = UnitLink(manager: self)
                     if let (newUnitObject, newUnitRef) = unsatisfiedRequirement.instantiateUnit(registeredUnit, link: link) {
-                        assert(unsatisfiedRequirement.satisfactionLevel(with: newUnitRef).isIdentitySatisfied)
+                        // Make sure the new unit is satisfying its init requirements
+                        assert(unsatisfiedRequirement.satisfaction(with: newUnitRef).hardPropertiesAreSatisfied)
+
+                        // Keep a strong ref, so the unit survives until updates are completed
+                        stronglyReferencedUnits[newUnitObject.id] = newUnitObject
+
+                        // Try satisfying it in next update round
                         unsatisfiedUnits.insert(newUnitRef)
-                        capturedUnits[newUnitObject.id] = newUnitObject
                         setNeedsUpdate()
                     }
                 }
             }
         }
 
-        // Check if all requirements (incl. output requirements) are satisfied
+        // Check if all requirements (incl. soft requirements) are satisfied
         for unit in satisfiedUnits {
             var resolvedUnits = ResolvedUnits()
 
             let requirements = unit.requirements.filter { requirement in
                 for otherUnit in satisfiedUnits {
-                    if requirement.satisfactionLevel(with: otherUnit) == .full {
+                    if requirement.satisfaction(with: otherUnit) == .hardAndSoft {
                         resolvedUnits.store[requirement] = otherUnit.object
                         return false
                     }

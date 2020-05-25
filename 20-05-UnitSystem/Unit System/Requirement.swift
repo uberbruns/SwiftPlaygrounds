@@ -18,7 +18,7 @@ struct Requirement<U: Unit>: Hashable {
     private struct SubRequirement {
         let keyPath: AnyKeyPath?
         let value: AnyHashable?
-        let isOutput: Bool
+        let isSoft: Bool
         let isSatisfied: (UnitRef) -> Bool
     }
 
@@ -34,11 +34,11 @@ struct Requirement<U: Unit>: Hashable {
         let isSatisfied: (UnitRef) -> Bool = { unitRef in
             return unitRef.object is U
         }
-        self.subRequirements = [SubRequirement(keyPath: nil, value: nil, isOutput: false, isSatisfied: isSatisfied)]
+        self.subRequirements = [SubRequirement(keyPath: nil, value: nil, isSoft: false, isSatisfied: isSatisfied)]
     }
 
 
-    private init<V: Hashable, UP: UnitProperty>(_ keyPath: KeyPath<U, UP>, _ value: V, isOutput: Bool) where UP.Value == V {
+    private init<V: Hashable, UP: UnitProperty>(_ keyPath: KeyPath<U, UP>, _ value: V, isSoft: Bool) where UP.Value == V {
         let isSatisfied: (UnitRef) -> Bool = { unitRef in
             guard let unit = unitRef.object as? U else {
                 return false
@@ -50,20 +50,20 @@ struct Requirement<U: Unit>: Hashable {
             SubRequirement(
                 keyPath: keyPath,
                 value: value,
-                isOutput: isOutput,
+                isSoft: isSoft,
                 isSatisfied: isSatisfied
             )
         ]
     }
 
 
-    fileprivate init<V: Hashable>(_ keyPath: KeyPath<U, Fixed<V>>, _ value: V) {
-        self = .init(keyPath, value, isOutput: false)
+    fileprivate init<V: Hashable>(_ keyPath: KeyPath<U, Hard<V>>, _ value: V) {
+        self = .init(keyPath, value, isSoft: false)
     }
 
 
-    fileprivate init<V: Hashable>(_ keyPath: KeyPath<U, Changing<V>>, _ value: V) {
-        self = .init(keyPath, value, isOutput: true)
+    fileprivate init<V: Hashable>(_ keyPath: KeyPath<U, Soft<V>>, _ value: V) {
+        self = .init(keyPath, value, isSoft: true)
     }
 
 
@@ -74,18 +74,18 @@ struct Requirement<U: Unit>: Hashable {
 
     // MARK: Core API
 
-    func satisfactionLevel(for unit: UnitRef) -> SatisfactionLevel {
-        var result = SatisfactionLevel.full
+    func satisfaction(with unit: UnitRef) -> SatisfactionLevel {
+        var result = SatisfactionLevel.hardAndSoft
         for subRequirement in subRequirements {
-            switch (subRequirement.isOutput, subRequirement.isSatisfied(unit)) {
+            switch (subRequirement.isSoft, subRequirement.isSatisfied(unit)) {
             case (_, true):
                 // Go on -> Keep `result`
                 break
             case (true, false):
-                // Unsatisfied Output -> Downgrade Level
-                result = .identity
+                // Unsatisfied Soft Requirement -> Downgrade Level
+                result = .hardOnly
             case (false, false):
-                // Unsatisfied Identity -> Early exit
+                // Unsatisfied Hard Requirement -> Early exit
                 return .unsatisfied
             }
         }
@@ -105,7 +105,7 @@ struct Requirement<U: Unit>: Hashable {
     }
 
 
-    func value<V: Equatable>(for keyPath: KeyPath<U, Fixed<V>>) throws -> V {
+    func value<V: Equatable>(for keyPath: KeyPath<U, Hard<V>>) throws -> V {
         for subRequirement in subRequirements {
             if keyPath == subRequirement.keyPath, let value = subRequirement.value?.base as? V {
                 return value
@@ -122,13 +122,13 @@ struct Requirement<U: Unit>: Hashable {
 
     // MARK: Convenience API
 
-    func and<V: Hashable>(where keyPath: KeyPath<U, Fixed<V>>, equals value: V) -> Requirement {
+    func and<V: Hashable>(where keyPath: KeyPath<U, Hard<V>>, equals value: V) -> Requirement {
         let newRequirement = Requirement(keyPath, value)
         return union(newRequirement)
     }
 
 
-    func and<V: Hashable>(where keyPath: KeyPath<U, Changing<V>>, equals value: V) -> Requirement {
+    func and<V: Hashable>(where keyPath: KeyPath<U, Soft<V>>, equals value: V) -> Requirement {
         let newRequirement = Requirement(keyPath, value)
         return union(newRequirement)
     }
@@ -163,7 +163,7 @@ struct AnyRequirement: Hashable {
     // MARK: Properties: Private
 
     private let baseHashValue: Int
-    private let satisfactionLevelFunc: (UnitRef) -> SatisfactionLevel
+    private let satisfactionFunc: (UnitRef) -> SatisfactionLevel
     private let instantiateUnitFunc: (UnitLink) -> (UnitObject, UnitRef)?
 
 
@@ -172,8 +172,8 @@ struct AnyRequirement: Hashable {
     init<U: Unit>(_ base: Requirement<U>) {
         self.base = base
         self.baseHashValue = base.hashValue
-        self.satisfactionLevelFunc = { unitRef in
-            base.satisfactionLevel(for: unitRef)
+        self.satisfactionFunc = { unitRef in
+            base.satisfaction(with: unitRef)
         }
         self.instantiateUnitFunc = { unitControl in
             return base.instantiateUnit(link: unitControl)
@@ -183,8 +183,8 @@ struct AnyRequirement: Hashable {
 
     // MARK: Core API
 
-    func satisfactionLevel(with unit: UnitRef) -> SatisfactionLevel {
-        satisfactionLevelFunc(unit)
+    func satisfaction(with unit: UnitRef) -> SatisfactionLevel {
+        satisfactionFunc(unit)
     }
 
 
@@ -211,14 +211,14 @@ struct AnyRequirement: Hashable {
 
 enum SatisfactionLevel: Equatable {
     case unsatisfied
-    case identity
-    case full
+    case hardOnly
+    case hardAndSoft
 
-    var isIdentitySatisfied: Bool {
+    var hardPropertiesAreSatisfied: Bool {
         switch self {
         case .unsatisfied:
             return false
-        case .full, .identity:
+        case .hardAndSoft, .hardOnly:
             return true
         }
     }
@@ -238,11 +238,11 @@ extension Unit {
         Requirement(Self.self)
     }
 
-    static func requirement<V: Hashable>(where keyPath: KeyPath<Self, Fixed<V>>, equals value: V) -> Requirement<Self> {
+    static func requirement<V: Hashable>(where keyPath: KeyPath<Self, Hard<V>>, equals value: V) -> Requirement<Self> {
         Requirement(keyPath, value)
     }
 
-    static func requirement<V: Hashable>(where keyPath: KeyPath<Self, Changing<V>>, equals value: V) -> Requirement<Self> {
+    static func requirement<V: Hashable>(where keyPath: KeyPath<Self, Soft<V>>, equals value: V) -> Requirement<Self> {
         Requirement(keyPath, value)
     }
 }

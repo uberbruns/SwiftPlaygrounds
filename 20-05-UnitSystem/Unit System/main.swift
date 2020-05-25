@@ -13,7 +13,7 @@ final class BluetoothAvailabilityUnit: Unit {
 
     let link: UnitLink
 
-    @Changing private(set) var isAvailable = false
+    @Soft private(set) var isAvailable = false
 
     init(requirement: Requirement<BluetoothAvailabilityUnit>, link: UnitLink) {
         self.link = link
@@ -36,8 +36,8 @@ final class UserTokenUnit: Unit {
 
     let link: UnitLink
 
-    @Changing private(set) var isAvailable = true
-    @Fixed private(set) var userName: String
+    @Soft private(set) var isAvailable = true
+    @Hard private(set) var userName: String
 
     init(requirement: Requirement<UserTokenUnit>, link: UnitLink) throws {
         self.link = link
@@ -57,8 +57,8 @@ final class DeviceConnectionUnit: Unit {
 
     let link: UnitLink
 
-    @Fixed private(set) var deviceUUID: UUID
-    @Changing private(set) var isConnected: Bool
+    @Hard private(set) var deviceUUID: UUID
+    @Soft private(set) var isConnected: Bool
 
     init(requirement: Requirement<DeviceConnectionUnit>, link: UnitLink) throws {
         self.link = link
@@ -77,7 +77,7 @@ final class DeviceConnectionUnit: Unit {
 
     func sendMessage(rawMessage: String) {
         print(rawMessage)
-        Program.shared.sendMessageUnit = nil
+        Program.shared.end()
     }
 }
 
@@ -113,7 +113,7 @@ final class SendMessage: Unit {
 
     let link: UnitLink
 
-    @Fixed private(set) var message: Message
+    @Hard private(set) var message: Message
 
     lazy var connectedDevice = DeviceConnectionUnit
         .requirement(where: \.$deviceUUID, equals: message.deviceUUID)
@@ -154,9 +154,9 @@ class Program {
         unitManager.register(DeviceScannerUnit.self)
         unitManager.register(SendMessage.self)
 
-
         let deviceScannerUnit = unitManager.resolve(DeviceScannerUnit.self)
         deviceScannerUnit.$foundDeviceUUIDs.sink { (foundDeviceUUIDs) in
+            self.deviceScannerUnit = nil
             if let deviceUUID = foundDeviceUUIDs.first {
                 let message = SendMessage.Message(
                     deviceUUID: deviceUUID,
@@ -164,16 +164,21 @@ class Program {
                     content: "Hello, World!"
                 )
 
-                _ = unitManager.resolve(SendMessage.requirement(where: \.$message, equals: message))
+                unitManager.resolve(SendMessage.requirement(where: \.$message, equals: message))
             }
         }.store(in: &cancellables)
 
         self.deviceScannerUnit = deviceScannerUnit
     }
+
+    func end(){
+        deviceScannerUnit = nil
+        OperationQueue.main.addOperation {
+            exit(0)
+        }
+    }
 }
 
 
 Program.shared.main()
-
-
 RunLoop.main.run()

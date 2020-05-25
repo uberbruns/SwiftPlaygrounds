@@ -16,12 +16,15 @@ class UnitLink {
         didSet {
             guard let unit = unitRef?.object else { return }
             if oldValue == nil {
-                unitName = "\(unit.self)".split(separator: ".").last.map(String.init) ?? "\(unit.self)"
+                debugName = "\(unit.self)".split(separator: ".").last.map(String.init) ?? "\(unit.self)"
+                print("\(debugName): init")
+            } else {
+                fatalError()
             }
-            print("\(unitName): init")
         }
     }
-    var unitName = "?"
+
+    private var debugName = "?"
     var resolvedUnits: ResolvedUnits?
 
     init(manager: UnitManager) {
@@ -29,7 +32,7 @@ class UnitLink {
     }
 
     deinit {
-        print("\(unitName): \(#function)")
+        print("\(debugName): \(#function)")
         if let unitRef = unitRef, let manager = manager {
             manager.removeUnit(unitRef)
         }

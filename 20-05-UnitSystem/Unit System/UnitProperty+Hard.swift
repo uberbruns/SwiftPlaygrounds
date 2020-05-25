@@ -9,13 +9,13 @@
 import Foundation
 
 
-protocol FixedUnitProperty {
+protocol HardUnitProperty {
     var hashValue: Int { get }
 }
 
 
 @propertyWrapper
-final class Fixed<V: Hashable>: UnitProperty, FixedUnitProperty {
+final class Hard<V: Hashable>: UnitProperty, HardUnitProperty {
     var hashValue: Int {
         value.hashValue
     }
@@ -31,7 +31,7 @@ final class Fixed<V: Hashable>: UnitProperty, FixedUnitProperty {
         }
     }
 
-    public var projectedValue: Fixed<V> {
+    public var projectedValue: Hard<V> {
         get { self }
     }
 
