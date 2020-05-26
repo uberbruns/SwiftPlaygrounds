@@ -9,14 +9,14 @@
 import Foundation
 
 
-protocol HardUnitProperty {
-    var hashValue: Int { get }
+protocol DistinctUnitProperty: AnyObject {
+    var intIdentifier: Int { get }
 }
 
 
 @propertyWrapper
-final class Hard<V: Hashable>: UnitProperty, HardUnitProperty {
-    var hashValue: Int {
+final class Distinct<V: Hashable>: UnitProperty, DistinctUnitProperty {
+    var intIdentifier: Int {
         value.hashValue
     }
 
@@ -31,7 +31,7 @@ final class Hard<V: Hashable>: UnitProperty, HardUnitProperty {
         }
     }
 
-    public var projectedValue: Hard<V> {
+    public var projectedValue: Distinct<V> {
         get { self }
     }
 

@@ -10,14 +10,22 @@ import Combine
 import Foundation
 
 
+protocol ChangingUnitProperty: AnyObject {
+    var unitManager: UnitManager? { get set }
+}
+
+
 @propertyWrapper
-final class Soft<V: Equatable>: UnitProperty {
+final class Changing<V: Equatable>: UnitProperty, ChangingUnitProperty {
 
-    // Property
-    private var value: V
+    // Protocol Conformance: ChangingUnitProperty
+    weak var unitManager: UnitManager?
 
-    // Subscriptions
+    // Protocol Conformance: Combine
     fileprivate var subscriptions = [CombineIdentifier: (V) -> Void]()
+
+    // Wrapped Value
+    private var value: V
 
     var wrappedValue: V {
         get {
@@ -29,34 +37,37 @@ final class Soft<V: Equatable>: UnitProperty {
             for (_ ,subscription) in subscriptions {
                 subscription(value)
             }
+            unitManager!.setNeedsUpdate()
         }
     }
 
-    public var projectedValue: Soft<V> {
+    public var projectedValue: Changing<V> {
         get { self }
     }
 
     init(wrappedValue: V) {
         self.value = wrappedValue
     }
+}
 
 
-    // MARK: Publisher Conformance
+// MARK: - Combine -
+// MARK: Publisher Conformance
+
+extension Changing: Publisher {
 
     public typealias Output = V
     public typealias Failure = Never
 
     public func receive<S>(subscriber: S) where S : Subscriber, S.Failure == Failure, S.Input == Output {
         subscriber.receive(
-            subscription: SoftPropertySubscription(subscriber: subscriber, stateObject: self)
+            subscription: ChangingPropertySubscription(subscriber: subscriber, stateObject: self)
         )
     }
 }
 
 
-// MARK: - Combine -
-
-final class SoftPropertySubscription<V: Equatable, SB: Subscriber, O: Soft<V>>: Subscription where SB.Input == V {
+final class ChangingPropertySubscription<V: Equatable, SB: Subscriber, O: Changing<V>>: Subscription where SB.Input == V {
     private var subscriber: SB?
     private weak var output: O?
 

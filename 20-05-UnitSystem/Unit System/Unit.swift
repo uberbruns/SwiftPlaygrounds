@@ -31,8 +31,8 @@ extension Unit {
         hasher.combine(String(describing: self))
         for child in Mirror(reflecting: self).children {
             switch child.value {
-            case let id as HardUnitProperty:
-                hasher.combine(id.hashValue)
+            case let distinctProperty as DistinctUnitProperty:
+                hasher.combine(distinctProperty.intIdentifier)
             default:
                 break
             }

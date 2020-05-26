@@ -35,7 +35,7 @@ class UnitManager {
     
     @discardableResult
     func resolve<U: Unit>(_ requirement: Requirement<U>) -> U {
-        for unit in satisfiedUnits where requirement.satisfaction(with: unit).hardPropertiesAreSatisfied {
+        for unit in satisfiedUnits where requirement.satisfaction(with: unit).distinctPropertiesSatisfied {
             return unit.object as! U
         }
 
@@ -99,7 +99,7 @@ class UnitManager {
             // when it was satisfied.
             let unsatisfiedRequirements = unsatisfiedUnit.requirements.filter { unsatisfiedRequirement in
                 for satisfiedUnit in satisfiedUnits {
-                    if unsatisfiedRequirement.satisfaction(with: satisfiedUnit).hardPropertiesAreSatisfied {
+                    if unsatisfiedRequirement.satisfaction(with: satisfiedUnit).distinctPropertiesSatisfied {
                         return false
                     }
                 }
@@ -135,7 +135,7 @@ class UnitManager {
             for registeredUnit in registeredUnits {
                 for unsatisfiedRequirement in allUnsatisfiedRequirements {
                     let isAlreadyInstantiated = unsatisfiedUnits.contains {
-                        unsatisfiedRequirement.satisfaction(with: $0).hardPropertiesAreSatisfied
+                        unsatisfiedRequirement.satisfaction(with: $0).distinctPropertiesSatisfied
                     }
 
                     guard !isAlreadyInstantiated else {
@@ -145,7 +145,7 @@ class UnitManager {
                     let link = UnitLink(manager: self)
                     if let (newUnitObject, newUnitRef) = unsatisfiedRequirement.instantiateUnit(registeredUnit, link: link) {
                         // Make sure the new unit is satisfying its init requirements
-                        assert(unsatisfiedRequirement.satisfaction(with: newUnitRef).hardPropertiesAreSatisfied)
+                        assert(unsatisfiedRequirement.satisfaction(with: newUnitRef).distinctPropertiesSatisfied)
 
                         // Keep a strong ref, so the unit survives until updates are completed
                         stronglyReferencedUnits[newUnitObject.id] = newUnitObject
@@ -158,13 +158,13 @@ class UnitManager {
             }
         }
 
-        // Check if all requirements (incl. soft requirements) are satisfied
+        // Check if all requirements (incl. changing requirements) are satisfied
         for unit in satisfiedUnits {
             var resolvedUnits = ResolvedUnits()
 
-            let requirements = unit.requirements.filter { requirement in
+            let unsatisfiedRequirements = unit.requirements.filter { requirement in
                 for otherUnit in satisfiedUnits {
-                    if requirement.satisfaction(with: otherUnit) == .hardAndSoft {
+                    if requirement.satisfaction(with: otherUnit) == .distinctAndChanging {
                         resolvedUnits.store[requirement] = otherUnit.object
                         return false
                     }
@@ -176,7 +176,7 @@ class UnitManager {
             unit.object.link.resolvedUnits = resolvedUnits
 
             let isFullySatisfied = fullySatisfiedSet.contains(unit.id)
-            let canBeFullySatisfied = requirements.isEmpty
+            let canBeFullySatisfied = unsatisfiedRequirements.isEmpty
 
             if isFullySatisfied != canBeFullySatisfied {
                 if canBeFullySatisfied {

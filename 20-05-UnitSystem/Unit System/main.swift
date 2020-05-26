@@ -13,7 +13,7 @@ final class BluetoothAvailabilityUnit: Unit {
 
     let link: UnitLink
 
-    @Soft private(set) var isAvailable = false
+    @Changing private(set) var isAvailable = false
 
     init(requirement: Requirement<BluetoothAvailabilityUnit>, link: UnitLink) {
         self.link = link
@@ -23,7 +23,6 @@ final class BluetoothAvailabilityUnit: Unit {
         print("BluetoothAvailabilityUnit satisfied")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.isAvailable = true
-            self.link.manager?.setNeedsUpdate()
         }
     }
 
@@ -36,8 +35,8 @@ final class UserTokenUnit: Unit {
 
     let link: UnitLink
 
-    @Soft private(set) var isAvailable = true
-    @Hard private(set) var userName: String
+    @Changing private(set) var isAvailable = true
+    @Distinct private(set) var userName: String
 
     init(requirement: Requirement<UserTokenUnit>, link: UnitLink) throws {
         self.link = link
@@ -57,8 +56,8 @@ final class DeviceConnectionUnit: Unit {
 
     let link: UnitLink
 
-    @Hard private(set) var deviceUUID: UUID
-    @Soft private(set) var isConnected: Bool
+    @Distinct private(set) var deviceUUID: UUID
+    @Changing private(set) var isConnected: Bool
 
     init(requirement: Requirement<DeviceConnectionUnit>, link: UnitLink) throws {
         self.link = link
@@ -113,7 +112,7 @@ final class SendMessage: Unit {
 
     let link: UnitLink
 
-    @Hard private(set) var message: Message
+    @Distinct private(set) var message: Message
 
     lazy var connectedDevice = DeviceConnectionUnit
         .requirement(where: \.$deviceUUID, equals: message.deviceUUID)

@@ -18,7 +18,7 @@ struct Requirement<U: Unit>: Hashable {
     private struct SubRequirement {
         let keyPath: AnyKeyPath?
         let value: AnyHashable?
-        let isSoft: Bool
+        let isChanging: Bool
         let isSatisfied: (UnitRef) -> Bool
     }
 
@@ -34,11 +34,11 @@ struct Requirement<U: Unit>: Hashable {
         let isSatisfied: (UnitRef) -> Bool = { unitRef in
             return unitRef.object is U
         }
-        self.subRequirements = [SubRequirement(keyPath: nil, value: nil, isSoft: false, isSatisfied: isSatisfied)]
+        self.subRequirements = [SubRequirement(keyPath: nil, value: nil, isChanging: false, isSatisfied: isSatisfied)]
     }
 
 
-    private init<V: Hashable, UP: UnitProperty>(_ keyPath: KeyPath<U, UP>, _ value: V, isSoft: Bool) where UP.Value == V {
+    private init<V: Hashable, UP: UnitProperty>(_ keyPath: KeyPath<U, UP>, _ value: V, isChanging: Bool) where UP.Value == V {
         let isSatisfied: (UnitRef) -> Bool = { unitRef in
             guard let unit = unitRef.object as? U else {
                 return false
@@ -50,20 +50,20 @@ struct Requirement<U: Unit>: Hashable {
             SubRequirement(
                 keyPath: keyPath,
                 value: value,
-                isSoft: isSoft,
+                isChanging: isChanging,
                 isSatisfied: isSatisfied
             )
         ]
     }
 
 
-    fileprivate init<V: Hashable>(_ keyPath: KeyPath<U, Hard<V>>, _ value: V) {
-        self = .init(keyPath, value, isSoft: false)
+    fileprivate init<V: Hashable>(_ keyPath: KeyPath<U, Distinct<V>>, _ value: V) {
+        self = .init(keyPath, value, isChanging: false)
     }
 
 
-    fileprivate init<V: Hashable>(_ keyPath: KeyPath<U, Soft<V>>, _ value: V) {
-        self = .init(keyPath, value, isSoft: true)
+    fileprivate init<V: Hashable>(_ keyPath: KeyPath<U, Changing<V>>, _ value: V) {
+        self = .init(keyPath, value, isChanging: true)
     }
 
 
@@ -74,18 +74,18 @@ struct Requirement<U: Unit>: Hashable {
 
     // MARK: Core API
 
-    func satisfaction(with unit: UnitRef) -> SatisfactionLevel {
-        var result = SatisfactionLevel.hardAndSoft
+    func satisfaction(with unit: UnitRef) -> PropertySatisfaction {
+        var result = PropertySatisfaction.distinctAndChanging
         for subRequirement in subRequirements {
-            switch (subRequirement.isSoft, subRequirement.isSatisfied(unit)) {
+            switch (subRequirement.isChanging, subRequirement.isSatisfied(unit)) {
             case (_, true):
                 // Go on -> Keep `result`
                 break
             case (true, false):
-                // Unsatisfied Soft Requirement -> Downgrade Level
-                result = .hardOnly
+                // Unsatisfied Changing Requirement -> Downgrade Level
+                result = .distinct
             case (false, false):
-                // Unsatisfied Hard Requirement -> Early exit
+                // Unsatisfied Distinct Requirement -> Early exit
                 return .unsatisfied
             }
         }
@@ -96,8 +96,19 @@ struct Requirement<U: Unit>: Hashable {
     func instantiateUnit(link: UnitLink) -> (U, UnitRef)? {
         do {
             let newUnit = try U.self.init(requirement: self, link: link)
+
             let unitRef = UnitRef(newUnit)
             link.unitRef = unitRef
+
+            for child in Mirror(reflecting: newUnit).children {
+                switch child.value {
+                case let property as ChangingUnitProperty:
+                    property.unitManager = link.manager
+                default:
+                    break
+                }
+            }
+
             return (newUnit, unitRef)
         } catch {
             return nil
@@ -105,7 +116,7 @@ struct Requirement<U: Unit>: Hashable {
     }
 
 
-    func value<V: Equatable>(for keyPath: KeyPath<U, Hard<V>>) throws -> V {
+    func value<V: Equatable>(for keyPath: KeyPath<U, Distinct<V>>) throws -> V {
         for subRequirement in subRequirements {
             if keyPath == subRequirement.keyPath, let value = subRequirement.value?.base as? V {
                 return value
@@ -122,13 +133,13 @@ struct Requirement<U: Unit>: Hashable {
 
     // MARK: Convenience API
 
-    func and<V: Hashable>(where keyPath: KeyPath<U, Hard<V>>, equals value: V) -> Requirement {
+    func and<V: Hashable>(where keyPath: KeyPath<U, Distinct<V>>, equals value: V) -> Requirement {
         let newRequirement = Requirement(keyPath, value)
         return union(newRequirement)
     }
 
 
-    func and<V: Hashable>(where keyPath: KeyPath<U, Soft<V>>, equals value: V) -> Requirement {
+    func and<V: Hashable>(where keyPath: KeyPath<U, Changing<V>>, equals value: V) -> Requirement {
         let newRequirement = Requirement(keyPath, value)
         return union(newRequirement)
     }
@@ -163,7 +174,7 @@ struct AnyRequirement: Hashable {
     // MARK: Properties: Private
 
     private let baseHashValue: Int
-    private let satisfactionFunc: (UnitRef) -> SatisfactionLevel
+    private let satisfactionFunc: (UnitRef) -> PropertySatisfaction
     private let instantiateUnitFunc: (UnitLink) -> (UnitObject, UnitRef)?
 
 
@@ -183,7 +194,7 @@ struct AnyRequirement: Hashable {
 
     // MARK: Core API
 
-    func satisfaction(with unit: UnitRef) -> SatisfactionLevel {
+    func satisfaction(with unit: UnitRef) -> PropertySatisfaction {
         satisfactionFunc(unit)
     }
 
@@ -209,16 +220,16 @@ struct AnyRequirement: Hashable {
 
 // MARK: - Supporting Types -
 
-enum SatisfactionLevel: Equatable {
+enum PropertySatisfaction: Equatable {
     case unsatisfied
-    case hardOnly
-    case hardAndSoft
+    case distinct
+    case distinctAndChanging
 
-    var hardPropertiesAreSatisfied: Bool {
+    var distinctPropertiesSatisfied: Bool {
         switch self {
         case .unsatisfied:
             return false
-        case .hardAndSoft, .hardOnly:
+        case .distinctAndChanging, .distinct:
             return true
         }
     }
@@ -238,11 +249,11 @@ extension Unit {
         Requirement(Self.self)
     }
 
-    static func requirement<V: Hashable>(where keyPath: KeyPath<Self, Hard<V>>, equals value: V) -> Requirement<Self> {
+    static func requirement<V: Hashable>(where keyPath: KeyPath<Self, Distinct<V>>, equals value: V) -> Requirement<Self> {
         Requirement(keyPath, value)
     }
 
-    static func requirement<V: Hashable>(where keyPath: KeyPath<Self, Soft<V>>, equals value: V) -> Requirement<Self> {
+    static func requirement<V: Hashable>(where keyPath: KeyPath<Self, Changing<V>>, equals value: V) -> Requirement<Self> {
         Requirement(keyPath, value)
     }
 }
