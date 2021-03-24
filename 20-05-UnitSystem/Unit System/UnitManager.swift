@@ -61,7 +61,7 @@ class UnitManager {
     }
 
 
-    func setNeedsUpdate() {
+    private func setNeedsUpdate() {
         guard needsUpdate == false else { return }
         
         needsUpdate = true
