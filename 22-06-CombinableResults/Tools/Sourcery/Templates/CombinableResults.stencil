@@ -1,0 +1,37 @@
+protocol Remixable { }
+
+
+{% for type in types.types where type.implements.Mixable %}
+
+// MARK: - `{{ type.name }}` Boxing Support
+
+protocol {{ type.name }}Input: Remixable {
+  var {{ type.name|lowerFirstWord }}: {{ type.name }} { get }
+}
+
+extension {{ type.name }}: {{ type.name }}Input {
+  var {{ type.name|lowerFirstWord }}: {{ type.name }} {
+    self
+  }
+}
+
+struct {{ type.name }}Output<Precursor>: {{ type.name }}Input, Remixable {
+  let {{ type.name|lowerFirstWord }}: {{ type.name }}
+  let precursor: Precursor
+}
+
+extension Remixable {
+  func mixIn(_ {{ type.name|lowerFirstWord }}: {{ type.name }}) -> {{ type.name }}Output<Self> {
+    {{ type.name }}Output({{ type.name|lowerFirstWord }}: {{ type.name|lowerFirstWord }}, precursor: self)
+  }
+}
+
+{% for precursorType in types.types where precursorType.implements.Mixable and precursorType.name != type.name %}
+extension {{ type.name }}Output: {{ precursorType.name }}Input where Precursor: {{ precursorType.name }}Input {
+  var {{ precursorType.name|lowerFirstWord }}: {{ precursorType.name }} {
+    precursor.{{ precursorType.name|lowerFirstWord }}
+  }
+}
+
+{% endfor %}
+{% endfor %}
