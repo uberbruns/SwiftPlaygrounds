@@ -10,15 +10,11 @@ struct StarWarsAPI {
   private let root = URLSessionDataTaskCall()
       .url("https://swapi.dev")
       .appendPathComponent("api")
-      .eraseToAnyHTTPCall()
 
   func people(id: Int) async throws -> Person {
     try await root
       .method(.get)
       .appendPathComponent("people/\(id)")
-      .requestModifier { request in
-        request.networkServiceType = .responsiveData
-      }
       .decodeJSONResponse(Person.self)
       .execute()
   }

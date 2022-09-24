@@ -9,11 +9,9 @@ public struct URLRequestModifier<ResponseBody>: HTTPCallModifier  {
   }
 
   public func call(configuration: HTTPCallConfiguration, execute: (HTTPCallConfiguration) async throws -> (ResponseBody, URLResponse)) async throws -> (ResponseBody, URLResponse) {
-    var configuration = configuration
-    configuration.add { request in
+    try await execute(configuration.addingRequestMutation { request in
       mutate(&request)
-    }
-    return try await execute(configuration)
+    })
   }
 }
 
