@@ -7,23 +7,25 @@ struct Person: Codable {
 }
 
 struct StarWarsAPI {
-  var starWars: AnyHTTPCall<Data> {
-    URLSessionDataTaskCall()
+  private let root = URLSessionDataTaskCall()
       .url("https://swapi.dev")
       .appendPathComponent("api")
-      .method(.get)
       .eraseToAnyHTTPCall()
-  }
 
-  func people(id: Int) -> some HTTPCall {
-    starWars
+  func people(id: Int) async throws -> Person {
+    try await root
+      .method(.get)
       .appendPathComponent("people/\(id)")
-      .decodeJSON(Person.self)
+      .requestModifier { request in
+        request.networkServiceType = .responsiveData
+      }
+      .decodeJSONResponse(Person.self)
+      .execute()
   }
 }
 
 
 let api = StarWarsAPI()
 
-let luke = try await api.people(id: 1).call()
-dump(luke)
+let person = try await api.people(id: 1)
+print(person.name)

@@ -8,17 +8,19 @@ public struct URLRequestModifier<ResponseBody>: HTTPCallModifier  {
     self.mutate = mutate
   }
 
-  public func call(request: URLRequest, execute: (URLRequest) async throws -> (ResponseBody, URLResponse)) async throws -> (ResponseBody, URLResponse) {
-    var request = request
-    mutate(&request)
-    return try await execute(request)
+  public func call(configuration: HTTPCallConfiguration, execute: (HTTPCallConfiguration) async throws -> (ResponseBody, URLResponse)) async throws -> (ResponseBody, URLResponse) {
+    var configuration = configuration
+    configuration.add { request in
+      mutate(&request)
+    }
+    return try await execute(configuration)
   }
 }
 
 
 public extension HTTPCall {
-  func requestModifier(request mutate: @escaping (inout URLRequest) -> Void) -> ModifiedHTTPCall<Self, URLRequestModifier<Self.ResponseBody>> {
-    modifier(URLRequestModifier(mutate))
+  func requestModifier(_ mutateRequest: @escaping (inout URLRequest) -> Void) -> ModifiedHTTPCall<Self, URLRequestModifier<Self.ResponseBody>> {
+    modifier(URLRequestModifier(mutateRequest))
   }
 
   func url(_ string: String) -> ModifiedHTTPCall<Self, URLRequestModifier<Self.ResponseBody>> {

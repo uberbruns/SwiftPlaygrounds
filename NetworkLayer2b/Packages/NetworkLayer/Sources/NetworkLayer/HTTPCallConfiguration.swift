@@ -2,9 +2,15 @@ import Foundation
 
 
 public struct HTTPCallConfiguration {
-  typealias RequestMutation = (URLRequest) -> URLRequest
+  private var urlRequestMutations = [(URLRequest) -> URLRequest]()
 
-  private var urlRequestMutations = [RequestMutation]()
+  public mutating func add(requestMutation: @escaping (inout URLRequest) -> Void) {
+    urlRequestMutations.append({ request in
+      var mutableRequest = request
+      requestMutation(&mutableRequest)
+      return mutableRequest
+    })
+  }
 
   public func finalizedRequest() -> URLRequest {
     var request = URLRequest(url: URL(string: "/")!)

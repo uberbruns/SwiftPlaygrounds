@@ -3,10 +3,12 @@ import SwiftUI
 
 @available(macOS 11.3, *)
 public struct HTTP3RequestModifier<ResponseBody>: HTTPCallModifier  {
-  public func call(request: URLRequest, execute: (URLRequest) async throws -> (ResponseBody, URLResponse)) async throws -> (ResponseBody, URLResponse) {
-    var request = request
-    request.assumesHTTP3Capable = true
-    return try await execute(request)
+  public func call(configuration: HTTPCallConfiguration, execute: (HTTPCallConfiguration) async throws -> (ResponseBody, URLResponse)) async throws -> (ResponseBody, URLResponse) {
+    var configuration = configuration
+    configuration.add { request in
+      request.assumesHTTP3Capable = true
+    }
+    return try await execute(configuration)
   }
 }
 

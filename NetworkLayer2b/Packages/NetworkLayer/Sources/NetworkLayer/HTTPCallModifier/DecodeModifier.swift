@@ -7,8 +7,8 @@ public struct DecodeJSONModifier<T: Decodable>: HTTPCallModifier {
 
   init<T>(_ type: T.Type) { }
 
-  public func call(request: URLRequest, execute: (URLRequest) async throws -> (Data, URLResponse)) async throws -> (T, URLResponse) {
-    let (data, response) = try await execute(request)
+  public func call(configuration: HTTPCallConfiguration, execute: (HTTPCallConfiguration) async throws -> (Data, URLResponse)) async throws -> (T, URLResponse) {
+    let (data, response) = try await execute(configuration)
     let decoded = try JSONDecoder().decode(T.self, from: data)
     return (decoded, response)
   }
@@ -16,7 +16,7 @@ public struct DecodeJSONModifier<T: Decodable>: HTTPCallModifier {
 
 
 public extension HTTPCall where ResponseBody == Data {
-  func decodeJSON<T: Codable>(_ type: T.Type) -> some HTTPCall {
+  func decodeJSONResponse<T: Codable>(_ type: T.Type) -> ModifiedHTTPCall<Self, DecodeJSONModifier<T>> {
     modifier(DecodeJSONModifier<T>(type))
   }
 }
