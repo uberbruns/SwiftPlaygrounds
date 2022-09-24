@@ -1,7 +1,7 @@
 import Foundation
 
 
-struct WrappingHTTPCallModifier<O: HTTPCallModifier, I: HTTPCallModifier>: HTTPCallModifier {
+struct WrappingHTTPExecutionModifier<O: HTTPExecutionModifier, I: HTTPExecutionModifier>: HTTPExecutionModifier {
   let outer: O
   let inner: I
 
@@ -13,8 +13,8 @@ struct WrappingHTTPCallModifier<O: HTTPCallModifier, I: HTTPCallModifier>: HTTPC
 }
 
 
-extension HTTPCallModifier {
-  func add<I: HTTPCallModifier>(_ innerModifier: I) -> WrappingHTTPCallModifier<Self, I> {
-    WrappingHTTPCallModifier(outer: self, inner: innerModifier)
+extension HTTPExecutionModifier {
+  func add<I: HTTPExecutionModifier>(_ innerModifier: I) -> WrappingHTTPExecutionModifier<Self, I> {
+    WrappingHTTPExecutionModifier(outer: self, inner: innerModifier)
   }
 }

@@ -3,10 +3,14 @@ import Foundation
 
 @available(macOS 12.0, *)
 extension HTTPCall {
-  static func starWars<D: Decodable>(path: String, decoding: D.Type) -> HTTPCall<Void, D> {
-    let request = URLRequest(url: URL(string: "https://swapi.dev/api")!.appendingPathComponent(path))
+  static func starWars<D: Decodable>(path: String, decoding: D.Type) -> HTTPCall<D> {
+    var request = URLRequest(url: URL(string: "https://swapi.dev")!)
+    request.setValue("application/json", forHTTPHeaderField: "Accept")
+    request.url?.appendPathComponent("api")
+    request.url?.appendPathComponent(path)
+    request.networkServiceType = .responsiveData
 
-    return HTTPCall<Void, D>(
+    return HTTPCall<D>(
       request: request,
       decode: { try JSONDecoder().decode(D.self, from: $0) }
     )
@@ -14,7 +18,28 @@ extension HTTPCall {
 }
 
 
-struct WookieModifier: HTTPCallModifier {
+
+@available(macOS 12.0, *)
+extension HTTPCall {
+
+  static func moia(host: (String) -> String) -> HTTPCall<Data> {
+    .init(url: URL(string: host("dev"))!)
+  }
+
+  static var tripHandling: HTTPCall<Data> {
+    .moia(host: { "https://trip-handling.trip.\($0).moia-group.io" })
+  }
+
+  static var cancellationFeedback: HTTPCall<PersonMessage> {
+    .tripHandling
+    .path("cancellation/feedback")
+    .method(.get)
+    .decodeResponse(as: PersonMessage.self)
+  }
+}
+
+
+struct WookieModifier: HTTPExecutionModifier {
   func modify(request: URLRequest, context: HTTPCallContext, execute: (URLRequest) async throws -> (Data, HTTPURLResponse)) async throws -> (Data, HTTPURLResponse) {
     let (data, urlResponse) = try await execute(request)
     let text = String(data: data, encoding: .utf8)!
@@ -24,7 +49,7 @@ struct WookieModifier: HTTPCallModifier {
 }
 
 
-struct LoggingHTTPCallModifier: HTTPCallModifier {
+struct LoggingHTTPExecutionModifier: HTTPExecutionModifier {
   func modify(request: URLRequest, context: HTTPCallContext, execute: (URLRequest) async throws -> (Data, HTTPURLResponse)) async throws -> (Data, HTTPURLResponse) {
     do {
       log("Executing", for: request)
@@ -83,11 +108,11 @@ final class StarWarsBackendService: HTTPBackendService {
     return person
   }
 
-  override func execute<RequestBody, ResponseBody, CallModifier>(call: HTTPCall<RequestBody, ResponseBody>, modifier: CallModifier) async throws -> (ResponseBody, HTTPURLResponse) where CallModifier : HTTPCallModifier {
+  override func execute<ResponseContent, ExecutionModifier>(call: HTTPCall<ResponseContent>, modifier: ExecutionModifier) async throws -> (ResponseContent, HTTPURLResponse) where ExecutionModifier : HTTPExecutionModifier {
     try await super.execute(
       call: call,
       modifier: modifier
-        .add(LoggingHTTPCallModifier())
+        .add(LoggingHTTPExecutionModifier())
         .add(WookieModifier())
     )
   }
@@ -99,6 +124,15 @@ struct Person: Codable {
 }
 
 
+struct PersonMessage: Codable, Message {
+  let name: String
+
+  init(data: Data) throws {
+    self = try JSONDecoder().decode(Self.self, from: data)
+  }
+}
+
+
 if #available(macOS 12.0, *) {
   Task {
     let httpService = StarWarsBackendService()
@@ -107,4 +141,9 @@ if #available(macOS 12.0, *) {
     exit(0)
   }
   RunLoop.main.run()
+}
+
+
+protocol Message {
+  init(data: Data) throws
 }

@@ -8,21 +8,20 @@ open class HTTPBackendService: NSObject {
     URLSession(configuration: .default, delegate: self, delegateQueue: nil)
   }
 
-  func execute<RequestBody, ResponseBody, CallModifier: HTTPCallModifier>(
-    call: HTTPCall<RequestBody, ResponseBody>,
-    modifier: CallModifier
-  ) async throws -> (ResponseBody, HTTPURLResponse) {
+  func execute<ResponseContent, ExecutionModifier: HTTPExecutionModifier>(
+    call: HTTPCall<ResponseContent>,
+    modifier: ExecutionModifier
+  ) async throws -> (ResponseContent, HTTPURLResponse) {
     let session = urlSession
     let context = HTTPCallContext(urlSession: session)
-
     let (data, response) = try await modifier.modify(request: call.request, context: context) { modifiedRequest in
       try await call.executor(session, modifiedRequest)
     }
     return (try call.decode(data), response)
   }
 
-  func execute<RequestBody, ResponseBody>(call: HTTPCall<RequestBody, ResponseBody>) async throws -> (ResponseBody, HTTPURLResponse) {
-    try await execute(call: call, modifier: NoOpHTTPCallModifier())
+  func execute<ResponseContent>(call: HTTPCall<ResponseContent>) async throws -> (ResponseContent, HTTPURLResponse) {
+    try await execute(call: call, modifier: NoOpHTTPExecutionModifier())
   }
 }
 

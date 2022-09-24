@@ -1,7 +1,7 @@
 import Foundation
 
 
-protocol HTTPCallModifier {
+protocol HTTPExecutionModifier {
   func modify(
     request: URLRequest,
     context: HTTPCallContext,
