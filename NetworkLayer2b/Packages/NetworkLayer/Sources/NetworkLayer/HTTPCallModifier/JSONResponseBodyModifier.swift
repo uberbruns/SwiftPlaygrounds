@@ -1,9 +1,7 @@
 import Foundation
 
 
-public struct DecodeJSONResponseModifier<T: Decodable>: HTTPCallModifier {
-  public typealias ResponseBodyIn = Data
-  public typealias ResponseBodyOut = T
+public struct JSONResponseBodyModifier<T: Decodable>: HTTPCallModifier {
 
   init<T>(_ type: T.Type) { }
 
@@ -16,7 +14,7 @@ public struct DecodeJSONResponseModifier<T: Decodable>: HTTPCallModifier {
 
 
 public extension HTTPCall where ResponseBody == Data {
-  func decodeJSONResponse<T: Codable>(_ type: T.Type) -> ModifiedHTTPCall<Self, DecodeJSONResponseModifier<T>> {
-    modifier(DecodeJSONResponseModifier<T>(type))
+  func jsonResponseBody<T: Decodable>(_ type: T.Type) -> some HTTPCall<T> {
+    modifier(JSONResponseBodyModifier<T>(type))
   }
 }

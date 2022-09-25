@@ -17,8 +17,9 @@ struct StarWarsAPI {
   func people(id: Int) async throws -> Person {
     try await apiEntry
       .appendPathComponent("people/\(id)")
-      .method(.get)
-      .decodeJSONResponse(Person.self)
+      .method(.post)
+      .jsonRequestBody(Person(name: "Hi"))
+      .jsonResponseBody(Person.self)
       .execute()
   }
 }
