@@ -2,11 +2,11 @@ import Foundation
 
 
 public struct ModifiedURLRequestCall<Call: HTTPCall>: HTTPCall {
-  let updateRequest: (inout URLRequest) -> Void
+  let updateRequest: (inout URLRequest) throws -> Void
 
   let original: Call
 
-  public init(original: Call, updateRequest: @escaping (inout URLRequest) -> Void) {
+  public init(original: Call, updateRequest: @escaping (inout URLRequest) throws -> Void) {
     self.original = original
     self.updateRequest = updateRequest
   }
@@ -20,13 +20,14 @@ public struct ModifiedURLRequestCall<Call: HTTPCall>: HTTPCall {
 
 
 public extension HTTPCall {
-  func requestModifier(_ mutate: @escaping (inout URLRequest) -> Void) -> some HTTPCall<Self.ResponseBody> {
-    ModifiedURLRequestCall(original: self, updateRequest: mutate)
+  func requestModifier(_ updateRequest: @escaping (inout URLRequest) throws -> Void) -> some HTTPCall<Self.ResponseBody> {
+    ModifiedURLRequestCall(original: self, updateRequest: updateRequest)
   }
 
   func url(_ string: String) -> some HTTPCall<Self.ResponseBody> {
     requestModifier { request in
-      request.url = URL(string: string)!
+      guard let url = URL(string: string) else { throw HTTPCallError.invalidRequest }
+      request.url = url
     }
   }
 

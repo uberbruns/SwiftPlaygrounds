@@ -11,21 +11,25 @@ public class URLSessionMeasuredDataTaskCall: NSObject, HTTPCall {
 
   public func call(configuration: HTTPCallConfiguration) async throws -> (Data, URLResponse) {
     try await withUnsafeThrowingContinuation { [self] continuation in
-      let task = urlSession.dataTask(
-        with: configuration.finalize(),
-        completionHandler: { data, response, error in
-          switch (data, response, error) {
-          case let (data?, response?, _):
-            continuation.resume(returning: (data, response))
-          case let (_, _, error?):
-            continuation.resume(throwing: error)
-          default:
-            fatalError()
+      do {
+        let task = urlSession.dataTask(
+          with: try configuration.finalize(),
+          completionHandler: { data, response, error in
+            switch (data, response, error) {
+            case let (data?, response?, _):
+              continuation.resume(returning: (data, response))
+            case let (_, _, error?):
+              continuation.resume(throwing: error)
+            default:
+              fatalError()
+            }
           }
-        }
-      )
-      task.delegate = self
-      task.resume()
+        )
+        task.delegate = self
+        task.resume()
+      } catch {
+        continuation.resume(throwing: error)
+      }
     }
   }
 }
