@@ -1,7 +1,7 @@
 import Foundation
 
 
-public protocol HTTPCall {
+public protocol HTTPCall<ResponseBody> {
   associatedtype ResponseBody
   func call(configuration: HTTPCallConfiguration) async throws -> (ResponseBody, URLResponse)
 }

@@ -12,7 +12,7 @@ public class URLSessionMeasuredDataTaskCall: NSObject, HTTPCall {
   public func call(configuration: HTTPCallConfiguration) async throws -> (Data, URLResponse) {
     try await withUnsafeThrowingContinuation { [self] continuation in
       let task = urlSession.dataTask(
-        with: configuration.finalizedRequest(),
+        with: configuration.finalize(),
         completionHandler: { data, response, error in
           switch (data, response, error) {
           case let (data?, response?, _):

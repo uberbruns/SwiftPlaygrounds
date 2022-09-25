@@ -2,14 +2,14 @@ import Foundation
 
 
 public struct AnyHTTPCall<ResponseBody>: HTTPCall {
-  let callFunc: (HTTPCallConfiguration) async throws -> (ResponseBody, URLResponse)
+  private let wrappedCall: (HTTPCallConfiguration) async throws -> (ResponseBody, URLResponse)
 
   public init<Call: HTTPCall>(_ httpCall: Call) where Call.ResponseBody == ResponseBody {
-    callFunc = httpCall.call
+    wrappedCall = httpCall.call
   }
 
   public func call(configuration: HTTPCallConfiguration) async throws -> (ResponseBody, URLResponse) {
-    try await callFunc(configuration)
+    try await wrappedCall(configuration)
   }
 }
 

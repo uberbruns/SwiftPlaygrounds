@@ -10,6 +10,6 @@ public struct URLSessionDataTaskCall: HTTPCall {
   }
 
   public func call(configuration: HTTPCallConfiguration) async throws -> (Data, URLResponse) {
-    try await urlSession.data(for: configuration.finalizedRequest())
+    try await urlSession.data(for: configuration.finalize())
   }
 }
