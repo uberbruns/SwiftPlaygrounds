@@ -17,7 +17,7 @@ public struct ModifiedHTTPCall<Call: HTTPCall, Modifier: HTTPCallModifier>: HTTP
 
 
 extension HTTPCall {
-  func modifier<Modifier: HTTPCallModifier>(_ modifier: Modifier) -> ModifiedHTTPCall<Self, Modifier> {
+  func modifier<Modifier: HTTPCallModifier>(_ modifier: Modifier) -> some HTTPCall<Modifier.ResponseBodyOut> where Self.ResponseBody == Modifier.ResponseBodyIn {
     ModifiedHTTPCall(original: self, modifier: modifier)
   }
 }

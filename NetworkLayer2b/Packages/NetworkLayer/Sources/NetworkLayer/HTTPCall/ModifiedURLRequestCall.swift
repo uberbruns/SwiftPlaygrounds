@@ -49,13 +49,13 @@ public extension HTTPCall {
     }
   }
 
-  func appendPathComponent(_ pathComponent: String) -> some HTTPCall<Self.ResponseBody> {
+  func appendedPathComponent(_ pathComponent: String) -> some HTTPCall<Self.ResponseBody> {
     requestModifier { request in
       request.url?.appendPathComponent(pathComponent)
     }
   }
 
-  func addQueryItem(name: String, value: String?) -> some HTTPCall<Self.ResponseBody> {
+  func adddedQueryItem(name: String, value: String?) -> some HTTPCall<Self.ResponseBody> {
     requestModifier { request in
       var newQueryItems = request.urlComponents?.queryItems ?? []
       newQueryItems.append(URLQueryItem(name: name, value: value))
@@ -66,6 +66,12 @@ public extension HTTPCall {
   func requestBody(_ data: Data?) -> some HTTPCall<Self.ResponseBody> {
     requestModifier { request in
       request.httpBody = data
+    }
+  }
+
+  func httpHeaderField(_ field: String, value: String?) -> some HTTPCall<Self.ResponseBody> {
+    requestModifier { request in
+      request.setValue(value, forHTTPHeaderField: field)
     }
   }
 }
