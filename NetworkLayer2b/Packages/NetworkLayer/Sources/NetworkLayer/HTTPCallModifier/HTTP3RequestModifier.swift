@@ -13,7 +13,7 @@ public struct HTTP3RequestModifier<ResponseBody>: HTTPCallModifier  {
 
 @available(macOS 11.3, *)
 extension HTTPCall {
-  var http3: some HTTPCall {
+  var http3: ModifiedHTTPCall<Self, HTTP3RequestModifier<Self.ResponseBody>> {
     modifier(HTTP3RequestModifier())
   }
 }

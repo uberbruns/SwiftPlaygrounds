@@ -6,6 +6,7 @@ struct Person: Codable {
   let name: String
 }
 
+
 struct StarWarsAPI {
   private let root = URLSessionDataTaskCall()
       .url("https://swapi.dev")
@@ -21,7 +22,7 @@ struct StarWarsAPI {
 }
 
 
-let api = StarWarsAPI()
+let swapi = StarWarsAPI()
+let person = try await swapi.people(id: 1)
 
-let person = try await api.people(id: 1)
 print(person.name)
