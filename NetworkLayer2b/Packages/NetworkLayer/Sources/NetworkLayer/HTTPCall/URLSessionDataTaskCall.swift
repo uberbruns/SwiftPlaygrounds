@@ -9,7 +9,9 @@ public struct URLSessionDataTaskCall: HTTPCall {
     self.urlSession = urlSession
   }
 
-  public func call(configuration: HTTPCallConfiguration) async throws -> (Data, URLResponse) {
-    try await urlSession.data(for: configuration.finalize())
+  public func call(configuration: HTTPCallConfiguration) async throws -> (Data, HTTPURLResponse) {
+    let (data, response) = try await urlSession.data(for: configuration.finalize())
+    guard let response = response as? HTTPURLResponse else { throw HTTPCallError.unexpectedResponse }
+    return (data, response)
   }
 }

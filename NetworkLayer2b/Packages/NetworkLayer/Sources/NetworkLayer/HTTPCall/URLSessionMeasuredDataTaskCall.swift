@@ -9,19 +9,19 @@ public class URLSessionMeasuredDataTaskCall: NSObject, HTTPCall {
     self.urlSession = urlSession
   }
 
-  public func call(configuration: HTTPCallConfiguration) async throws -> (Data, URLResponse) {
+  public func call(configuration: HTTPCallConfiguration) async throws -> (Data, HTTPURLResponse) {
     try await withUnsafeThrowingContinuation { [self] continuation in
       do {
         let task = urlSession.dataTask(
           with: try configuration.finalize(),
           completionHandler: { data, response, error in
             switch (data, response, error) {
-            case let (data?, response?, _):
+            case let (data?, .some(response as HTTPURLResponse), _):
               continuation.resume(returning: (data, response))
             case let (_, _, error?):
               continuation.resume(throwing: error)
             default:
-              fatalError()
+              continuation.resume(throwing: HTTPCallError.unexpectedResponse)
             }
           }
         )

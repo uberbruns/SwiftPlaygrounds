@@ -11,7 +11,7 @@ public struct ModifiedURLRequestCall<Call: HTTPCall>: HTTPCall {
     self.updateRequest = updateRequest
   }
 
-  public func call(configuration: HTTPCallConfiguration) async throws -> (Call.ResponseBody, URLResponse) {
+  public func call(configuration: HTTPCallConfiguration) async throws -> (Call.ResponseBody, HTTPURLResponse) {
     try await original.call(
       configuration: configuration.addingRequestMutation(updateRequest)
     )

@@ -9,7 +9,7 @@ public struct JSONRequestBodyModifier<T: Encodable, ResponseBody>: HTTPCallModif
     self.body = body
   }
 
-  public func call(configuration: HTTPCallConfiguration, execute: (HTTPCallConfiguration) async throws -> (ResponseBody, URLResponse)) async throws -> (ResponseBody, URLResponse) {
+  public func call(configuration: HTTPCallConfiguration, execute: (HTTPCallConfiguration) async throws -> (ResponseBody, HTTPURLResponse)) async throws -> (ResponseBody, HTTPURLResponse) {
     try await execute(
       configuration.addingRequestMutation { request in
         request.httpBody = try JSONEncoder().encode(body)

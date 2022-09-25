@@ -9,7 +9,7 @@ struct Person: Codable {
 
 struct StarWarsAPI {
   private var apiEntry: some HTTPCall<Data> {
-    URLSessionDataTaskCall()
+    URLSessionMeasuredDataTaskCall()
       .url("https://swapi.dev")
       .appendPathComponent("api")
   }
@@ -17,8 +17,7 @@ struct StarWarsAPI {
   func people(id: Int) async throws -> Person {
     try await apiEntry
       .appendPathComponent("people/\(id)")
-      .method(.post)
-      .jsonRequestBody(Person(name: "Hi"))
+      .method(.get)
       .jsonResponseBody(Person.self)
       .execute()
   }

@@ -10,7 +10,7 @@ public struct ModifiedHTTPCall<Call: HTTPCall, Modifier: HTTPCallModifier>: HTTP
     self.modifier = modifier
   }
 
-  public func call(configuration: HTTPCallConfiguration) async throws -> (Modifier.ResponseBodyOut, URLResponse) {
+  public func call(configuration: HTTPCallConfiguration) async throws -> (Modifier.ResponseBodyOut, HTTPURLResponse) {
     try await modifier.call(configuration: configuration, execute: original.call(configuration:))
   }
 }
