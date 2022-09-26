@@ -55,7 +55,7 @@ public extension HTTPCall {
     }
   }
 
-  func adddedQueryItem(name: String, value: String?) -> some HTTPCall<Self.ResponseBody> {
+  func addedQueryItem(name: String, value: String?) -> some HTTPCall<Self.ResponseBody> {
     requestModifier { request in
       var newQueryItems = request.urlComponents?.queryItems ?? []
       newQueryItems.append(URLQueryItem(name: name, value: value))
@@ -72,6 +72,12 @@ public extension HTTPCall {
   func httpHeaderField(_ field: String, value: String?) -> some HTTPCall<Self.ResponseBody> {
     requestModifier { request in
       request.setValue(value, forHTTPHeaderField: field)
+    }
+  }
+
+  func basicAuthorization(username: String, password: String) -> some HTTPCall<Self.ResponseBody> {
+    requestModifier { request in
+      request.setBasicAuthorizationHeader(userName: username, password: password)
     }
   }
 }

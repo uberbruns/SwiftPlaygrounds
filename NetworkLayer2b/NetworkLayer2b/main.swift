@@ -8,17 +8,19 @@ struct Person: Codable {
 
 
 struct StarWarsAPI {
-  private var apiEntryPoint: some HTTPCall<Data> {
+  private let decoder = JSONDecoder()
+
+  private var apiRoot: some HTTPCall<Data> {
     URLSessionMeasuredDataTaskCall()
       .url("https://swapi.dev")
       .appendedPathComponent("api")
   }
 
   func people(id: Int) async throws -> Person {
-    try await apiEntryPoint
+    try await apiRoot
       .appendedPathComponent("people/\(id)")
       .method(.get)
-      .jsonResponseBody(Person.self)
+      .responseBody(Person.self, decoder: decoder)
       .execute()
   }
 }

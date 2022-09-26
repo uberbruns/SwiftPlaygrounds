@@ -12,7 +12,6 @@ public extension URLRequest {
     }
   }
 
-
   var standardHTTPMethod: StandardHTTPMethod? {
     get {
       httpMethod.map(StandardHTTPMethod.init(rawValue:))
@@ -21,7 +20,16 @@ public extension URLRequest {
       httpMethod = newValue?.rawValue
     }
   }
-}
+
+  mutating func setBasicAuthorizationHeader(userName: String, password: String) {
+    let encodedCredentials = [userName, password].joined(separator: ":").data(using: .utf8)!.base64EncodedString()
+    let authorizationValue = ["Basic", encodedCredentials].joined(separator: " ")
+    setValue(authorizationValue, forHTTPHeaderField: "Authorization")
+  }
+
+  mutating func removeBasicAuthorizationHeader() {
+    allHTTPHeaderFields?.removeValue(forKey: "Authorization")
+  }}
 
 
 public enum StandardHTTPMethod {
