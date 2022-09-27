@@ -3,7 +3,8 @@ import Foundation
 
 
 @available(macOS 10.15, *)
-public struct CodableResponseBodyModifier<T: Decodable, D: TopLevelDecoder>: HTTPCallModifier where D.Input == Data {
+@available(iOS 13.0, *)
+public actor CodableResponseBodyModifier<T: Decodable, D: TopLevelDecoder>: HTTPCallModifier where D.Input == Data {
 
   private let decoder: D
 
@@ -20,6 +21,7 @@ public struct CodableResponseBodyModifier<T: Decodable, D: TopLevelDecoder>: HTT
 
 
 @available(macOS 10.15, *)
+@available(iOS 13.0, *)
 public extension HTTPCall where ResponseBody == Data {
   func responseBody<T: Decodable, D: TopLevelDecoder>(_ type: T.Type, decoder: D) -> some HTTPCall<T> where D.Input == Data {
     modifier(CodableResponseBodyModifier<T, D>(type, decoder: decoder))

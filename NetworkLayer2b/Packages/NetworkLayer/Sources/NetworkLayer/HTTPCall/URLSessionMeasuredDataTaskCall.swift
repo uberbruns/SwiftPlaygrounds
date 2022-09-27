@@ -1,6 +1,7 @@
 import Foundation
 
 
+@available(iOS 15.0, *)
 @available(macOS 12.0, *)
 public class URLSessionMeasuredDataTaskCall: NSObject, HTTPCall {
   let urlSession: URLSession
@@ -10,31 +11,14 @@ public class URLSessionMeasuredDataTaskCall: NSObject, HTTPCall {
   }
 
   public func call(configuration: HTTPCallConfiguration) async throws -> (Data, HTTPURLResponse) {
-    try await withUnsafeThrowingContinuation { [self] continuation in
-      do {
-        let task = urlSession.dataTask(
-          with: try configuration.finalize(),
-          completionHandler: { data, response, error in
-            switch (data, response, error) {
-            case let (data?, .some(response as HTTPURLResponse), _):
-              continuation.resume(returning: (data, response))
-            case let (_, _, error?):
-              continuation.resume(throwing: error)
-            default:
-              continuation.resume(throwing: HTTPCallError.unexpectedResponse)
-            }
-          }
-        )
-        task.delegate = self
-        task.resume()
-      } catch {
-        continuation.resume(throwing: error)
-      }
-    }
+    let (data, urlResponse) = try await urlSession.data(for: configuration.finalize(), delegate: self)
+    guard let urlResponse = urlResponse as? HTTPURLResponse else { throw HTTPCallError.unexpectedResponse }
+    return (data, urlResponse)
   }
 }
 
 
+@available(iOS 15.0, *)
 @available(macOS 12.0, *)
 extension URLSessionMeasuredDataTaskCall: URLSessionTaskDelegate {
   public func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {

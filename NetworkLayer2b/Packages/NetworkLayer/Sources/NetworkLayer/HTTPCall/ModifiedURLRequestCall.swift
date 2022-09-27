@@ -49,6 +49,12 @@ public extension HTTPCall {
     }
   }
 
+  func method(_ method: String) -> some HTTPCall<Self.ResponseBody> {
+    requestModifier { request in
+      request.httpMethod = method
+    }
+  }
+
   func appendedPathComponent(_ pathComponent: String) -> some HTTPCall<Self.ResponseBody> {
     requestModifier { request in
       request.url?.appendPathComponent(pathComponent)
@@ -77,7 +83,11 @@ public extension HTTPCall {
 
   func basicAuthorization(username: String, password: String) -> some HTTPCall<Self.ResponseBody> {
     requestModifier { request in
-      request.setBasicAuthorizationHeader(userName: username, password: password)
+      request.setBasicAuthorizationHeader(username: username, password: password)
     }
+  }
+
+  func contentType(_ contentType: String) -> some HTTPCall<Self.ResponseBody> {
+    httpHeaderField("Content-Type", value: contentType)
   }
 }
