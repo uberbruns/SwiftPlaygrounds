@@ -12,7 +12,14 @@ public struct URLSessionDataTaskCall: HTTPCall {
 
   public func call(configuration: HTTPCallConfiguration) async throws -> (Data, HTTPURLResponse) {
     let (data, response) = try await urlSession.data(for: configuration.finalize())
-    guard let response = response as? HTTPURLResponse else { throw HTTPCallError.unexpectedResponse }
+    guard let response = response as? HTTPURLResponse else { throw HTTPCallError.URLSessionDataTask.invalidResponse }
     return (data, response)
+  }
+}
+
+
+public extension HTTPCallError {
+  enum URLSessionDataTask: Error {
+    case invalidResponse
   }
 }

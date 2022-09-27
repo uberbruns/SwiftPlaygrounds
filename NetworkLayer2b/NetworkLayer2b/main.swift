@@ -61,7 +61,6 @@ struct EchoAPI {
       .execute()
   }
 
-
   func testBasicAuth() async throws -> BasicAuthResponse {
     try await apiRoot
       .appendedPathComponent("basic-auth")

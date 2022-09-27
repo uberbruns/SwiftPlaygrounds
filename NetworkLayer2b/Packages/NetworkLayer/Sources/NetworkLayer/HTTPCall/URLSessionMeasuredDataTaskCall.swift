@@ -12,7 +12,7 @@ public class URLSessionMeasuredDataTaskCall: NSObject, HTTPCall {
 
   public func call(configuration: HTTPCallConfiguration) async throws -> (Data, HTTPURLResponse) {
     let (data, urlResponse) = try await urlSession.data(for: configuration.finalize(), delegate: self)
-    guard let urlResponse = urlResponse as? HTTPURLResponse else { throw HTTPCallError.unexpectedResponse }
+    guard let urlResponse = urlResponse as? HTTPURLResponse else { throw HTTPCallError.URLSessionMeasuredDataTask.invalidResponse }
     return (data, urlResponse)
   }
 }
@@ -23,5 +23,12 @@ public class URLSessionMeasuredDataTaskCall: NSObject, HTTPCall {
 extension URLSessionMeasuredDataTaskCall: URLSessionTaskDelegate {
   public func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
     print(metrics.taskInterval.duration)
+  }
+}
+
+
+public extension HTTPCallError {
+  enum URLSessionMeasuredDataTask: Error {
+    case invalidResponse
   }
 }

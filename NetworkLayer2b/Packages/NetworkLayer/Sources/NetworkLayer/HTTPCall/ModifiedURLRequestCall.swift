@@ -19,6 +19,13 @@ public struct ModifiedURLRequestCall<Call: HTTPCall>: HTTPCall {
 }
 
 
+extension HTTPCallError {
+  enum URLRequest: Error {
+    case invalidURL
+  }
+}
+
+
 public extension HTTPCall {
   func requestModifier(_ updateRequest: @escaping (inout URLRequest) throws -> Void) -> some HTTPCall<Self.ResponseBody> {
     ModifiedURLRequestCall(original: self, updateRequest: updateRequest)
@@ -26,7 +33,7 @@ public extension HTTPCall {
 
   func url(_ string: String) -> some HTTPCall<Self.ResponseBody> {
     requestModifier { request in
-      guard let url = URL(string: string) else { throw HTTPCallError.invalidRequest }
+      guard let url = URL(string: string) else { throw HTTPCallError.URLRequest.invalidURL }
       request.url = url
     }
   }

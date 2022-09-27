@@ -7,12 +7,14 @@ import UIKit
 public struct BackgroundTaskCallModifier<ResponseBody>: HTTPCallModifier  {
   public func call(configuration: HTTPCallConfiguration, execute: (HTTPCallConfiguration) async throws -> (ResponseBody, HTTPURLResponse)) async throws -> (ResponseBody, HTTPURLResponse) {
     let taskIdentifier = await UIApplication.shared.beginBackgroundTask()
-    let (responseBody, response) = try await execute(configuration)
-    if Task.isCancelled {
-      await UIApplication.shared.endBackgroundTask(taskIdentifier)
-    } else {
-      await UIApplication.shared.endBackgroundTask(taskIdentifier)
+    let (responseBody, response) = try await withTaskCancellationHandler {
+      Task.detached {
+        await UIApplication.shared.endBackgroundTask(taskIdentifier)
+      }
+    } operation: {
+      try await execute(configuration)
     }
+    await UIApplication.shared.endBackgroundTask(taskIdentifier)
     return (responseBody, response)
   }
 }

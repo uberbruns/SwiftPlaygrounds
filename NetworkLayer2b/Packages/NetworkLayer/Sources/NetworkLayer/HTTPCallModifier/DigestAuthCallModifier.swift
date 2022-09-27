@@ -1,6 +1,7 @@
 import Foundation
 
 
+@available(iOS 13.0, *)
 @available(macOS 10.15, *)
 public struct DigestAuthorizationCallModifier<ResponseBody>: HTTPCallModifier {
   let username: String
@@ -25,6 +26,7 @@ public struct DigestAuthorizationCallModifier<ResponseBody>: HTTPCallModifier {
   }
 }
 
+@available(iOS 13.0, *)
 @available(macOS 10.15, *)
 public extension HTTPCall {
   func digestAuthorization(username: String, password: String) -> some HTTPCall<ResponseBody> {

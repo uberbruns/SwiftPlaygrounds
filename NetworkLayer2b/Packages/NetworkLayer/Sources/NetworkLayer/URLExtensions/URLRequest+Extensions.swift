@@ -28,6 +28,7 @@ public extension URLRequest {
     setValue(authorizationValue, forHTTPHeaderField: "Authorization")
   }
 
+  @available(iOS 13.0, *)
   @available(macOS 10.15, *)
   mutating func setDigestAuthorizationHeader(
     username: String,

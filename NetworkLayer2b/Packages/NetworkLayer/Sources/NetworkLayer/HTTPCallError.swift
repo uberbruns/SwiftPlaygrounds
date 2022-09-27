@@ -1,7 +1,6 @@
 import Foundation
 
 
-public enum HTTPCallError: Error {
-  case invalidRequest
+public enum HTTPCallError {
   case unexpectedResponse
 }
